@@ -348,7 +348,7 @@ namespace clstd
       return FALSE;
     }
 
-    if( ! file.ReadToBuffer(&m_Buffer)) {
+    if( ! file.Read(&m_Buffer)) {
       // 如果Load一个空文件，则自己创建一个缓冲
       m_Buffer.Reserve(1024);
       m_Buffer.Resize(0, FALSE);

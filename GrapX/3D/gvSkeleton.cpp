@@ -307,12 +307,12 @@ GVSkeleton::~GVSkeleton()
 
   m_NameIdDict.clear();
   SAFE_RELEASE(m_pCurrTrack);
-  SAFE_RELEASE(m_pPrimitive);
+  SAFE_RELEASE(m_Renderer.pPrimitive);
 }
 
 GVRENDERDESC2* GVSkeleton::GetRenderDesc(int nRenderCate)
 {
-  if (nRenderCate >= (int)m_MtlInsts.size()) {
+  if (nRenderCate >= (int)m_Renderer.materials.size()) {
     return NULL;
   }
   return &m_Renderer;
@@ -320,11 +320,11 @@ GVRENDERDESC2* GVSkeleton::GetRenderDesc(int nRenderCate)
 
 void GVSkeleton::GetRenderDesc(int nRenderCate, GVRENDERDESC* pRenderDesc)
 {
-  if(nRenderCate < (int)m_MtlInsts.size())
+  if(nRenderCate < (int)m_Renderer.materials.size())
   {
-    pRenderDesc->pPrimitive = m_pPrimitive;
+    pRenderDesc->pPrimitive = m_Renderer.pPrimitive;
     pRenderDesc->ePrimType = GXPT_LINELIST;
-    pRenderDesc->pMaterial = m_MtlInsts[nRenderCate];
+    pRenderDesc->pMaterial = m_Renderer.materials[nRenderCate];
     pRenderDesc->matWorld = m_Transformation.GlobalMatrix;
 
     pRenderDesc->dwFlags = m_dwFlags;
@@ -332,9 +332,9 @@ void GVSkeleton::GetRenderDesc(int nRenderCate, GVRENDERDESC* pRenderDesc)
     pRenderDesc->RenderQueue = pRenderDesc->pMaterial ? pRenderDesc->pMaterial->GetRenderQueue() : 0;
     pRenderDesc->BaseVertexIndex = 0;
     pRenderDesc->MinIndex = 0;
-    pRenderDesc->NumVertices = m_nPrimiCount * 2;
+    pRenderDesc->NumVertices = m_Renderer.PrimitiveCount * 2;
     pRenderDesc->StartIndex = 0;
-    pRenderDesc->PrimitiveCount = m_nPrimiCount;
+    pRenderDesc->PrimitiveCount = m_Renderer.PrimitiveCount;
   }
   else
   {
@@ -396,7 +396,7 @@ void GVSkeleton::BuildUpdateOrderTable()
 GXBOOL GVSkeleton::BuildRenderData(GrapX::Graphics* pGraphics)
 {
   CombineFlags(GVNF_VISIBLE);
-  SAFE_RELEASE(m_pPrimitive);
+  SAFE_RELEASE(m_Renderer.pPrimitive);
 
   const GXUINT nBoneCount = (GXUINT)m_aBones.size();
   if(nBoneCount == 0) {
@@ -414,7 +414,7 @@ GXBOOL GVSkeleton::BuildRenderData(GrapX::Graphics* pGraphics)
     pVertex = new GXVERTEX_P3T2C4F[nBoneCount];
     pIndices = new GXWORD[nBoneCount * 2];
 
-    m_nPrimiCount = 0;
+    m_Renderer.PrimitiveCount = 0;
     for(GXUINT i = 0; i < nBoneCount; i++)
     {
       pVertex[i].pos = m_aBones[i].matAbs.GetRow(3);
@@ -427,20 +427,20 @@ GXBOOL GVSkeleton::BuildRenderData(GrapX::Graphics* pGraphics)
 
       if(m_aBones[i].nParent >= 0)
       {
-        pIndices[m_nPrimiCount * 2] = i;
-        pIndices[m_nPrimiCount * 2 + 1] = m_aBones[i].nParent;
-        m_nPrimiCount++;
+        pIndices[m_Renderer.PrimitiveCount * 2] = i;
+        pIndices[m_Renderer.PrimitiveCount * 2 + 1] = m_aBones[i].nParent;
+        m_Renderer.PrimitiveCount++;
       }
     }
-    m_nVertCount = m_nPrimiCount * 2;
+    m_Renderer.NumVertices = m_Renderer.PrimitiveCount * 2;
 
     //pGraphics->CreatePrimitiveVI(&m_pPrimitive,
     //  NULL, MOGetSysVertexDecl(GXVD_P3T2C4F), GXRU_DEFAULT, m_nPrimiCount * 2, nBoneCount, 
     //  0, pIndices, pVertex);
 
-    pGraphics->CreatePrimitive(&m_pPrimitive,
+    pGraphics->CreatePrimitive(&m_Renderer.pPrimitive,
       NULL, MOGetSysVertexDecl(GXVD_P3T2C4F), GXResUsage::Default,
-      nBoneCount, 0, pVertex, m_nPrimiCount * 2, 2, pIndices);
+      nBoneCount, 0, pVertex, m_Renderer.PrimitiveCount * 2, 2, pIndices);
 
     SAFE_DELETE_ARRAY(pVertex);
     SAFE_DELETE_ARRAY(pIndices);
@@ -459,7 +459,7 @@ GXBOOL GVSkeleton::UpdateRenderData()
   //GXWORD* pIndices;
   const GXUINT nBoneCount = (GXUINT)m_aBones.size();
 
-  GrapX::PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::Write);
+  GrapX::PrimitiveUtility::MapVertices locker_v(m_Renderer.pPrimitive, GXResMap::Write);
   //PrimitiveUtility::LockIndices locker_i(m_pPrimitive);
 
   //if(m_pPrimitive->Lock(0, 0, 0, 0, (GXLPVOID*)&pVertices, &pIndices))
@@ -499,7 +499,7 @@ GXBOOL GVSkeleton::Update(const GVSCENEUPDATE& sContext)
   }
 
   UpdateBones();
-  if(m_pPrimitive != NULL)
+  if(m_Renderer.pPrimitive != NULL)
   {
     UpdateRenderData();
   }

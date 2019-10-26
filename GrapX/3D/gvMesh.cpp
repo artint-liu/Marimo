@@ -38,20 +38,20 @@ using namespace GrapX;
 GVMesh::GVMesh(Graphics* pGraphics)
   : GVNode       (NULL, GXMAKEFOURCC('M','E','S','H'))
   //, m_pMtlInst    (NULL)
-  , m_pPrimitive  (NULL)
-  , m_nPrimiCount (0)
-  , m_nVertCount  (0)
-  , m_nStartIndex (0)
+  //, m_pPrimitive  (NULL)
+  //, m_nPrimiCount (0)
+  //, m_nVertCount  (0)
+  //, m_nStartIndex (0)
 {
 }
 
 GVMesh::GVMesh(Graphics* pGraphics, GXDWORD dwClassCode)
   : GVNode       (NULL, dwClassCode)
   //, m_pMtlInst(NULL)
-  , m_pPrimitive(NULL)
-  , m_nPrimiCount (0)
-  , m_nVertCount  (0)
-  , m_nStartIndex (0)
+  //, m_pPrimitive(NULL)
+  //, m_nPrimiCount (0)
+  //, m_nVertCount  (0)
+  //, m_nStartIndex (0)
 {
 }
 
@@ -62,12 +62,12 @@ GVMesh::~GVMesh()
 
 void GVMesh::Clear()
 {
-  m_nPrimiCount = 0;
-  m_nVertCount  = 0;
-  m_nStartIndex = 0;
-  m_MtlInsts.clear();
+  m_Renderer.PrimitiveCount = 0;
+  m_Renderer.NumVertices  = 0;
+  m_Renderer.StartIndex = 0;
+  m_Renderer.materials.clear();
   //SAFE_RELEASE(m_pMtlInst);
-  SAFE_RELEASE(m_pPrimitive);
+  SAFE_RELEASE(m_Renderer.pPrimitive);
 }
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
@@ -159,11 +159,11 @@ GXBOOL GVMesh::IntCreatePrimitiveT(Graphics* pGraphics, GXSIZE_T nPrimCount, GXL
 {
   GXBOOL bval = FALSE;
   //m_eType       = eType;
-  m_nPrimiCount = (GXUINT)nPrimCount;
-  m_nVertCount  = (GXUINT)nVertCount;
+  m_Renderer.PrimitiveCount = (GXUINT)nPrimCount;
+  m_Renderer.NumVertices = (GXUINT)nVertCount;
 
   const GXUINT nStride = MOGetDeclVertexSize(lpVertDecl);
-  if(GXSUCCEEDED(pGraphics->CreatePrimitive(&m_pPrimitive, NULL,
+  if (GXSUCCEEDED(pGraphics->CreatePrimitive(&m_Renderer.pPrimitive, NULL,
     lpVertDecl, usage, (GXUINT)nVertCount, (GXUINT)nStride, lpVertics, (GXUINT)nIdxCount, sizeof(_VIndexT), pIndices)))
   {
     GXVERTEXELEMENT Desc;
@@ -192,15 +192,15 @@ GXBOOL GVMesh::IntCreatePrimitive(Graphics* pGraphics, GXSIZE_T nPrimCount, GXLP
 
 GXBOOL GVMesh::IntSetPrimitive(GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, Primitive* pPrimitive)
 {
-  m_pPrimitive = pPrimitive;
-  if(m_pPrimitive) {
-    m_pPrimitive->AddRef();
+  m_Renderer.pPrimitive = pPrimitive;
+  if(m_Renderer.pPrimitive) {
+    m_Renderer.pPrimitive->AddRef();
   }
   else return FALSE;
   //m_eType = eType;
-  m_nPrimiCount = (GXUINT)nPrimCount;
-  m_nStartIndex = (GXUINT)nStartIndex;
-  m_nVertCount = m_pPrimitive->GetVertexCount();
+  m_Renderer.PrimitiveCount = (GXUINT)nPrimCount;
+  m_Renderer.StartIndex = (GXUINT)nStartIndex;
+  m_Renderer.NumVertices = m_Renderer.pPrimitive->GetVertexCount();
 
   //GVertexDeclaration* pDeclaration = NULL;
   //pPrimitive->GetVertexDeclaration(&pDeclaration);
@@ -224,7 +224,7 @@ GXBOOL GVMesh::IntSetPrimitive(GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, Primit
 
 GVRENDERDESC2* GVMesh::GetRenderDesc(int nRenderCate)
 {
-  if (nRenderCate >= (int)m_MtlInsts.size()) {
+  if (nRenderCate >= (int)m_Renderer.materials.size()) {
     return NULL;
   }
   return &m_Renderer;
@@ -232,21 +232,21 @@ GVRENDERDESC2* GVMesh::GetRenderDesc(int nRenderCate)
 
 void GVMesh::GetRenderDesc(int nRenderCate, GVRENDERDESC* pRenderDesc)
 {
-  if(nRenderCate < (int)m_MtlInsts.size())
+  if(nRenderCate < (int)m_Renderer.materials.size())
   {
     pRenderDesc->dwFlags = m_dwFlags;
     pRenderDesc->dwLayer = m_dwLayer;
     pRenderDesc->ePrimType = GXPT_TRIANGLELIST;
-    pRenderDesc->pPrimitive = m_pPrimitive;
-    pRenderDesc->pMaterial = m_MtlInsts[nRenderCate];
+    pRenderDesc->pPrimitive = m_Renderer.pPrimitive;
+    pRenderDesc->pMaterial = m_Renderer.materials[nRenderCate];
     pRenderDesc->matWorld = m_Transformation.GlobalMatrix;
     pRenderDesc->BaseVertexIndex = 0;
     pRenderDesc->RenderQueue = pRenderDesc->pMaterial ? pRenderDesc->pMaterial->GetRenderQueue() : 0;
 
     pRenderDesc->MinIndex = 0;
-    pRenderDesc->NumVertices = m_nVertCount;
-    pRenderDesc->StartIndex = m_nStartIndex;
-    pRenderDesc->PrimitiveCount = m_nPrimiCount;
+    pRenderDesc->NumVertices = m_Renderer.NumVertices;
+    pRenderDesc->StartIndex = m_Renderer.StartIndex;
+    pRenderDesc->PrimitiveCount = m_Renderer.PrimitiveCount;
   }
   else
   {
@@ -272,14 +272,14 @@ GXBOOL GVMesh::RayTrace(const Ray& ray, NODERAYTRACE* pRayTrace) // TODO: Ray 改
     pRayTrace->vLocalHit = RayLocal.vOrigin + RayLocal.vDirection * fDist;
     pRayTrace->fSquareDist = fDist * fDist;
 
-    if(m_pPrimitive == NULL || TEST_FLAG(m_dwFlags, GVNF_CONTAINER))
+    if(m_Renderer.pPrimitive == NULL || TEST_FLAG(m_dwFlags, GVNF_CONTAINER))
     {
       return TRUE;
     }
 
     // --- 模型相交检测
-    PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::Read);
-    PrimitiveUtility::MapIndices  locker_i(m_pPrimitive, GXResMap::Read);
+    PrimitiveUtility::MapVertices locker_v(m_Renderer.pPrimitive, GXResMap::Read);
+    PrimitiveUtility::MapIndices  locker_i(m_Renderer.pPrimitive, GXResMap::Read);
 
     // 如果锁定失败，则只返回AABB求交结果
     GXBYTE* pVertBuf = static_cast<GXBYTE*>(locker_v.GetPtr());
@@ -288,9 +288,9 @@ GXBOOL GVMesh::RayTrace(const Ray& ray, NODERAYTRACE* pRayTrace) // TODO: Ray 改
       return TRUE;
     }
 
-    GXUINT nFaceCount = m_pPrimitive->GetIndexCount() / 3;
-    GXUINT nStride = m_pPrimitive->GetVertexStride();
-    GXINT uOffset = m_pPrimitive->GetElementOffset(GXDECLUSAGE_POSITION, 0);
+    GXUINT nFaceCount = m_Renderer.pPrimitive->GetIndexCount() / 3;
+    GXUINT nStride = m_Renderer.pPrimitive->GetVertexStride();
+    GXINT uOffset = m_Renderer.pPrimitive->GetElementOffset(GXDECLUSAGE_POSITION, 0);
     if(uOffset < 0 || nFaceCount == 0) {
       return TRUE;
     }
@@ -328,10 +328,10 @@ GXBOOL GVMesh::RayTrace(const Ray& ray, NODERAYTRACE* pRayTrace) // TODO: Ray 改
 
 GXBOOL GVMesh::SetMaterial(GrapX::Material* pMtlInst, int nRenderCate)
 {
-  if (nRenderCate >= (int)m_MtlInsts.size()) {
-    m_MtlInsts.resize((size_t)nRenderCate + 1, GrapX::ObjectT<GrapX::Material>(NULL));
+  if (nRenderCate >= (int)m_Renderer.materials.size()) {
+    m_Renderer.materials.resize((size_t)nRenderCate + 1, GrapX::ObjectT<GrapX::Material>(NULL));
   }
-  m_MtlInsts[nRenderCate] = pMtlInst;
+  m_Renderer.materials[nRenderCate] = pMtlInst;
 
   return TRUE;
   //return InlSetNewObjectT(m_pMtlInst, pMtlInst);
@@ -339,8 +339,8 @@ GXBOOL GVMesh::SetMaterial(GrapX::Material* pMtlInst, int nRenderCate)
 
 GXBOOL GVMesh::GetMaterial(int nRenderCate, GrapX::Material** ppMtlInst)
 {
-  if (nRenderCate < (int)m_MtlInsts.size()) {
-    *ppMtlInst = m_MtlInsts[nRenderCate];
+  if (nRenderCate < (int)m_Renderer.materials.size()) {
+    *ppMtlInst = m_Renderer.materials[nRenderCate];
     (*ppMtlInst)->AddRef();
     return TRUE;
   }
@@ -355,11 +355,11 @@ GXBOOL GVMesh::GetMaterial(int nRenderCate, GrapX::Material** ppMtlInst)
 
 GXBOOL GVMesh::GetMaterialFilename(int nRenderCate, clStringW* pstrFilename)
 {
-  if (nRenderCate < (int)m_MtlInsts.size() && m_MtlInsts[nRenderCate] != NULL) {
+  if (nRenderCate < (int)m_Renderer.materials.size() && m_Renderer.materials[nRenderCate] != NULL) {
     if (pstrFilename == NULL) {
       return TRUE; // 只是探测 m_pMtlInst 是否有效就直接返回
     }
-    return m_MtlInsts[nRenderCate]->GetFilename(pstrFilename);
+    return m_Renderer.materials[nRenderCate]->GetFilename(pstrFilename);
   }
   return FALSE;
 
@@ -525,15 +525,15 @@ GXHRESULT GVMesh::Clone( GVNode** ppClonedNode/*, GXBOOL bRecursive*/ )
   pNewMesh->m_aabbLocal       = m_aabbLocal;
   pNewMesh->m_Transformation  = m_Transformation;
 
-  pNewMesh->m_MtlInsts = m_MtlInsts;
+  pNewMesh->m_Renderer.materials = m_Renderer.materials;
   //pNewMesh->m_pMtlInst->AddRef();
 
-  pNewMesh->m_pPrimitive = m_pPrimitive;
-  pNewMesh->m_pPrimitive->AddRef();
+  pNewMesh->m_Renderer.pPrimitive = m_Renderer.pPrimitive;
+  pNewMesh->m_Renderer.pPrimitive->AddRef();
 
-  pNewMesh->m_nPrimiCount = m_nPrimiCount;
-  pNewMesh->m_nVertCount  = m_nVertCount;
-  pNewMesh->m_nStartIndex = m_nStartIndex;
+  pNewMesh->m_Renderer.PrimitiveCount = m_Renderer.PrimitiveCount;
+  pNewMesh->m_Renderer.NumVertices  = m_Renderer.NumVertices;
+  pNewMesh->m_Renderer.StartIndex = m_Renderer.StartIndex;
 
   *ppClonedNode = pNewMesh;
   return GX_OK;
@@ -601,19 +601,19 @@ GXHRESULT GVMesh::SaveFile(SmartRepository* pStorage)
 {
   pStorage->WriteStringA(NULL, MESH_NAME, GetName());
 
-  if(m_MtlInsts.empty() == false && m_MtlInsts[0] != NULL)
+  if(m_Renderer.materials.empty() == false && m_Renderer.materials[0] != NULL)
   {
     clStringW strMtlFile;
-    m_MtlInsts[0]->GetFilename(&strMtlFile);
+    m_Renderer.materials[0]->GetFilename(&strMtlFile);
     if(strMtlFile.IsNotEmpty()) {
-      m_pPrimitive->GetGraphicsUnsafe()->ConvertToRelativePathW(strMtlFile);
+      m_Renderer.pPrimitive->GetGraphicsUnsafe()->ConvertToRelativePathW(strMtlFile);
       pStorage->WriteStringW(NULL, MESH_MTLINST, strMtlFile);
     }
   }
 
-  if(m_pPrimitive != NULL)
+  if(m_Renderer.pPrimitive != NULL)
   {
-    RepoUtility::SavePrimitive(pStorage, "Mesh", m_pPrimitive, m_nStartIndex, m_nPrimiCount);
+    RepoUtility::SavePrimitive(pStorage, "Mesh", m_Renderer.pPrimitive, m_Renderer.StartIndex, m_Renderer.PrimitiveCount);
   }
 
   float4x4 matLocal = m_Transformation.ToRelativeMatrix();
@@ -687,13 +687,13 @@ GXVOID GVMesh::CalculateAABB()
 {
   GVNode::CalculateAABB();
 
-  if(m_pPrimitive) {
-    int nOffset = m_pPrimitive->GetElementOffset(GXDECLUSAGE_POSITION, 0);
+  if(m_Renderer.pPrimitive) {
+    int nOffset = m_Renderer.pPrimitive->GetElementOffset(GXDECLUSAGE_POSITION, 0);
     AABB aabb;
-    PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::Read);
-    PrimitiveUtility::MapIndices  locker_i(m_pPrimitive, GXResMap::Read);
+    PrimitiveUtility::MapVertices locker_v(m_Renderer.pPrimitive, GXResMap::Read);
+    PrimitiveUtility::MapIndices  locker_i(m_Renderer.pPrimitive, GXResMap::Read);
     mesh::CalculateAABB(aabb, reinterpret_cast<float3*>((GXLPBYTE)locker_v.GetPtr() + nOffset), 
-      m_pPrimitive->GetVertexCount(), m_pPrimitive->GetVertexStride());
+      m_Renderer.pPrimitive->GetVertexCount(), m_Renderer.pPrimitive->GetVertexStride());
 
     m_aabbLocal.Merge(aabb);
   }
@@ -701,35 +701,35 @@ GXVOID GVMesh::CalculateAABB()
 
 void GVMesh::ApplyTransform()
 {
-  const int nCount = m_pPrimitive->GetVertexCount();
-  const int nStride = m_pPrimitive->GetVertexStride();
+  const int nCount = m_Renderer.pPrimitive->GetVertexCount();
+  const int nStride = m_Renderer.pPrimitive->GetVertexStride();
   const float4x4 mat = m_Transformation.ToRelativeMatrix();
-  PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::ReadWrite);
+  PrimitiveUtility::MapVertices locker_v(m_Renderer.pPrimitive, GXResMap::ReadWrite);
   const GXLPBYTE lpBuffer = static_cast<GXLPBYTE>(locker_v.GetPtr());
 
-  int nOffset = m_pPrimitive->GetElementOffset(GXDECLUSAGE_POSITION, 0);
+  int nOffset = m_Renderer.pPrimitive->GetElementOffset(GXDECLUSAGE_POSITION, 0);
   mesh::TransformPosition(mat, (float3*)(lpBuffer + nOffset), nCount, nStride);
 
   // 法线
-  nOffset = m_pPrimitive->GetElementOffset(GXDECLUSAGE_NORMAL, 0);
+  nOffset = m_Renderer.pPrimitive->GetElementOffset(GXDECLUSAGE_NORMAL, 0);
   if(nOffset >= 0) {
     mesh::TransformVectors(mat, (float3*)(lpBuffer + nOffset), nCount, nStride);
   }
 
   // 切线
-  nOffset = m_pPrimitive->GetElementOffset(GXDECLUSAGE_TANGENT, 0);
+  nOffset = m_Renderer.pPrimitive->GetElementOffset(GXDECLUSAGE_TANGENT, 0);
   if(nOffset >= 0) {
     mesh::TransformVectors(mat, (float3*)(lpBuffer + nOffset), nCount, nStride);
   }
 
   // 副法线
-  nOffset = m_pPrimitive->GetElementOffset(GXDECLUSAGE_BINORMAL, 0);
+  nOffset = m_Renderer.pPrimitive->GetElementOffset(GXDECLUSAGE_BINORMAL, 0);
   if(nOffset >= 0) {
     mesh::TransformVectors(mat, (float3*)(lpBuffer + nOffset), nCount, nStride);
   }
 
   // 更新顶点
-  //m_pPrimitive->UpdateResouce(GPrimitive::ResourceVertices);
+  //m_Renderer.pPrimitive->UpdateResouce(GPrimitive::ResourceVertices);
 
   // 重置变换矩阵为单位阵
   float3 vScale(1.0f);

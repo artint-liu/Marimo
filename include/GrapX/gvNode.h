@@ -118,21 +118,22 @@ struct GVRENDERDESC
   GXUINT  PrimitiveCount;
 };
 
+typedef clvector<GrapX::ObjectT<GrapX::Material>>  MaterialArray;
+
 struct GVRENDERDESC2
 {
-  GrapX::Primitive* pPrimitive;
-  GXPrimitiveType   ePrimType;
-  GrapX::Material*   pMaterial;
-  float4x4          matWorld;   // 全局变换, 这个应该返回TRANSFORM::GlobalMatrix, 否则裁剪会有问题
+  GrapX::Primitive* pPrimitive = NULL;
+  GXPrimitiveType   ePrimType = GXPT_TRIANGLELIST;
+  MaterialArray     materials;
+  float4x4          matWorld = float4x4::Identity;             // 全局变换, 这个应该返回TRANSFORM::GlobalMatrix, 否则裁剪会有问题
 
-  GXDWORD dwFlags;              // 参考 GVModelFlags 定义
-  GXDWORD dwLayer;
-  GXUINT  RenderQueue;          // 渲染队列, 尚未使用, 这个默认取自Material中的记录
-  GXINT   BaseVertexIndex;      // StartVertex
-  GXUINT  MinIndex;
-  GXUINT  NumVertices;
-  GXUINT  StartIndex;
-  GXUINT  PrimitiveCount;
+  GXUINT            RenderQueue = GrapX::RenderQueue_Geometry;          // 渲染队列, 尚未使用, 这个默认取自Material中的记录
+  GXINT             BaseVertexIndex = 0;      // StartVertex
+  GXUINT            MinIndex = 0;
+  GXUINT            NumVertices = 0;
+  GXUINT            StartIndex = 0;
+  GXUINT            PrimitiveCount = 0;
+  clstd::geometry::AABB aabbAbsulate;
 };
 
 //struct GXGEOMETRYDESC
@@ -153,7 +154,7 @@ public:
   typedef clstd::geometry::Plane Plane;
   typedef clstd::geometry::NormalizedRay NormalizedRay;
   typedef clstd::geometry::FrustumPlanes FrustumPlanes;
-  typedef clvector<GrapX::ObjectT<GrapX::Material>>  MaterialArray;
+  //typedef clvector<GrapX::ObjectT<GrapX::Material>>  MaterialArray;
   enum ESpace {
     S_ABSOLUTE = clstd::S_World,
     S_RELATIVE = clstd::S_Self,

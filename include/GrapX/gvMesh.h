@@ -79,11 +79,11 @@ class GXDLL GVMesh : public GVNode
 {
   //typedef clvector<GrapX::ObjectT<GrapX::Material>>  MaterialArray;
 protected:
-  MaterialArray     m_MtlInsts;
-  GrapX::Primitive* m_pPrimitive;
-  GXUINT            m_nPrimiCount;
-  GXUINT            m_nVertCount;
-  GXUINT            m_nStartIndex;
+  //MaterialArray     m_MtlInsts;
+  //GrapX::Primitive* m_pPrimitive;
+  //GXUINT            m_nPrimiCount;
+  //GXUINT            m_nVertCount;
+  //GXUINT            m_nStartIndex;
 
   GVRENDERDESC2     m_Renderer;
 

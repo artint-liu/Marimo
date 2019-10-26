@@ -454,6 +454,7 @@ namespace GrapX
       for(GXUINT i = 0; i < nCount; i++)
       {
         INTERMEDIATE_CODE InterCode;
+        pInclude->SetDesc(pShaderDescs + i);
         GXHRESULT hr = CompileShader(&InterCode, pShaderDescs + i, pInclude);
 
         if(GXFAILED(hr) || InterCode.type == TargetType::Undefine) {

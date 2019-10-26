@@ -11,6 +11,13 @@ private:
   Graphics* m_pGraphics;
   clStringA   m_strBaseDir;
   IncDict     m_IncFiles;
+  const GXSHADER_SOURCE_DESC* m_pDesc = NULL;
+
+public:
+  void SetDesc(const GXSHADER_SOURCE_DESC* pDesc)
+  {
+    m_pDesc = pDesc;
+  }
 
 public:
   IHLSLIncludeT(Graphics* pGraphics, GXLPCSTR szBaseDir)
@@ -74,21 +81,25 @@ public:
       clFile file;
       clStringA strFullPath;
 
-      if(clpathfile::IsRelative(pFileName))
+      //if(clpathfile::IsRelative(pFileName))
+      //{
+      //  if(m_pGraphics != NULL) {
+      //    strFullPath = pFileName;
+      //    m_pGraphics->ConvertToAbsolutePathA(strFullPath);
+      //  }
+      //  else if(m_strBaseDir.IsNotEmpty()) {
+      //    clpathfile::CombinePath(strFullPath, m_strBaseDir, pFileName);
+      //  }
+      //  else {
+      //    strFullPath = pFileName;
+      //  }
+      //}
+      //else {
+      //  strFullPath = pFileName;
+      //}
+      if(_CL_NOT_(FindLocalFile(strFullPath, pFileName)))
       {
-        if(m_pGraphics != NULL) {
-          strFullPath = pFileName;
-          m_pGraphics->ConvertToAbsolutePathA(strFullPath);
-        }
-        else if(m_strBaseDir.IsNotEmpty()) {
-          clpathfile::CombinePath(strFullPath, m_strBaseDir, pFileName);
-        }
-        else {
-          strFullPath = pFileName;
-        }
-      }
-      else {
-        strFullPath = pFileName;
+        return E_FAIL;
       }
 
       // 查找 Include 是否已经存在
@@ -128,6 +139,33 @@ public:
   STDMETHOD(Close)(LPCVOID pData)
   {
     return S_OK;
+  }
+
+  GXBOOL FindLocalFile(clStringA& strFullPath, LPCSTR pFileName)
+  {
+    GXLPCWSTR* pSearchingDirectiory =  m_pDesc->pHeaderDirectory;
+    for(int i = 0; pSearchingDirectiory && pSearchingDirectiory[i] != NULL; i++)
+    {
+      clStringA strDirectoryA = pSearchingDirectiory[i];
+      if(clpathfile::IsPathExist(clpathfile::CombinePath(strFullPath, strDirectoryA, pFileName)))
+      {
+        return TRUE;
+      }
+    }
+
+    if (m_pGraphics != NULL) {
+      strFullPath = pFileName;
+      m_pGraphics->ConvertToAbsolutePathA(strFullPath);
+      if(clpathfile::IsPathExist(strFullPath)) {
+        return TRUE;
+      }
+    }
+    
+    if (m_strBaseDir.IsNotEmpty() && 
+      clpathfile::IsPathExist(clpathfile::CombinePath(strFullPath, m_strBaseDir, pFileName))) {
+      return TRUE;
+    }
+    return FALSE;
   }
 };
 

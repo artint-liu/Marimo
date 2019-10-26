@@ -42,12 +42,7 @@ using namespace GrapX;
 GVGeometry::GVGeometry(Graphics* pGraphics, GEOTYPE eType, const float3& vMin, const float3& vMax)
   : GVMesh        (pGraphics, GXMAKEFOURCC('G','E','O','Y'))
   , m_eType       (GXPT_POINTLIST)
-  //, m_nPrimiCount (0)
-  //, m_nVertCount  (0)
-  //, m_nStartIndex (0)
   , m_eGeoType    (eType)
-  //, m_pMtlInst    (NULL)
-  //, m_pPrimitive  (NULL)
 {
   m_aabbLocal.vMin = vMin;
   m_aabbLocal.vMax = vMax;
@@ -61,25 +56,19 @@ GVGeometry::GVGeometry()
 {
   m_aabbLocal.vMin = FLT_MAX;
   m_aabbLocal.vMax = FLT_MIN;
-  //m_aabbLocal.UpdateCenterExtent();
 }
 
 GVGeometry::GVGeometry(Graphics* pGraphics, GEOTYPE eType)
   : GVMesh        (pGraphics, GXMAKEFOURCC('G','E','O','Y'))
   , m_eType       (GXPT_POINTLIST)
-  //, m_nPrimiCount (0)
-  //, m_nVertCount  (0)
-  //, m_nStartIndex (0)
   , m_eGeoType    (eType)
-  //, m_pMtlInst    (NULL)
-  //, m_pPrimitive  (NULL)
 {
 }
 
 GVGeometry::~GVGeometry()
 {
   //SAFE_RELEASE(m_pMtlInst);
-  SAFE_RELEASE(m_pPrimitive);
+  SAFE_RELEASE(m_Renderer.pPrimitive);
 }
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
@@ -93,7 +82,7 @@ GXHRESULT GVGeometry::AddRef()
 GXBOOL GVGeometry::InitializeAsAABB(Graphics* pGraphics, GXCOLOR clr)
 {
   m_eType = GXPT_LINELIST;
-  m_nPrimiCount = 12;
+  m_Renderer.PrimitiveCount = 12;
 
   GXVERTEX_P3F_C1D pVertices[8];
   GXWORD pIndices[24];
@@ -110,7 +99,7 @@ GXBOOL GVGeometry::InitializeAsAABB(Graphics* pGraphics, GXCOLOR clr)
   pVertices[5].pos.set(m_aabbLocal.vMin.x, m_aabbLocal.vMax.y, m_aabbLocal.vMax.z);
   pVertices[6].pos.set(m_aabbLocal.vMax.x, m_aabbLocal.vMax.y, m_aabbLocal.vMax.z);
   pVertices[7].pos.set(m_aabbLocal.vMax.x, m_aabbLocal.vMax.y, m_aabbLocal.vMin.z);
-  m_nVertCount = 8;
+  m_Renderer.NumVertices = 8;
 
   for(int i = 0; i < 8; i++)
   {
@@ -135,7 +124,7 @@ GXBOOL GVGeometry::InitializeAsAABB(Graphics* pGraphics, GXCOLOR clr)
   //m_pPrimitive->Unlock();
 
   pGraphics->CreatePrimitive(
-    &m_pPrimitive, NULL, MOGetSysVertexDecl(GXVD_P3F_C1D), GXResUsage::Default,
+    &m_Renderer.pPrimitive, NULL, MOGetSysVertexDecl(GXVD_P3F_C1D), GXResUsage::Default,
     8, sizeof(GXVERTEX_P3F_C1D), pVertices, 24, 2, pIndices);
 
   return TRUE;
@@ -162,7 +151,7 @@ GXBOOL GVGeometry::InitializeAsAxis(Graphics* pGraphics, const float3& vPos, flo
     pVertices[3].color = 0xffff0000;
     pVertices[4].color = 0xff00ff00;
     pVertices[5].color = 0xff0000ff;
-    m_nVertCount = 6;
+    m_Renderer.NumVertices = 6;
 
     pIndices[0] = 0;    pIndices[1] = 3;
     pIndices[2] = 1;    pIndices[3] = 4;
@@ -285,8 +274,8 @@ GXBOOL GVGeometry::InitializeAsQuadPlane(Graphics* pGraphics, const float3& vPos
   }
 
   m_eType = GXPT_TRIANGLELIST;
-  m_nPrimiCount = (GXUINT)(aIndices.size() / 3);
-  m_nVertCount = (GXUINT)aVertices.size();
+  m_Renderer.PrimitiveCount = (GXUINT)(aIndices.size() / 3);
+  m_Renderer.NumVertices = (GXUINT)aVertices.size();
 
   return IntCreateMesh(pGraphics, &MeshData);
 
@@ -300,11 +289,11 @@ GXBOOL GVGeometry::CreatePrimitive(Graphics* pGraphics, GXPrimitiveType eType, i
 {
   GXBOOL bval = FALSE;
   m_eType       = eType;
-  m_nPrimiCount = nPrimCount;
-  m_nVertCount  = nVertCount;
+  m_Renderer.PrimitiveCount = nPrimCount;
+  m_Renderer.NumVertices  = nVertCount;
 
   const GXUINT nStride = MOGetDeclVertexSize(lpVertDecl);
-  if(GXSUCCEEDED(pGraphics->CreatePrimitive(&m_pPrimitive, NULL, lpVertDecl, GXResUsage::Default,
+  if(GXSUCCEEDED(pGraphics->CreatePrimitive(&m_Renderer.pPrimitive, NULL, lpVertDecl, GXResUsage::Default,
     nVertCount, nStride, lpVertics, nIdxCount, 2, pIndices)))
   {
     GXVERTEXELEMENT Desc;
@@ -326,7 +315,7 @@ GXBOOL GVGeometry::CreatePrimitive(Graphics* pGraphics, GXPrimitiveType eType, i
 
 GVRENDERDESC2* GVGeometry::GetRenderDesc(int nRenderCate)
 {
-  if (nRenderCate >= (int)m_MtlInsts.size()) {
+  if (nRenderCate >= (int)m_Renderer.materials.size()) {
     return NULL;
   }
   return &m_Renderer;
@@ -334,21 +323,21 @@ GVRENDERDESC2* GVGeometry::GetRenderDesc(int nRenderCate)
 
 void GVGeometry::GetRenderDesc(int nRenderCate, GVRENDERDESC* pRenderDesc)
 {
-  if(nRenderCate < (int)m_MtlInsts.size())
+  if(nRenderCate < (int)m_Renderer.materials.size())
   {
     pRenderDesc->dwFlags = m_dwFlags;
     pRenderDesc->dwLayer = m_dwLayer;
     pRenderDesc->ePrimType = m_eType;
-    pRenderDesc->pPrimitive = m_pPrimitive;
-    pRenderDesc->pMaterial = m_MtlInsts[nRenderCate];
+    pRenderDesc->pPrimitive = m_Renderer.pPrimitive;
+    pRenderDesc->pMaterial = m_Renderer.materials[nRenderCate];
     pRenderDesc->matWorld = m_Transformation.GlobalMatrix;
     pRenderDesc->RenderQueue = pRenderDesc->pMaterial ? pRenderDesc->pMaterial->GetRenderQueue() : 0;
     pRenderDesc->BaseVertexIndex = 0;
 
     pRenderDesc->MinIndex = 0;
-    pRenderDesc->NumVertices = m_nVertCount;
-    pRenderDesc->StartIndex = m_nStartIndex;
-    pRenderDesc->PrimitiveCount = m_nPrimiCount;
+    pRenderDesc->NumVertices = m_Renderer.NumVertices;
+    pRenderDesc->StartIndex = m_Renderer.StartIndex;
+    pRenderDesc->PrimitiveCount = m_Renderer.PrimitiveCount;
   }
   else
   {

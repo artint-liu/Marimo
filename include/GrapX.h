@@ -4667,11 +4667,12 @@ struct GXVERTEXELEMENT
 
 struct GXSHADER_SOURCE_DESC
 {
-  GXLPCSTR            szSourceData; // 代码
-  GXSIZE_T            nSourceLen;   // 代码长度，如果为0，代码需要以'\0'结尾
-  GXLPCSTR            szEntry;      // 入口函数
-  GXLPCSTR            szTarget;     // 编译目标
-  const GXDEFINITION* pDefines;     // 宏，预处理定义
+  GXLPCSTR            szSourceData;      // 代码
+  GXSIZE_T            nSourceLen;        // 代码长度，如果为0，代码需要以'\0'结尾
+  GXLPCSTR            szEntry;           // 入口函数
+  GXLPCSTR            szTarget;          // 编译目标
+  const GXDEFINITION* pDefines;          // 宏，预处理定义
+  GXLPCWSTR*          pHeaderDirectory;  // 头文件搜索目录,最后以NULL结尾
 };
 
 // TODO: 各种type应该能合并成统一的定义

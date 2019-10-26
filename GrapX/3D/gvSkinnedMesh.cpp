@@ -84,13 +84,13 @@ GXBOOL GVSkinnedMeshSoft::Initialize(GrapX::Graphics* pGraphics, const GVMESHDAT
       m_pSkeleton = pSkeleton;
       m_pSkeleton->AddRef();
     }
-    m_nVertStride = m_pPrimitive->GetVertexStride();
-    m_nPosOffset = m_pPrimitive->GetElementOffset(GXDECLUSAGE_POSITION, 0);
-    m_nNormalOffset = m_pPrimitive->GetElementOffset(GXDECLUSAGE_NORMAL, 0);
+    m_nVertStride = m_Renderer.pPrimitive->GetVertexStride();
+    m_nPosOffset = m_Renderer.pPrimitive->GetElementOffset(GXDECLUSAGE_POSITION, 0);
+    m_nNormalOffset = m_Renderer.pPrimitive->GetElementOffset(GXDECLUSAGE_NORMAL, 0);
     m_pVertices = new GXBYTE[m_nVertStride * nVertCount];
     m_nClusterCount = nClusterCount;
 
-    PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::Write);
+    PrimitiveUtility::MapVertices locker_v(m_Renderer.pPrimitive, GXResMap::Write);
     memcpy(m_pVertices, locker_v.GetPtr(), m_nVertStride * nVertCount);
 
     return TRUE;
@@ -197,7 +197,7 @@ GXBOOL GVSkinnedMeshSoft::Update(const GVSCENEUPDATE& sContext)
   float3* pDestNormal = NULL;
   m_aabbLocal.Clear();
 
-  PrimitiveUtility::MapVertices locker_v(m_pPrimitive, GXResMap::ReadWrite);
+  PrimitiveUtility::MapVertices locker_v(m_Renderer.pPrimitive, GXResMap::ReadWrite);
 
   //if(m_pPrimitive->Lock(0, 0, 0, 0, &pNewVertices, &pIndices))
   if(locker_v.GetPtr())
@@ -209,7 +209,7 @@ GXBOOL GVSkinnedMeshSoft::Update(const GVSCENEUPDATE& sContext)
     pSrcNormal = (float3*)((GXBYTE*)m_pVertices + m_nNormalOffset);
     pDestNormal = (float3*)((GXBYTE*)pNewVertices + m_nNormalOffset);
 
-    for(GXSIZE_T nVertIndex = 0; nVertIndex < m_nVertCount; nVertIndex++)
+    for (GXSIZE_T nVertIndex = 0; nVertIndex < m_Renderer.NumVertices; nVertIndex++)
     {
       float3 vPos(0.0f);
       float3 vNormal(0.0f);
@@ -247,17 +247,17 @@ GXHRESULT GVSkinnedMeshSoft::SaveFile(clSmartRepository* pStorage)
 {
   pStorage->WriteStringA(NULL, SKINNEDMESH_NAME, GetName());
 
-  if(m_MtlInsts.empty() == FALSE && m_MtlInsts[0] != NULL)
+  if (m_Renderer.materials.empty() == FALSE && m_Renderer.materials[0] != NULL)
   {
     clStringW strMtlFile;
-    m_MtlInsts[0]->GetFilename(&strMtlFile);
+    m_Renderer.materials[0]->GetFilename(&strMtlFile);
     if(strMtlFile.IsNotEmpty()) {
-      m_pPrimitive->GetGraphicsUnsafe()->ConvertToRelativePathW(strMtlFile);
+      m_Renderer.pPrimitive->GetGraphicsUnsafe()->ConvertToRelativePathW(strMtlFile);
       pStorage->WriteStringW(NULL, SKINNEDMESH_MTLINST, strMtlFile);
     }
   }
 
-  if(m_pPrimitive != NULL)
+  if(m_Renderer.pPrimitive != NULL)
   {
     //GVertexDeclaration* pVertexDecl = NULL;
     //if(GXSUCCEEDED(m_pPrimitive->GetVertexDeclaration(&pVertexDecl))) {
@@ -271,7 +271,7 @@ GXHRESULT GVSkinnedMeshSoft::SaveFile(clSmartRepository* pStorage)
     float4x4 matLocal = m_Transformation.ToRelativeMatrix();
     pStorage->WriteStructT(NULL, SKINNEDMESH_TRANSFORM, matLocal);
 
-    ASSERT(m_pPrimitive->GetVertexStride() == m_nVertStride);
+    ASSERT(m_Renderer.pPrimitive->GetVertexStride() == m_nVertStride);
     //pStorage->Write(NULL, SKINNEDMESH_ASMVERTICES, m_pVertices, 
     //  m_nVertStride * m_pPrimitive->GetVerticesCount());
 
@@ -280,9 +280,9 @@ GXHRESULT GVSkinnedMeshSoft::SaveFile(clSmartRepository* pStorage)
 
     //pStorage->Write64(NULL, SKINNEDMESH_PRIMCOUNT, m_nPrimiCount, 0);
     //pStorage->Write64(NULL, SKINNEDMESH_STARTINDEX, m_nStartIndex, 0);
-    RepoUtility::SavePrimitive(pStorage, "SkMesh", m_pPrimitive, m_nStartIndex, m_nPrimiCount);
+    RepoUtility::SavePrimitive(pStorage, "SkMesh", m_Renderer.pPrimitive, m_Renderer.StartIndex, m_Renderer.PrimitiveCount);
     
-    pStorage->Write(NULL, SKINNEDMESH_WEIGHT, m_pWeight, (u32)(m_nVertCount * m_nClusterCount * sizeof(float)));
+    pStorage->Write(NULL, SKINNEDMESH_WEIGHT, m_pWeight, (u32)(m_Renderer.NumVertices * m_nClusterCount * sizeof(float)));
     pStorage->Write64(NULL, SKINNEDMESH_CLUSTERCOUNT, (u32)m_nClusterCount, 0);
   }
 
