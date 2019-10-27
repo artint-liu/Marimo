@@ -224,6 +224,20 @@ GXBOOL GVMesh::IntSetPrimitive(GXSIZE_T nPrimCount, GXSIZE_T nStartIndex, Primit
   return TRUE;
 }
 
+void GVMesh::OnChangingFlags(GXDWORD dwNewFlags)
+{
+  // 这个计算出的AABB在有旋转的情况下是不太准确的
+  float3 vTranslation;
+  float3 vScaling;
+  m_Transformation.GlobalMatrix.DecomposeTranslation(&vTranslation);
+  m_Transformation.GlobalMatrix.DecomposeScaling(&vScaling);
+
+  m_Renderer.aabbAbsulate.Set(m_aabbLocal.vMin * vScaling + vTranslation,
+    m_aabbLocal.vMax * vScaling + vTranslation);
+
+  return GVNode::OnChangingFlags(dwNewFlags);
+}
+
 GVRENDERDESC2* GVMesh::GetRenderDesc(int nRenderCate)
 {
   if (nRenderCate >= (int)m_Renderer.materials.size()) {

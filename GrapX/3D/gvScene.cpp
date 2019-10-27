@@ -537,9 +537,17 @@ GXHRESULT GVScene::Generate( Canvas3D* pCanvas, GVSequence* pRenderSequence, int
           goto JMP_ADD;
         }
 
-        pNode->GetAbsoluteAABB(aabbAbs);
-        if(pFrustum->IntersectAABB(aabbAbs) == 0) {
-          goto JMP_NEXT;
+        if(TEST_FLAG(dwFlags, GVNF_STATIC))
+        {
+          if(pFrustum->IntersectAABB(pRenderer->aabbAbsulate) == 0) {
+            goto JMP_NEXT;
+          }
+        }
+        else
+        {
+          if(pFrustum->IntersectAABB(pNode->GetAbsoluteAABB(aabbAbs)) == 0) {
+            goto JMP_NEXT;
+          }
         }
 JMP_ADD:  // 主要是这个不想写两遍
         pRenderSequence->Add(pRenderer);

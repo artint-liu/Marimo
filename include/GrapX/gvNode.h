@@ -193,7 +193,7 @@ public:
   GXDWORD   GetLayer                  () const;
 //void      CombineRecursiveFlags    (GXDWORD dwFlags);
 //void      RemoveRecursiveFlags     (GXDWORD dwFlags);
-  GXVOID    GetAbsoluteAABB           (AABB& aabb) const;
+  AABB&     GetAbsoluteAABB           (AABB& aabb) const;
 
   void      SetScaling                (CFloat3& vScaling/*, ESpace eTransform = S_RELATIVE*/);
 
@@ -222,7 +222,7 @@ public:
   virtual GXHRESULT AddRef    ();
   virtual GXHRESULT Release   ();
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
-
+  virtual void      OnChangingFlags           (GXDWORD dwNewFlags);
   virtual GXVOID    OnNotify                  (const NODENOTIFY* pNotify);
   virtual GXBOOL    Update                    (const GVSCENEUPDATE& sContext);
   virtual GXBOOL    Collision                 ();

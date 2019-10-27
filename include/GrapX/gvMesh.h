@@ -113,6 +113,8 @@ public:
   virtual GXHRESULT AddRef  ();
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
+  void OnChangingFlags(GXDWORD dwNewFlags) override;
+
   //virtual GXBOOL  Update          (const GVSCENEUPDATE& sContext);
   virtual void    GetRenderDesc   (int nRenderCate, GVRENDERDESC* pRenderDesc);
   GVRENDERDESC2*  GetRenderDesc         (int nRenderCate) override;

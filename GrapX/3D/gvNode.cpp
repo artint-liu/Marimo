@@ -61,6 +61,7 @@ GXBOOL GVNode::Show(GXBOOL bShow)
 GXDWORD GVNode::SetFlags(GXDWORD dwNewFlags)
 {
   GXDWORD dwOldFlags = m_dwFlags;
+  OnChangingFlags(dwNewFlags);
   m_dwFlags = dwNewFlags;
   return dwOldFlags;
 }
@@ -68,7 +69,9 @@ GXDWORD GVNode::SetFlags(GXDWORD dwNewFlags)
 GXDWORD GVNode::CombineFlags(GXDWORD dwFlags)
 {
   GXDWORD dwOldFlags = m_dwFlags;
-  m_dwFlags |= dwFlags;
+  dwFlags |= m_dwFlags;
+  OnChangingFlags(dwFlags);
+  m_dwFlags = dwFlags;
   return dwOldFlags;
 }
 
@@ -257,6 +260,10 @@ GXHRESULT GVNode::Release()
   return nRefCount;
 }
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
+
+void GVNode::OnChangingFlags(GXDWORD dwNewFlags)
+{
+}
 
 GXVOID GVNode::OnNotify( const NODENOTIFY* pNotify )
 {
@@ -613,7 +620,7 @@ void GVNode::SetPosition(const float3& vPos, ESpace eSpace/* = S_RELATIVVE*/)
   }
 }
 
-GXVOID GVNode::GetAbsoluteAABB( AABB& aabb ) const
+GVNode::AABB& GVNode::GetAbsoluteAABB( AABB& aabb ) const
 {
   // 这个计算出的AABB在有旋转的情况下是不太准确的
   float3 vTranslation;
@@ -621,7 +628,7 @@ GXVOID GVNode::GetAbsoluteAABB( AABB& aabb ) const
   m_Transformation.GlobalMatrix.DecomposeTranslation(&vTranslation);
   m_Transformation.GlobalMatrix.DecomposeScaling(&vScaling);
 
-  aabb.Set(m_aabbLocal.vMin * vScaling + vTranslation, 
+  return aabb.Set(m_aabbLocal.vMin * vScaling + vTranslation, 
       m_aabbLocal.vMax * vScaling + vTranslation);
   //aabb.Set(m_aabbLocal.vMin * m_Transformation.GlobalMatrix, 
   //  m_aabbLocal.vMax * m_Transformation.GlobalMatrix);

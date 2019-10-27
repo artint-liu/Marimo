@@ -384,10 +384,7 @@ namespace GrapX
             SetWorldMatrix(pRenderer->pNode->GetTransform().GlobalMatrix);
           }
 
-          if (TEST_FLAG(dwFlags, GVNF_CONTAINER)) {
-            continue;
-          }
-
+          ASSERT(TEST_FLAG(dwFlags, GVNF_CONTAINER) == 0);
           Material* pMaterial = pRenderer->materials[nRenderCategory];
 
           // Ó¦ÓÃ²ÄÖÊ
