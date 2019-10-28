@@ -153,7 +153,7 @@ namespace GrapX
       TexDesc.SampleDesc.Count = 1;
       TexDesc.SampleDesc.Quality = 0;
 
-      if(m_dwResType == RESTYPE_TEXTURE_CUBE)
+      if(m_dwResType == RESTYPE_TEXTURE_CUBE || m_dwResType == RESTYPE_CUBERENDERTARGET)
       {
         TexDesc.ArraySize = 6;
         TexDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
@@ -592,11 +592,11 @@ namespace GrapX
 
     //////////////////////////////////////////////////////////////////////////
 
-    TextureImpl_RenderTarget::TextureImpl_RenderTarget(Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight)
+    TextureImpl_RenderTarget::TextureImpl_RenderTarget(Graphics* pGraphics, GXDWORD dwResType, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight)
       : TextureImpl(pGraphics, eFormat, nWidth, nHeight, 1, GXResUsage::Default)
-      , m_pD3D11RenderTargetView(NULL)
     {
-      m_dwResType = RESTYPE_RENDERTEXTURE;
+      ASSERT(dwResType == RESTYPE_RENDERTEXTURE || dwResType == RESTYPE_CUBERENDERTARGET);
+      m_dwResType = dwResType;
     }
 
     TextureImpl_RenderTarget::~TextureImpl_RenderTarget()
@@ -628,8 +628,30 @@ namespace GrapX
       ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
 
       D3D11_RENDER_TARGET_VIEW_DESC TarDesc = { GrapXToDX11::FormatFrom(m_Format) };
-      TarDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+      if (m_dwResType == RESTYPE_RENDERTEXTURE)
+      {
+        TarDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+      }
+      else
+      {
+        TarDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
+        TarDesc.Texture2DArray.ArraySize = 6;
+      }
 
+      HRESULT hval = pd3dDevice->CreateRenderTargetView(m_pD3D11Texture, &TarDesc, &m_pD3D11RenderTargetView);
+      return SUCCEEDED(hval);
+    }
+
+    GXBOOL TextureImpl_RenderTarget::InitRenderTexture(ID3D11Texture2D* pD3D11Texture, int nFaceIndex)
+    {
+      m_pD3D11Texture = pD3D11Texture;
+      pD3D11Texture->AddRef();
+      D3D11_RENDER_TARGET_VIEW_DESC TarDesc = { GrapXToDX11::FormatFrom(m_Format) };
+      //ASSERT(m_dwResType == RESTYPE_CUBERENDERTARGET);
+      TarDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+      TarDesc.Texture2DArray.FirstArraySlice = nFaceIndex;
+      
+      ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
       HRESULT hval = pd3dDevice->CreateRenderTargetView(m_pD3D11Texture, &TarDesc, &m_pD3D11RenderTargetView);
       return SUCCEEDED(hval);
     }
@@ -638,6 +660,40 @@ namespace GrapX
     {
       return m_pD3D11RenderTargetView;
     }
+
+    //////////////////////////////////////////////////////////////////////////
+
+    //TextureImpl_CubeFaceRenderTarget::TextureImpl_CubeFaceRenderTarget(Graphics* pGraphics, GXFormat eFormat, GXUINT nSize)
+    //  : TextureImpl(pGraphics, eFormat, nSize, nSize, 1, GXResUsage::Default)
+    //{
+    //  m_dwResType = RESTYPE_CUBERENDERTARGET;
+    //}
+
+    //TextureImpl_CubeFaceRenderTarget::~TextureImpl_CubeFaceRenderTarget()
+    //{
+    //  SAFE_RELEASE(m_pD3D11RenderTargetView);
+    //}
+
+    //GXBOOL TextureImpl_CubeFaceRenderTarget::InitRenderTexture(ID3D11Resource* pTexture, int nFaceIndex)
+    //{
+    //  //if (_CL_NOT_(TextureImpl::InitTexture(TRUE, NULL, 0))) {
+    //  //  return FALSE;
+    //  //}
+
+    //  ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
+
+    //  D3D11_RENDER_TARGET_VIEW_DESC TarDesc = { GrapXToDX11::FormatFrom(m_Format) };
+    //  ASSERT(m_dwResType == RESTYPE_CUBERENDERTARGET);
+    //  TarDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+    //  TarDesc.Texture2DArray.FirstArraySlice = nFaceIndex;
+    //  HRESULT hval = pd3dDevice->CreateRenderTargetView(m_pD3D11Texture, &TarDesc, &m_pD3D11RenderTargetView);
+    //  return SUCCEEDED(hval);
+    //}
+
+    //ID3D11RenderTargetView* TextureImpl_CubeFaceRenderTarget::D3DGetRenderTargetView() const
+    //{
+    //  return m_pD3D11RenderTargetView;
+    //}
 
     //////////////////////////////////////////////////////////////////////////
 

@@ -41,15 +41,15 @@ namespace GrapX
     GXSTDINTERFACE(void           SetWorldMatrix        (const float4x4& matWorld));
 
 #ifdef REFACTOR_SHADER
-    GXSTDINTERFACE(GXDWORD        GetGlobalHandle       (GXLPCSTR szName));
+    //GXSTDINTERFACE(GXDWORD        GetGlobalHandle       (GXLPCSTR szName));
 
-    GXSTDINTERFACE(GXHRESULT      SetCanvasFloat        (GXDWORD dwGlobalHandle, float fValue));
-    GXSTDINTERFACE(GXHRESULT      SetCanvasVector       (GXDWORD dwGlobalHandle, const float4& rVector));
-    GXSTDINTERFACE(GXHRESULT      SetCanvasMatrix       (GXDWORD dwGlobalHandle, const float4x4& rMatrix));
+    //GXSTDINTERFACE(GXHRESULT      SetCanvasFloat        (GXDWORD dwGlobalHandle, float fValue));
+    //GXSTDINTERFACE(GXHRESULT      SetCanvasVector       (GXDWORD dwGlobalHandle, const float4& rVector));
+    //GXSTDINTERFACE(GXHRESULT      SetCanvasMatrix       (GXDWORD dwGlobalHandle, const float4x4& rMatrix));
 
-    GXSTDINTERFACE(GXHRESULT      SetCanvasFloat        (GXLPCSTR szName, float fValue));
-    GXSTDINTERFACE(GXHRESULT      SetCanvasVector       (GXLPCSTR szName, const float4& rVector));
-    GXSTDINTERFACE(GXHRESULT      SetCanvasMatrix       (GXLPCSTR szName, const float4x4& rMatrix));
+    //GXSTDINTERFACE(GXHRESULT      SetCanvasFloat        (GXLPCSTR szName, float fValue));
+    //GXSTDINTERFACE(GXHRESULT      SetCanvasVector       (GXLPCSTR szName, const float4& rVector));
+    //GXSTDINTERFACE(GXHRESULT      SetCanvasMatrix       (GXLPCSTR szName, const float4x4& rMatrix));
 #endif // #ifdef REFACTOR_SHADER
 
     GXSTDINTERFACE(GXHRESULT      TransformPosition     (const float3* pPos, GXOUT float4* pView)); // Transform world position to screen
@@ -64,10 +64,10 @@ namespace GrapX
     GXSTDINTERFACE(float          GetAspect             () const);
 
     GXSTDINTERFACE(const FrustumPlanes*     GetViewFrustum        ());
-#ifdef REFACTOR_SHADER
-#else
-    GXSTDINTERFACE(STANDARDMTLUNIFORMTABLE* GetStandardUniform    ());  // 返回的数据可以在应用程序中修改
-#endif // #ifdef REFACTOR_SHADER
+//#ifdef REFACTOR_SHADER
+//#else
+//    GXSTDINTERFACE(STANDARDMTLUNIFORMTABLE* GetStandardUniform    ());  // 返回的数据可以在应用程序中修改
+//#endif // #ifdef REFACTOR_SHADER
     GXSTDINTERFACE(GXHRESULT      UpdateCommonUniforms  ());
   };
 } // namespace GrapX

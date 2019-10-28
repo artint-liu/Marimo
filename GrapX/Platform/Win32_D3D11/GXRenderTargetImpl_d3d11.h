@@ -16,21 +16,40 @@ namespace GrapX
   {
     class GraphicsImpl;
 
-    class RenderTargetImpl : public RenderTarget
+    template<class _TargetInterfaceT>
+    class RenderTargetBase : public _TargetInterfaceT
+    {
+    protected:
+      GraphicsImpl* m_pGraphics;
+      TextureImpl_RenderTarget* m_pColorTexture = NULL;
+      TextureImpl_DepthStencil* m_pDepthStencilTexture = NULL;
+
+    public:
+      RenderTargetBase(GraphicsImpl* pGraphics);
+      RenderTargetBase(GraphicsImpl* pGraphics, TextureImpl_RenderTarget* pColorTexture, TextureImpl_DepthStencil* pDepthTexture); // 只组装，后面没有创建
+      virtual ~RenderTargetBase();
+      //GXBOOL Initialize(GXDWORD dwResType, GXUINT width, GXUINT height, GXFormat eColorFormat, GXFormat eDepthStencilFormat);
+
+    protected:
+      GXBOOL InitDepthStencil(GXFormat eDepthStencilFormat, GXUINT nWidth, GXUINT nHeight);
+    };
+
+    //////////////////////////////////////////////////////////////////////////
+
+    class RenderTargetImpl : public RenderTargetBase<RenderTarget>
     {
       friend class GraphicsImpl;
       friend class CanvasCoreImpl;
 
     protected:
-      GraphicsImpl* m_pGraphics;
-      TextureImpl_RenderTarget* m_pColorTexture;
-      TextureImpl_DepthStencil* m_pDepthStencilTexture;
       TextureImpl_GPUReadBack*  m_pReadBackTexture = NULL;
       const GXINT m_nWidth;
       const GXINT m_nHeight;
 
     public:
       RenderTargetImpl(Graphics* pGraphics, GXINT nWidth, GXINT nHeight);
+      RenderTargetImpl(Graphics* pGraphics, GXINT nWidth, GXINT nHeight, TextureImpl_RenderTarget* pColorTexture, TextureImpl_DepthStencil* pDepthTexture); // 只组装，后面没有创建
+
       virtual ~RenderTargetImpl();
 
     public:
@@ -55,8 +74,33 @@ namespace GrapX
 
     protected:
       GXBOOL IntCreateReadBackTexture(TextureImpl_GPUReadBack** ppReadBackTex);
-      GXBOOL InitDepthStencil(GXFormat eDepthStencilFormat, GXUINT nWidth, GXUINT nHeight);
 
+    };
+
+    class CubeRenderTargetImpl : public RenderTargetBase<CubeRenderTarget>
+    {
+      friend class GraphicsImpl;
+      typedef TextureImpl_RenderTarget CubeFaceRenderTargetTextureImpl;
+    protected:
+      CubeFaceRenderTargetTextureImpl* m_pCubeFace[6] = { NULL };
+      RenderTargetImpl* m_pRenderTargetFace[countof(m_pCubeFace)] = { NULL };
+      u8                m_CubeFaceTextureBuffer[countof(m_pCubeFace) * sizeof(CubeFaceRenderTargetTextureImpl)];
+      u8                m_CubeFaceRenderTargetBuffer[countof(m_pCubeFace) * sizeof(RenderTargetImpl)];
+
+      TextureImpl_GPUReadBack*  m_pReadBackTexture = NULL;
+
+    protected:
+      CubeRenderTargetImpl(Graphics* pGraphics);
+      virtual ~CubeRenderTargetImpl();
+
+      GXHRESULT  AddRef                 () override;
+      GXHRESULT  Release                () override;
+      GXHRESULT  Invoke                 (GRESCRIPTDESC* pDesc) override;
+
+      GXBOOL Initialize(GXUINT nSize, GXFormat eColorFormat, GXFormat eDepthStencilFormat);
+
+      RenderTarget*  GetFaceUnsafe(Face face) override;
+      RenderTarget** GetFacesUnsafe() override;
     };
 
     //////////////////////////////////////////////////////////////////////////

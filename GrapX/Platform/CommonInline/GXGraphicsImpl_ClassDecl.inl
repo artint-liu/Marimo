@@ -115,7 +115,7 @@
   //virtual GXImage*    CreateImage             (GXLONG nWidth, GXLONG nHeight, GXFormat eFormat, GXBOOL bRenderable, const GXLPVOID lpBits) override;
   //virtual GXImage*    CreateImageFromFile     (GXLPCWSTR lpwszFilename) override;
   //virtual GXImage*    CreateImageFromTexture  (Texture* pTexture) override;
-
+  GXHRESULT CreateCubeRenderTarget(CubeRenderTarget** ppRenderTarget, GXLPCWSTR szName, GXUINT nSize, GXFormat eColorFormat, GXFormat eDepthStencilFormat) override;
   GXHRESULT CreateRenderTarget(RenderTarget** ppRenderTarget, GXLPCWSTR szName, GXINT nWidth, GXINT nHeight, GXFormat eColorFormat, GXFormat eDepthStencilFormat) override;
 
   GXHRESULT CreateRenderTarget(RenderTarget** ppRenderTarget, GXLPCWSTR szName, GXSizeRatio nWidth, GXINT nHeight, GXFormat eColorFormat, GXFormat eDepthStencilFormat) override

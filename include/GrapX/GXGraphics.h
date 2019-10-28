@@ -22,6 +22,7 @@ namespace GrapX
   class Graphics;
   class Primitive;
   class RenderTarget;
+  class CubeRenderTarget;
   class Shader;
   class Effect;
   class Material;
@@ -299,6 +300,7 @@ namespace GrapX
     //GXSTDINTERFACE(GXImage*    CreateImage                 (GXLONG nWidth, GXLONG nHeight, GXFormat eFormat, GXBOOL bRenderable, const GXLPVOID lpBits));
     //GXSTDINTERFACE(GXImage*    CreateImageFromFile         (GXLPCWSTR lpwszFilename));
     //GXSTDINTERFACE(GXImage*    CreateImageFromTexture      (GTexture* pTexture));
+    GXSTDINTERFACE(GXHRESULT  CreateCubeRenderTarget       (CubeRenderTarget** ppRenderTarget, GXLPCWSTR szName, GXUINT nSize, GXFormat eColorFormat, GXFormat eDepthStencilFormat));
     GXSTDINTERFACE(GXHRESULT  CreateRenderTarget           (RenderTarget** ppRenderTarget, GXLPCWSTR szName, GXINT nWidth, GXINT nHeight, GXFormat eColorFormat, GXFormat eDepthStencilFormat));
     GXSTDINTERFACE(GXHRESULT  CreateRenderTarget           (RenderTarget** ppRenderTarget, GXLPCWSTR szName, GXSizeRatio nWidth, GXINT nHeight, GXFormat eColorFormat, GXFormat eDepthStencilFormat));
     GXSTDINTERFACE(GXHRESULT  CreateRenderTarget           (RenderTarget** ppRenderTarget, GXLPCWSTR szName, GXINT nWidth, GXSizeRatio nHeight, GXFormat eColorFormat, GXFormat eDepthStencilFormat));

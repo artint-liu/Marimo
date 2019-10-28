@@ -27,15 +27,118 @@
 //#include <clPathFile.h>
 #ifdef ENABLE_GRAPHICS_API_DX11
 #include <FreeImage.h>
+
+#define _RENDERTARGET_TEMPL template<class _TargetInterfaceT>
+#define _RENDERTARGET_IMPL RenderTargetBase<_TargetInterfaceT>
+
 namespace GrapX
 {
   namespace D3D11
   {
+    GXBOOL CheckRenderTargetFormatSupport(ID3D11Device* pD3D11Device, GXFormat eColorFormat, GXFormat eDepthStencilFormat)
+    {
+      UINT uColorSupport;
+      UINT uDepthStencilSupport;
+
+      pD3D11Device->CheckFormatSupport(GrapXToDX11::FormatFrom(eColorFormat), &uColorSupport);
+      if (TEST_FLAG_NOT(uColorSupport, D3D11_FORMAT_SUPPORT_RENDER_TARGET)) {
+        CLOG_ERROR("RenderTarget: %s 格式不能作为渲染纹理", FormatToString(eColorFormat));
+        return FALSE;
+      }
+
+      if (eDepthStencilFormat != Format_Unknown) {
+        pD3D11Device->CheckFormatSupport(GrapXToDX11::FormatFrom(eDepthStencilFormat), &uDepthStencilSupport);
+        if (TEST_FLAG_NOT(uDepthStencilSupport, D3D11_FORMAT_SUPPORT_DEPTH_STENCIL)) {
+          CLOG_ERROR("RenderTarget: %s 格式不能作为渲染模板深度缓冲", FormatToString(eDepthStencilFormat));
+          return FALSE;
+        }
+      }
+      return TRUE;
+    }
+
+    //////////////////////////////////////////////////////////////////////////
+    _RENDERTARGET_TEMPL
+      _RENDERTARGET_IMPL::RenderTargetBase(GraphicsImpl* pGraphics)
+      : m_pGraphics(pGraphics)
+    {
+    }
+
+
+    _RENDERTARGET_TEMPL
+      _RENDERTARGET_IMPL::RenderTargetBase(GraphicsImpl* pGraphics, TextureImpl_RenderTarget* pColorTexture, TextureImpl_DepthStencil* pDepthTexture)
+      : m_pGraphics(pGraphics)
+      , m_pColorTexture(pColorTexture)
+      , m_pDepthStencilTexture(pDepthTexture)
+    {
+      pColorTexture->AddRef();
+      pDepthTexture->AddRef();
+    }
+
+    _RENDERTARGET_TEMPL
+      _RENDERTARGET_IMPL::~RenderTargetBase()
+    {
+      SAFE_RELEASE(m_pColorTexture);
+      SAFE_RELEASE(m_pDepthStencilTexture);
+    }
+
+    //_RENDERTARGET_TEMPL
+    //GXBOOL _RENDERTARGET_IMPL::Initialize(GXDWORD dwResType, GXUINT width, GXUINT height, GXFormat eColorFormat, GXFormat eDepthStencilFormat)
+    //{
+    //  //
+    //  // 检查
+    //  //
+    //  ID3D11Device* pD3D11Device = m_pGraphics->D3DGetDevice();
+    //  ASSERT(m_pColorTexture == NULL);
+    //  ASSERT(m_pDepthStencilTexture == NULL);
+    //  
+    //  if (CheckRenderTargetFormatSupport(pD3D11Device, eColorFormat, eDepthStencilFormat) == FALSE) {
+    //    return FALSE;
+    //  }
+
+    //  m_pColorTexture = new _RenderTargetTextureTempl(m_pGraphics, eColorFormat, width, height);
+    //  if (InlIsFailedToNewObject(m_pColorTexture)) {
+    //    return FALSE;
+    //  }
+
+    //  if (_CL_NOT_(m_pColorTexture->InitRenderTexture(NULL))) {
+    //    SAFE_RELEASE(m_pColorTexture);
+    //    return FALSE;
+    //  }
+
+    //  if (eDepthStencilFormat != Format_Unknown) {
+    //    return InitDepthStencil(eDepthStencilFormat, width, height);
+    //  }
+    //  return TRUE;
+    //}
+
+    _RENDERTARGET_TEMPL
+    GXBOOL _RENDERTARGET_IMPL::InitDepthStencil(GXFormat eDepthStencilFormat, GXUINT nWidth, GXUINT nHeight)
+    {
+      m_pDepthStencilTexture = new TextureImpl_DepthStencil(m_pGraphics, eDepthStencilFormat, nWidth, nHeight);
+
+      if (InlIsFailedToNewObject(m_pDepthStencilTexture)) {
+        return FALSE;
+      }
+
+      if (_CL_NOT_(m_pDepthStencilTexture->InitDepthStencil())) {
+        SAFE_RELEASE(m_pColorTexture);
+        SAFE_RELEASE(m_pDepthStencilTexture);
+        return FALSE;
+      }
+      return TRUE;
+    }
+
+    //////////////////////////////////////////////////////////////////////////
 
     RenderTargetImpl::RenderTargetImpl(Graphics* pGraphics, GXINT nWidth, GXINT nHeight)
-      : m_pGraphics(static_cast<GraphicsImpl*>(pGraphics))
-      , m_pColorTexture(NULL)
-      , m_pDepthStencilTexture(NULL)
+      : RenderTargetBase(static_cast<GraphicsImpl*>(pGraphics))
+      , m_nWidth(nWidth)
+      , m_nHeight(nHeight)
+    {
+    }
+
+    RenderTargetImpl::RenderTargetImpl(Graphics* pGraphics, GXINT nWidth, GXINT nHeight, TextureImpl_RenderTarget* pColorTexture, TextureImpl_DepthStencil* pDepthTexture)
+      : RenderTargetBase(static_cast<GraphicsImpl*>(pGraphics), pColorTexture, pDepthTexture)
       , m_nWidth(nWidth)
       , m_nHeight(nHeight)
     {
@@ -44,8 +147,6 @@ namespace GrapX
     RenderTargetImpl::~RenderTargetImpl()
     {
       SAFE_RELEASE(m_pReadBackTexture);
-      SAFE_RELEASE(m_pColorTexture);
-      SAFE_RELEASE(m_pDepthStencilTexture);
     }
 
     GXHRESULT RenderTargetImpl::AddRef()
@@ -188,37 +289,26 @@ namespace GrapX
       // 检查
       //
       ID3D11Device* pD3D11Device = m_pGraphics->D3DGetDevice();
-      UINT uColorSupport = 0;
-      UINT uDepthStencilSupport = 0;
-      pD3D11Device->CheckFormatSupport(GrapXToDX11::FormatFrom(eColorFormat), &uColorSupport);
-      if(TEST_FLAG_NOT(uColorSupport, D3D11_FORMAT_SUPPORT_RENDER_TARGET)) {
-        CLOG_ERROR("RenderTarget: %s 格式不能作为渲染纹理", FormatToString(eColorFormat));
+      ASSERT(m_pColorTexture == NULL);
+      ASSERT(m_pDepthStencilTexture == NULL);
+
+      if (CheckRenderTargetFormatSupport(pD3D11Device, eColorFormat, eDepthStencilFormat) == FALSE) {
         return FALSE;
       }
 
-      if(eDepthStencilFormat != Format_Unknown) {
-        pD3D11Device->CheckFormatSupport(GrapXToDX11::FormatFrom(eDepthStencilFormat), &uDepthStencilSupport);
-        if(TEST_FLAG_NOT(uDepthStencilSupport, D3D11_FORMAT_SUPPORT_DEPTH_STENCIL)) {
-          CLOG_ERROR("RenderTarget: %s 格式不能作为渲染模板深度缓冲", FormatToString(eDepthStencilFormat));
-          return FALSE;
-        }
-      }
-
-
-      m_pColorTexture = new TextureImpl_RenderTarget(m_pGraphics, eColorFormat, nWidth, nHeight);
-      if(InlIsFailedToNewObject(m_pColorTexture)) {
+      m_pColorTexture = new TextureImpl_RenderTarget(m_pGraphics, RESTYPE_RENDERTEXTURE, eColorFormat, nWidth, nHeight);
+      if (InlIsFailedToNewObject(m_pColorTexture)) {
         return FALSE;
       }
 
-      if(_CL_NOT_(m_pColorTexture->InitRenderTexture(NULL))) {
+      if (_CL_NOT_(m_pColorTexture->InitRenderTexture(NULL))) {
         SAFE_RELEASE(m_pColorTexture);
         return FALSE;
       }
 
-      if(eDepthStencilFormat != Format_Unknown) {
+      if (eDepthStencilFormat != Format_Unknown) {
         return InitDepthStencil(eDepthStencilFormat, nWidth, nHeight);
       }
-
       return TRUE;
     }
 
@@ -254,21 +344,21 @@ namespace GrapX
       return TRUE;
     }
 
-    GXBOOL RenderTargetImpl::InitDepthStencil(GXFormat eDepthStencilFormat, GXUINT nWidth, GXUINT nHeight)
-    {
-      m_pDepthStencilTexture = new TextureImpl_DepthStencil(m_pGraphics, eDepthStencilFormat, nWidth, nHeight);
+    //GXBOOL RenderTargetImpl::InitDepthStencil(GXFormat eDepthStencilFormat, GXUINT nWidth, GXUINT nHeight)
+    //{
+    //  m_pDepthStencilTexture = new TextureImpl_DepthStencil(m_pGraphics, eDepthStencilFormat, nWidth, nHeight);
 
-      if(InlIsFailedToNewObject(m_pDepthStencilTexture)) {
-        return FALSE;
-      }
+    //  if(InlIsFailedToNewObject(m_pDepthStencilTexture)) {
+    //    return FALSE;
+    //  }
 
-      if(_CL_NOT_(m_pDepthStencilTexture->InitDepthStencil())) {
-        SAFE_RELEASE(m_pColorTexture);
-        SAFE_RELEASE(m_pDepthStencilTexture);
-        return FALSE;
-      }
-      return TRUE;
-    }
+    //  if(_CL_NOT_(m_pDepthStencilTexture->InitDepthStencil())) {
+    //    SAFE_RELEASE(m_pColorTexture);
+    //    SAFE_RELEASE(m_pDepthStencilTexture);
+    //    return FALSE;
+    //  }
+    //  return TRUE;
+    //}
 
     //////////////////////////////////////////////////////////////////////////
 
@@ -298,7 +388,7 @@ namespace GrapX
         return FALSE;
       }
 
-      m_pColorTexture = new TextureImpl_RenderTarget(m_pGraphics, Format_Unknown, 0, 0);
+      m_pColorTexture = new TextureImpl_RenderTarget(m_pGraphics, RESTYPE_RENDERTEXTURE, Format_Unknown, 0, 0);
       if(InlIsFailedToNewObject(m_pColorTexture)) {
         return FALSE;
       }
@@ -351,6 +441,106 @@ namespace GrapX
       //hval = m_pd3dDevice->CreateDepthStencilView(m_pDepthStencil, &descDSV, &m_pDepthStencilView);
       //if(FAILED(hval))
       //  return hval;
+    }
+
+    //////////////////////////////////////////////////////////////////////////
+
+    CubeRenderTargetImpl::CubeRenderTargetImpl(Graphics* pGraphics)
+      : RenderTargetBase(static_cast<GraphicsImpl*>(pGraphics))
+    {
+    }
+
+    CubeRenderTargetImpl::~CubeRenderTargetImpl()
+    {
+      SAFE_RELEASE(m_pReadBackTexture);
+      for (int n = 0; n < countof(m_pCubeFace); n++)
+      {
+        SAFE_RELEASE(m_pCubeFace[n])
+        SAFE_RELEASE(m_pRenderTargetFace[n]);
+      }
+
+    }
+
+    GXHRESULT CubeRenderTargetImpl::AddRef()
+    {
+      return gxInterlockedIncrement(&m_nRefCount);
+    }
+
+    GXHRESULT CubeRenderTargetImpl::Release()
+    {
+      GXLONG nRefCount = gxInterlockedDecrement(&m_nRefCount);
+      if (nRefCount == 0)
+      {
+        if (m_pColorTexture) {
+          m_pGraphics->UnregisterResource(this);
+        }
+        delete this;
+        return GX_OK;
+      }
+
+      return nRefCount;
+    }
+
+    GXHRESULT CubeRenderTargetImpl::Invoke(GRESCRIPTDESC* pDesc)
+    {
+      return GX_OK;
+    }
+
+    GXBOOL CubeRenderTargetImpl::Initialize(GXUINT nSize, GXFormat eColorFormat, GXFormat eDepthStencilFormat)
+    {
+      //
+      // 检查
+      //
+      ID3D11Device* pD3D11Device = m_pGraphics->D3DGetDevice();
+      ASSERT(m_pColorTexture == NULL);
+      ASSERT(m_pDepthStencilTexture == NULL);
+
+      if (CheckRenderTargetFormatSupport(pD3D11Device, eColorFormat, eDepthStencilFormat) == FALSE) {
+        return FALSE;
+      }
+
+      m_pColorTexture = new TextureImpl_RenderTarget(m_pGraphics, RESTYPE_CUBERENDERTARGET, eColorFormat, nSize, nSize);
+      if (InlIsFailedToNewObject(m_pColorTexture)) {
+        return FALSE;
+      }
+
+      if (_CL_NOT_(m_pColorTexture->InitRenderTexture(NULL))) {
+        SAFE_RELEASE(m_pColorTexture);
+        return FALSE;
+      }
+
+      if (eDepthStencilFormat != Format_Unknown) {
+        if(_CL_NOT_(InitDepthStencil(eDepthStencilFormat, nSize, nSize))) {
+          return FALSE;
+        }
+      }
+
+
+      //GXBOOL bval = RenderTargetBase::Initialize(RESTYPE_CUBERENDERTARGET, nSize, nSize, eColorFormat, eDepthStencilFormat);
+      //if(_CL_NOT_(bval)) {
+      //  return bval;
+      //}
+
+      for(int n = 0; n < countof(m_pCubeFace); n++)
+      {
+        m_pCubeFace[n] = new // (m_CubeFaceTextureBuffer + sizeof(CubeFaceRenderTargetTextureImpl) * n)
+          CubeFaceRenderTargetTextureImpl(m_pGraphics, RESTYPE_RENDERTEXTURE, eColorFormat, nSize, nSize);
+        m_pCubeFace[n]->InitRenderTexture(m_pColorTexture->D3DTexture(), n);
+
+        m_pRenderTargetFace[n] = new // (m_CubeFaceRenderTargetBuffer + sizeof(RenderTargetImpl) * n)
+          RenderTargetImpl(m_pGraphics, nSize, nSize, m_pCubeFace[n], m_pDepthStencilTexture);
+      }
+      return TRUE;
+    }
+
+    RenderTarget* CubeRenderTargetImpl::GetFaceUnsafe(Face face)
+    {
+      return static_cast<RenderTarget*>(m_pRenderTargetFace[(int)face]);
+    }
+
+    RenderTarget** CubeRenderTargetImpl::GetFacesUnsafe()
+    {
+      return reinterpret_cast<RenderTarget**>(m_pRenderTargetFace);
     }
 
   } // namespace D3D11

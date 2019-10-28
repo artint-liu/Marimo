@@ -41,6 +41,7 @@ enum {
   RESTYPE_IMAGE,              //    1
   RESTYPE_RENDERTARGET,       //    1
   RESTYPE_GRAPHICS,           //    0
+  RESTYPE_CUBERENDERTARGET,   //    2
   RESTYPE_CANVAS2D,           //    2
   RESTYPE_CANVAS3D,           //    2
 };

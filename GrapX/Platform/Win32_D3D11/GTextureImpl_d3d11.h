@@ -176,14 +176,28 @@ namespace GrapX
     {
       friend class GraphicsImpl;
     protected:
-      ID3D11RenderTargetView* m_pD3D11RenderTargetView;
+      ID3D11RenderTargetView* m_pD3D11RenderTargetView = NULL;
 
     public:
-      TextureImpl_RenderTarget(GrapX::Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight);
+      TextureImpl_RenderTarget(GrapX::Graphics* pGraphics, GXDWORD dwResType, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight);
       virtual ~TextureImpl_RenderTarget();
       GXBOOL InitRenderTexture(ID3D11Texture2D* pD3D11Texture);
+      GXBOOL InitRenderTexture(ID3D11Texture2D* pD3D11Texture, int nFaceIndex);
       ID3D11RenderTargetView* D3DGetRenderTargetView() const;
     };
+
+    //class TextureImpl_CubeFaceRenderTarget : public TextureImpl
+    //{
+    //  friend class GraphicsImpl;
+    //protected:
+    //  ID3D11RenderTargetView* m_pD3D11RenderTargetView = {NULL};
+
+    //public:
+    //  TextureImpl_CubeFaceRenderTarget(GrapX::Graphics* pGraphics, GXFormat eFormat, GXUINT nSize);
+    //  virtual ~TextureImpl_CubeFaceRenderTarget();
+    //  GXBOOL InitRenderTexture(ID3D11Resource* pTexture, int nFaceIndex);
+    //  ID3D11RenderTargetView* D3DGetRenderTargetView() const;
+    //};
 
     //////////////////////////////////////////////////////////////////////////
 

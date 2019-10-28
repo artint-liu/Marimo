@@ -74,17 +74,17 @@ namespace GrapX
 
       void        SetWorldMatrix        (const float4x4& matWorld) override;
 
-      GXDWORD     GetGlobalHandle       (GXLPCSTR szName) override;
+      //GXDWORD     GetGlobalHandle       (GXLPCSTR szName) override;
 
       template<typename _Ty>
       inline GXHRESULT   SetCanvasUniformT     (GXDWORD dwGlobalHandle, const _Ty& rUniform);
 
-      GXHRESULT   SetCanvasFloat        (GXDWORD dwGlobalHandle, float fValue) override;
-      GXHRESULT   SetCanvasVector       (GXDWORD dwGlobalHandle, const float4& rVector) override;
-      GXHRESULT   SetCanvasMatrix       (GXDWORD dwGlobalHandle, const float4x4& rMatrix) override;
-      GXHRESULT   SetCanvasFloat        (GXLPCSTR szName, float fValue) override;
-      GXHRESULT   SetCanvasVector       (GXLPCSTR szName, const float4& rVector) override;
-      GXHRESULT   SetCanvasMatrix       (GXLPCSTR szName, const float4x4& rMatrix) override;
+      //GXHRESULT   SetCanvasFloat        (GXDWORD dwGlobalHandle, float fValue) override;
+      //GXHRESULT   SetCanvasVector       (GXDWORD dwGlobalHandle, const float4& rVector) override;
+      //GXHRESULT   SetCanvasMatrix       (GXDWORD dwGlobalHandle, const float4x4& rMatrix) override;
+      //GXHRESULT   SetCanvasFloat        (GXLPCSTR szName, float fValue) override;
+      //GXHRESULT   SetCanvasVector       (GXLPCSTR szName, const float4& rVector) override;
+      //GXHRESULT   SetCanvasMatrix       (GXLPCSTR szName, const float4x4& rMatrix) override;
 
       void        SetViewport           (GXVIEWPORT* pViewport) override;
       GXLPCVIEWPORT GetViewport         () const override;

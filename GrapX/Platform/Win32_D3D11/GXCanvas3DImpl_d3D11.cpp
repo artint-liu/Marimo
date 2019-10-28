@@ -493,17 +493,17 @@ namespace GrapX
     }
 
 #ifdef REFACTOR_SHADER
-    GXDWORD Canvas3DImpl::GetGlobalHandle(GXLPCSTR szName)
-    {
-      Marimo::ShaderConstName* pConstNameObj = m_pGraphicsImpl->InlGetShaderConstantNameObj();
-      GXINT_PTR handle = pConstNameObj->AllocHandle(szName, GXUB_UNDEFINED);
+    //GXDWORD Canvas3DImpl::GetGlobalHandle(GXLPCSTR szName)
+    //{
+    //  Marimo::ShaderConstName* pConstNameObj = m_pGraphicsImpl->InlGetShaderConstantNameObj();
+    //  GXINT_PTR handle = pConstNameObj->AllocHandle(szName, GXUB_UNDEFINED);
 
-      //if(pConstNameObj->GetSize() > m_CanvasUniformBuf.GetSize()) {
-      //  BroadcastCanvasUniformBufferSize(pConstNameObj->GetSize());
-      //}
+    //  //if(pConstNameObj->GetSize() > m_CanvasUniformBuf.GetSize()) {
+    //  //  BroadcastCanvasUniformBufferSize(pConstNameObj->GetSize());
+    //  //}
 
-      return (GXDWORD)handle;
-    }
+    //  return (GXDWORD)handle;
+    //}
 
     template<typename _Ty>
     GXHRESULT Canvas3DImpl::SetCanvasUniformT(GXDWORD dwGlobalHandle, const _Ty& rUniform)
@@ -518,38 +518,38 @@ namespace GrapX
       return GX_OK;
     }
 
-    GXHRESULT Canvas3DImpl::SetCanvasFloat(GXDWORD dwGlobalHandle, float fValue)
-    {
-      return SetCanvasUniformT(dwGlobalHandle, fValue);
-    }
+    //GXHRESULT Canvas3DImpl::SetCanvasFloat(GXDWORD dwGlobalHandle, float fValue)
+    //{
+    //  return SetCanvasUniformT(dwGlobalHandle, fValue);
+    //}
 
-    GXHRESULT Canvas3DImpl::SetCanvasVector(GXDWORD dwGlobalHandle, const float4& rVector)
-    {
-      return SetCanvasUniformT(dwGlobalHandle, rVector);
-    }
+    //GXHRESULT Canvas3DImpl::SetCanvasVector(GXDWORD dwGlobalHandle, const float4& rVector)
+    //{
+    //  return SetCanvasUniformT(dwGlobalHandle, rVector);
+    //}
 
-    GXHRESULT Canvas3DImpl::SetCanvasMatrix(GXDWORD dwGlobalHandle, const float4x4& rMatrix)
-    {
-      return SetCanvasUniformT(dwGlobalHandle, rMatrix);
-    }
+    //GXHRESULT Canvas3DImpl::SetCanvasMatrix(GXDWORD dwGlobalHandle, const float4x4& rMatrix)
+    //{
+    //  return SetCanvasUniformT(dwGlobalHandle, rMatrix);
+    //}
 
-    GXHRESULT Canvas3DImpl::SetCanvasFloat(GXLPCSTR szName, float fValue)
-    {
-      GXDWORD dwHandle = GetGlobalHandle(szName);
-      return SetCanvasUniformT(dwHandle, fValue);
-    }
+    //GXHRESULT Canvas3DImpl::SetCanvasFloat(GXLPCSTR szName, float fValue)
+    //{
+    //  GXDWORD dwHandle = GetGlobalHandle(szName);
+    //  return SetCanvasUniformT(dwHandle, fValue);
+    //}
 
-    GXHRESULT Canvas3DImpl::SetCanvasVector(GXLPCSTR szName, const float4& rVector)
-    {
-      GXDWORD dwHandle = GetGlobalHandle(szName);
-      return SetCanvasUniformT(dwHandle, rVector);
-    }
+    //GXHRESULT Canvas3DImpl::SetCanvasVector(GXLPCSTR szName, const float4& rVector)
+    //{
+    //  GXDWORD dwHandle = GetGlobalHandle(szName);
+    //  return SetCanvasUniformT(dwHandle, rVector);
+    //}
 
-    GXHRESULT Canvas3DImpl::SetCanvasMatrix(GXLPCSTR szName, const float4x4& rMatrix)
-    {
-      GXDWORD dwHandle = GetGlobalHandle(szName);
-      return SetCanvasUniformT(dwHandle, rMatrix);
-    }
+    //GXHRESULT Canvas3DImpl::SetCanvasMatrix(GXLPCSTR szName, const float4x4& rMatrix)
+    //{
+    //  GXDWORD dwHandle = GetGlobalHandle(szName);
+    //  return SetCanvasUniformT(dwHandle, rMatrix);
+    //}
 #endif // #ifdef REFACTOR_SHADER
 
     GXBOOL Canvas3DImpl::Begin()

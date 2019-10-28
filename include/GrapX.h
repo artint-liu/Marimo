@@ -5212,7 +5212,7 @@ inline GXBOOL InlIsFailedToNewObject(_TIUnknown* pIUnknown)
     return TRUE;
   }
 
-  pIUnknown->AddRef();
+  static_cast<GUnknown*>(pIUnknown)->AddRef();
   return FALSE;
 }
 

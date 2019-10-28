@@ -27,6 +27,29 @@ namespace GrapX
     GXSTDINTERFACE(GXBOOL     SaveToFile            (GXLPCWSTR szFilePath, GXLPCSTR pImageFormat, GXBOOL bVertFlip));
     GXSTDINTERFACE(GXBOOL     SaveToMemory          (clstd::MemBuffer* pBuffer, GXLPCSTR pImageFormat, GXBOOL bVertFlip));
   };
+
+  class CubeRenderTarget : public GResource
+  {
+  public:
+    enum class Face: int
+    {
+      PositiveX,
+      NegativeX,
+      PositiveY,
+      NegativeY,
+      PositiveZ,
+      NegativeZ,
+    };
+  public:
+    CubeRenderTarget() : GResource(2, RESTYPE_RENDERTEXTURE) {}
+
+    GXSTDINTERFACE(GXHRESULT    AddRef            ());
+    GXSTDINTERFACE(GXHRESULT    Release           ());
+
+  public:
+    GXSTDINTERFACE(RenderTarget*  GetFaceUnsafe(Face face));
+    GXSTDINTERFACE(RenderTarget** GetFacesUnsafe());
+  };
 } // namespace GrapX
 
 

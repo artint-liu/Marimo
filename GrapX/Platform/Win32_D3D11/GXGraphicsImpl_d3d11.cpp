@@ -895,6 +895,31 @@ namespace GrapX
       return 0;
     }
 
+    GXHRESULT GraphicsImpl::CreateCubeRenderTarget(CubeRenderTarget** ppRenderTarget, GXLPCWSTR szName, GXUINT nSize, GXFormat eColorFormat, GXFormat eDepthStencilFormat)
+    {
+      GRESKETCH rs = { RESTYPE_CUBERENDERTARGET };
+
+      GXHRESULT hr = m_ResMgr.Find(reinterpret_cast<GResource**>(ppRenderTarget), &rs);
+      if (GXSUCCEEDED(hr)) {
+        return hr;
+      }
+
+      CubeRenderTargetImpl* pTarget = new CubeRenderTargetImpl(this);
+      if (InlIsFailedToNewObject(pTarget)) {
+        return GX_ERROR_OUROFMEMORY;
+      }
+
+      if (_CL_NOT_(pTarget->Initialize(nSize, eColorFormat, eDepthStencilFormat)))
+      {
+        SAFE_RELEASE(pTarget);
+        return GX_FAIL;
+      }
+
+      RegisterResource(pTarget, &rs);
+      *ppRenderTarget = pTarget;
+      return GX_OK;
+    }
+
     GXHRESULT GraphicsImpl::CreateRenderTarget(
       RenderTarget** ppRenderTarget, GXLPCWSTR szName, GXINT nWidth, GXINT nHeight,
       GXFormat eColorFormat, GXFormat eDepthStencilFormat)
