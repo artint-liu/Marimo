@@ -734,7 +734,7 @@ namespace GrapX
     {
     }
 
-    GXBOOL TextureImpl_GPUReadBack::InitReadBackTexture()
+    GXBOOL TextureImpl_GPUReadBack::InitReadBackTexture(int count)
     {
       ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
 
@@ -746,7 +746,7 @@ namespace GrapX
       TexDesc.Width = m_nWidth;
       TexDesc.Height = m_nHeight;
       TexDesc.MipLevels = m_nMipLevels;
-      TexDesc.ArraySize = 1;
+      TexDesc.ArraySize = count;
       TexDesc.Format = GrapXToDX11::FormatFrom(m_Format);
       TexDesc.SampleDesc.Count = 1;
       TexDesc.SampleDesc.Quality = 0;

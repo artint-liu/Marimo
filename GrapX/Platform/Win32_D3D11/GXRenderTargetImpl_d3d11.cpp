@@ -334,7 +334,11 @@ namespace GrapX
         return FALSE;
       }
 
-      if(_CL_NOT_(pReadBackTexture->InitReadBackTexture()))
+      D3D11_TEXTURE2D_DESC desc = {0};
+      m_pColorTexture->D3DTexture()->GetDesc(&desc);
+
+      //ASSERT(m_pColorTexture->m_dwResType == RESTYPE_RENDERTEXTURE || m_pColorTexture->m_dwResType == RESTYPE_CUBERENDERTARGET);
+      if(_CL_NOT_(pReadBackTexture->InitReadBackTexture(desc.ArraySize)))
       {
         CLOG_ERROR("%s(%d): ³õÊ¼»¯ÎÆÀíÊ§°Ü", __FUNCTION__, __LINE__);
         SAFE_RELEASE(pReadBackTexture);
@@ -525,10 +529,12 @@ namespace GrapX
       {
         m_pCubeFace[n] = new // (m_CubeFaceTextureBuffer + sizeof(CubeFaceRenderTargetTextureImpl) * n)
           CubeFaceRenderTargetTextureImpl(m_pGraphics, RESTYPE_RENDERTEXTURE, eColorFormat, nSize, nSize);
+        m_pCubeFace[n]->AddRef();
         m_pCubeFace[n]->InitRenderTexture(m_pColorTexture->D3DTexture(), n);
 
         m_pRenderTargetFace[n] = new // (m_CubeFaceRenderTargetBuffer + sizeof(RenderTargetImpl) * n)
           RenderTargetImpl(m_pGraphics, nSize, nSize, m_pCubeFace[n], m_pDepthStencilTexture);
+        m_pRenderTargetFace[n]->AddRef();
       }
       return TRUE;
     }

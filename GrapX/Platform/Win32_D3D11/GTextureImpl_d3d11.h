@@ -220,7 +220,7 @@ namespace GrapX
     protected:
     public:
       TextureImpl_GPUReadBack(GrapX::Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight);
-      GXBOOL InitReadBackTexture();
+      GXBOOL InitReadBackTexture(int count);
 
       GXBOOL Map    (MAPPED* pMappedRect, GXResMap eResMap) override;
       GXBOOL Unmap  () override;
