@@ -75,7 +75,7 @@ namespace GrapX
         //OnDeviceEvent(DE_LostDevice);
         INVOKE_LOST_DEVICE;
         if((m_pD3D11Texture && m_pD3D11ShaderView) &&
-          (m_dwResType == RESTYPE_TEXTURE2D || m_dwResType == RESTYPE_TEXTURE3D || m_dwResType == RESTYPE_TEXTURE_CUBE)) {
+          (m_eResType == ResourceType::Texture2D || m_eResType == ResourceType::Texture3D || m_eResType == ResourceType::TextureCube)) {
           m_pGraphics->UnregisterResource(this);
         }
         delete this;
@@ -153,7 +153,7 @@ namespace GrapX
       TexDesc.SampleDesc.Count = 1;
       TexDesc.SampleDesc.Quality = 0;
 
-      if(m_dwResType == RESTYPE_TEXTURE_CUBE || m_dwResType == RESTYPE_CUBERENDERTEXTURE)
+      if(m_eResType == ResourceType::TextureCube || m_eResType == ResourceType::CubeRenderTexture)
       {
         TexDesc.ArraySize = 6;
         TexDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
@@ -193,7 +193,7 @@ namespace GrapX
       }
       else  if(m_nMipLevels == 1)
       {
-        if(m_dwResType == RESTYPE_TEXTURE_CUBE)
+        if(m_eResType == ResourceType::TextureCube)
         {
           D3D11_SUBRESOURCE_DATA aTexInitData[6] = { {0, nPitch, 0}, {0, nPitch, 0}, {0, nPitch, 0}, {0, nPitch, 0}, {0, nPitch, 0}, {0, nPitch, 0} };
           GXUINT nFacePitch = 0;
@@ -227,7 +227,7 @@ namespace GrapX
       }
       else
       {
-        if(m_dwResType == RESTYPE_TEXTURE_CUBE)
+        if(m_eResType == ResourceType::TextureCube)
         {
           return FALSE; // 没实现Cube 的Mipmaps
         }
@@ -268,7 +268,7 @@ namespace GrapX
         sResourceViewDesc.TextureCube.MipLevels = TexDesc.MipLevels;
         sResourceViewDesc.TextureCube.MostDetailedMip = 0;
 
-        hval = pd3dDevice->CreateShaderResourceView(m_pD3D11Texture, (m_dwResType == RESTYPE_TEXTURE_CUBE) ? &sResourceViewDesc : NULL, &m_pD3D11ShaderView);
+        hval = pd3dDevice->CreateShaderResourceView(m_pD3D11Texture, (m_eResType == ResourceType::TextureCube) ? &sResourceViewDesc : NULL, &m_pD3D11ShaderView);
         if(m_nMipLevels == 0 && pInitData) {
           ASSERT(nPitch);
           ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
@@ -378,7 +378,7 @@ namespace GrapX
         box.bottom = lprcSource->bottom;
       }
 
-      if(pSrc->m_dwResType == RESTYPE_RENDERTEXTURE)
+      if(pSrc->m_eResType == ResourceType::RenderTexture)
       {
         ASSERT(dynamic_cast<TextureImpl_RenderTarget*>(pSrc) != NULL);
 
@@ -604,11 +604,11 @@ namespace GrapX
 
     //////////////////////////////////////////////////////////////////////////
 
-    TextureImpl_RenderTarget::TextureImpl_RenderTarget(Graphics* pGraphics, GXDWORD dwResType, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight)
+    TextureImpl_RenderTarget::TextureImpl_RenderTarget(Graphics* pGraphics, ResourceType dwResType, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight)
       : TextureImpl(pGraphics, eFormat, nWidth, nHeight, 1, GXResUsage::Default)
     {
-      ASSERT(dwResType == RESTYPE_RENDERTEXTURE || dwResType == RESTYPE_CUBERENDERTEXTURE);
-      m_dwResType = dwResType;
+      ASSERT(dwResType == ResourceType::RenderTexture || dwResType == ResourceType::CubeRenderTexture);
+      m_eResType = dwResType;
     }
 
     TextureImpl_RenderTarget::~TextureImpl_RenderTarget()
@@ -640,7 +640,7 @@ namespace GrapX
       ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
 
       D3D11_RENDER_TARGET_VIEW_DESC TarDesc = { GrapXToDX11::FormatFrom(m_Format) };
-      if (m_dwResType == RESTYPE_RENDERTEXTURE)
+      if (m_eResType == ResourceType::RenderTexture)
       {
         TarDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
       }
@@ -719,7 +719,7 @@ namespace GrapX
       : TextureImpl(pGraphics, eFormat, nWidth, nHeight, 1, GXResUsage::Default)
       , m_pD3D11DepthStencilView(NULL)
     {
-      m_dwResType = RESTYPE_DEPTHSTENCILTEXTURE;
+      m_eResType = ResourceType::DepthStenciltexture;
     }
 
     TextureImpl_DepthStencil::~TextureImpl_DepthStencil()

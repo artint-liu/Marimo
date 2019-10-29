@@ -685,14 +685,14 @@ namespace GrapX
   void MaterialImpl::TEXTUREUNIT::UpdateTexelSize(GXDWORD& dwFlags)
   {
     if(TexelSize.IsValid() && (texture != NULL)) {
-      if(texture->GetType() == RESTYPE_TEXTURE2D)
+      if(texture->GetType() == ResourceType::Texture2D)
       {
         GXSIZE size;
         static_cast<Texture*>(static_cast<TextureBase*>(texture))->GetDimension(&size);
         TexelSize->set(1.0f / size.cx, 1.0f / size.cy, (float)size.cx, (float)size.cy);
         dwFlags |= MATERIAL_FLAG_UNIFORM_CHANGED;
       }
-      else if(texture->GetType() == RESTYPE_TEXTURE_CUBE)
+      else if(texture->GetType() == ResourceType::TextureCube)
       {
         TextureCube* pCube = static_cast<TextureCube*>(static_cast<TextureBase*>(texture));
         GXINT width = pCube->GetSize();

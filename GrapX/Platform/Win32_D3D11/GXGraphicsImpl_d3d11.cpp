@@ -897,7 +897,7 @@ namespace GrapX
 
     GXHRESULT GraphicsImpl::CreateCubeRenderTarget(CubeRenderTarget** ppRenderTarget, GXLPCWSTR szName, GXUINT nSize, GXFormat eColorFormat, GXFormat eDepthStencilFormat)
     {
-      GRESKETCH rs = { RESTYPE_CUBERENDERTARGET };
+      GRESKETCH rs = { (GXDWORD)ResourceType::CubeRenderTarget };
 
       GXHRESULT hr = m_ResMgr.Find(reinterpret_cast<GResource**>(ppRenderTarget), &rs);
       if (GXSUCCEEDED(hr)) {
@@ -924,7 +924,8 @@ namespace GrapX
       RenderTarget** ppRenderTarget, GXLPCWSTR szName, GXINT nWidth, GXINT nHeight,
       GXFormat eColorFormat, GXFormat eDepthStencilFormat)
     {
-      GRESKETCH rs = { RESTYPE_RENDERTARGET };
+
+      GRESKETCH rs = { (GXDWORD)ResourceType::RenderTarget };
 
       GXHRESULT hr = m_ResMgr.Find(reinterpret_cast<GResource**>(ppRenderTarget), &rs);
       if(GXSUCCEEDED(hr)) {

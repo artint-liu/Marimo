@@ -6,13 +6,13 @@ namespace GrapX
   class RasterizerState : public GResource
   {
   public:
-    RasterizerState() : GResource(0, RESTYPE_RASTERIZER_STATE) {}
+    RasterizerState() : GResource(0, ResourceType::RasterizerState) {}
   };
 
   class BlendState : public GResource
   {
   public:
-    BlendState() : GResource(0, RESTYPE_BLEND_STATE) {}
+    BlendState() : GResource(0, ResourceType::BlendState) {}
     GXSTDINTERFACE(GXDWORD SetBlendFactor  (GXDWORD dwBlendFactor));
   };
 
@@ -20,7 +20,7 @@ namespace GrapX
   class DepthStencilState : public GResource
   {
   public:
-    DepthStencilState() : GResource(0, RESTYPE_DEPTHSTENCIL_STATE) {}
+    DepthStencilState() : GResource(0, ResourceType::DepthStencilState) {}
     GXSTDINTERFACE(GXDWORD SetStencilRef  (GXDWORD dwStencilRef));
   };
 
@@ -28,7 +28,7 @@ namespace GrapX
   class SamplerState : public GResource
   {
   public:
-    SamplerState() : GResource(0, RESTYPE_SAMPLER_STATE) {}
+    SamplerState() : GResource(0, ResourceType::SamplerState) {}
     GXSTDINTERFACE(GXHRESULT  AddRef          ());
     GXSTDINTERFACE(GXHRESULT  Release         ());
 

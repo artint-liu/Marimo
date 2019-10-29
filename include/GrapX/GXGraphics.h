@@ -85,7 +85,7 @@ namespace GrapX
   class Graphics : public GResource
   {
   public:
-    Graphics() : GResource(0, RESTYPE_GRAPHICS) {}
+    Graphics() : GResource(0, ResourceType::Graphics) {}
     // 接口实现
     GXSTDINTERFACE(GXHRESULT AddRef());
     GXSTDINTERFACE(GXHRESULT Release());

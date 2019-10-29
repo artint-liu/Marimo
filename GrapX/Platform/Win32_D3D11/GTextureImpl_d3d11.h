@@ -182,7 +182,7 @@ namespace GrapX
       UINT m_nSlice = 0;
 
     public:
-      TextureImpl_RenderTarget(GrapX::Graphics* pGraphics, GXDWORD dwResType, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight);
+      TextureImpl_RenderTarget(Graphics* pGraphics, ResourceType dwResType, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight);
       virtual ~TextureImpl_RenderTarget();
       GXBOOL InitRenderTexture(ID3D11Texture2D* pD3D11Texture);
       GXBOOL InitRenderTexture(ID3D11Texture2D* pD3D11Texture, int nFaceIndex);

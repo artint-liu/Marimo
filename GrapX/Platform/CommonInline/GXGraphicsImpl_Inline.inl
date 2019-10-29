@@ -76,7 +76,7 @@ GXHRESULT GraphicsImpl::InlSetCanvas(CanvasCore *pCanvasCore)
   {
     ASSERT(TEST_FLAG(m_dwFlags, F_ACTIVATE) != 0);
     hr = m_pCurCanvasCore->AddRef();
-    if(pCanvasCore->GetType() == RESTYPE_CANVAS3D)
+    if(pCanvasCore->GetType() == ResourceType::Canvas3D)
     {
       Canvas3DImpl* pCanvas3DImpl = reinterpret_cast<Canvas3DImpl*>(pCanvasCore);
       InlSetRenderTarget(pCanvas3DImpl);

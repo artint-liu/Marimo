@@ -17,7 +17,7 @@ namespace GrapX
     typedef clstd::geometry::FrustumPlanes FrustumPlanes;
 
   public:
-    Canvas3D(GXUINT nPrioruty, GXDWORD dwType) : CanvasCore(nPrioruty, dwType) {}
+    Canvas3D(GXUINT nPrioruty, ResourceType dwType) : CanvasCore(nPrioruty, dwType) {}
     GXSTDINTERFACE(GXBOOL         SetTarget             (RenderTarget** pTargetArray, GXUINT count));
     GXSTDINTERFACE(GXBOOL         SetTarget             (RenderTarget* pTarget));
     GXSTDINTERFACE(RenderTarget*  GetTargetUnsafe       (GXUINT index) const);

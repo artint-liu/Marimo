@@ -66,7 +66,7 @@ namespace GrapX
 
 //////////////////////////////////////////////////////////////////////////
     CanvasImpl::CanvasImpl(GraphicsImpl* pGraphics, GXBOOL bStatic)
-      : CanvasCoreImpl    (pGraphics, 2, RESTYPE_CANVAS2D)
+      : CanvasCoreImpl    (pGraphics, 2, ResourceType::Canvas2D)
       , m_bStatic           (bStatic)
       , m_xAbsOrigin        (0)
       , m_yAbsOrigin        (0)

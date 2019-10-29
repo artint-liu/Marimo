@@ -1,4 +1,4 @@
-CanvasCoreImpl::CanvasCoreImpl(GraphicsImpl* pGraphics, GXUINT nPriority, GXDWORD dwType)
+CanvasCoreImpl::CanvasCoreImpl(GraphicsImpl* pGraphics, GXUINT nPriority, ResourceType dwType)
   : Canvas            (nPriority, dwType)
   , m_pGraphics         (pGraphics)
   , m_pTargetTex        (NULL)

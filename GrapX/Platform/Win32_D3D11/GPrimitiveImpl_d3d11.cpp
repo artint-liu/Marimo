@@ -95,7 +95,7 @@ namespace GrapX
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
     GPrimitiveVertexOnlyImpl::GPrimitiveVertexOnlyImpl(Graphics* pGraphics, GXResUsage eUsage, GXUINT nVertexCount, GXUINT nVertexStride)
-      : Primitive  (0, RESTYPE_PRIMITIVE)
+      : Primitive  (0, ResourceType::Primitive)
       , m_pGraphicsImpl(static_cast<GraphicsImpl*>(pGraphics))
       , m_pD3D11VertexBuffer(NULL)
       , m_uVertexCount(nVertexCount)

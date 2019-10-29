@@ -17,35 +17,39 @@ Invoke(&Desc);}
 if(pDesc->szCmdString != NULL && pDesc->dwCmdCode != NULL)\
 { CLOG_ERROR("%s : Bad script desc param.\n", __FUNCTION__); return GX_FAIL; }
 
-enum {
-  RESTYPE_UNKNOWN,            // [优先级]
-  RESTYPE_SHADER,             //    0
-  RESTYPE_SHADER_STUB,        //    1
-  RESTYPE_SHADER_EFFECT,      //    2
-  RESTYPE_SHADER_MATERIAL,    //    2
-  RESTYPE_RASTERIZER_STATE,   //    0
-  RESTYPE_BLEND_STATE,        //    0
-  RESTYPE_DEPTHSTENCIL_STATE, //    0
-  RESTYPE_SAMPLER_STATE,      //    0
-  RESTYPE_VERTEX_DECLARATION, //    0
-  RESTYPE_RENDERTEXTURE,      //    0
-  RESTYPE_CUBERENDERTEXTURE,  //    0
-  RESTYPE_DEPTHSTENCILTEXTURE,//    0
-  RESTYPE_TEXTURE2D,          //    0
-  RESTYPE_TEXTURE3D,          //    0
-  RESTYPE_TEXTURE_CUBE,       //    0
-  RESTYPE_PRIMITIVE,          //    0
-  //RESTYPE_INDEXED_PRIMITIVE,  //    0
-  RESTYPE_REGION,             //    -
+namespace GrapX
+{
+  enum class ResourceType : unsigned int
+  {
+    Unknown,            // [优先级]
+    Shader,             //    0
+    ShaderStub,         //    1
+    ShaderEffect,       //    2
+    ShaderMaterial,     //    2
+    RasterizerState,    //    0
+    BlendState,         //    0
+    DepthStencilState,  //    0
+    SamplerState,       //    0
+    VertexDeclaration,  //    0
+    RenderTexture,      //    0
+    CubeRenderTexture,  //    0
+    DepthStenciltexture,//    0
+    Texture2D,          //    0
+    Texture3D,          //    0
+    TextureCube,        //    0
+    Primitive,          //    0
+    //RESTYPE_INDEXED_PRIMITIVE,  //    0
+    Region,             //    -
 
-  RESTYPE_FONT,               //    1
-  RESTYPE_IMAGE,              //    1
-  RESTYPE_RENDERTARGET,       //    1
-  RESTYPE_GRAPHICS,           //    0
-  RESTYPE_CUBERENDERTARGET,   //    2
-  RESTYPE_CANVAS2D,           //    2
-  RESTYPE_CANVAS3D,           //    2
-};
+    Font,               //    1
+    Image,              //    1
+    RenderTarget,       //    1
+    Graphics,           //    0
+    CubeRenderTarget,   //    2
+    Canvas2D,           //    2
+    Canvas3D,           //    2
+  };
+} // namespace GrapX
 
 struct GRESKETCH // resource sketch
 {
@@ -71,19 +75,19 @@ namespace GrapX
   {
   public:
   protected:
-    GResource(GXUINT nPriority, GXDWORD dwType)
+    GResource(GXUINT nPriority, ResourceType eType)
       : GUnknown()
       , m_dwPriority(nPriority)
-      , m_dwResType(dwType)
+      , m_eResType(eType)
     {
       ASSERT(nPriority < 4);
-      ASSERT(dwType < 256);
+      ASSERT((int)eType < 256);
     }
     virtual ~GResource() {}
 
   public:
     GXDWORD         m_dwPriority : 2; // 值越小优先级越高, 在广播时越先处理
-    GXDWORD         m_dwResType : 8;
+    ResourceType    m_eResType : 8;
     GXSTDINTERFACE(GXHRESULT  Invoke            (GRESCRIPTDESC* pDesc));
 
     virtual GXUINT  GetPriority () const
@@ -98,9 +102,9 @@ namespace GrapX
       return nPrevPriority;
     }
 
-    virtual GXDWORD GetType     () const
+    virtual ResourceType GetType() const
     {
-      return (GXDWORD)m_dwResType;
+      return (ResourceType)m_eResType;
     }
   };
 

@@ -41,7 +41,7 @@ namespace GrapX
   class GVertexDeclaration : public GResource
   {
   public:
-    GVertexDeclaration() : GResource(0, RESTYPE_VERTEX_DECLARATION) {}
+    GVertexDeclaration() : GResource(0, ResourceType::VertexDeclaration) {}
 
     GXSTDINTERFACE(GXHRESULT          AddRef            ());
     GXSTDINTERFACE(GXHRESULT          Release           ());
@@ -55,7 +55,7 @@ namespace GrapX
   class GUniformBinderDecl : public GResource
   {
   public:
-    GUniformBinderDecl() : GResource(0, RESTYPE_UNKNOWN) {}
+    GUniformBinderDecl() : GResource(0, ResourceType::Unknown) {}
 
     GXSTDINTERFACE(GXHRESULT    AddRef            ());
     GXSTDINTERFACE(GXHRESULT    Release           ());
@@ -80,7 +80,7 @@ namespace GrapX
     };
 
   public:
-    Shader() : GResource(0, RESTYPE_SHADER) {}
+    Shader() : GResource(0, ResourceType::Shader) {}
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
     GXSTDINTERFACE(GXHRESULT    AddRef            ());
     GXSTDINTERFACE(GXHRESULT    Release           ());
@@ -97,7 +97,7 @@ namespace GrapX
   class Effect : public GResource
   {
   public:
-    Effect() : GResource(0, RESTYPE_SHADER_EFFECT) {}
+    Effect() : GResource(0, ResourceType::ShaderEffect) {}
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
     GXSTDINTERFACE(GXHRESULT    AddRef            ());
@@ -142,7 +142,7 @@ namespace GrapX
     };
 
   public:
-    Material() : GResource(0, RESTYPE_SHADER_MATERIAL) {}
+    Material() : GResource(0, ResourceType::ShaderMaterial) {}
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
     GXSTDINTERFACE(GXHRESULT    AddRef            ());

@@ -298,7 +298,7 @@ namespace GrapX
         return FALSE;
       }
 
-      m_pColorTexture = new TextureImpl_RenderTarget(m_pGraphics, RESTYPE_RENDERTEXTURE, eColorFormat, nWidth, nHeight);
+      m_pColorTexture = new TextureImpl_RenderTarget(m_pGraphics, ResourceType::RenderTexture, eColorFormat, nWidth, nHeight);
       if (InlIsFailedToNewObject(m_pColorTexture)) {
         return FALSE;
       }
@@ -394,7 +394,7 @@ namespace GrapX
         return FALSE;
       }
 
-      m_pColorTexture = new TextureImpl_RenderTarget(m_pGraphics, RESTYPE_RENDERTEXTURE, Format_Unknown, 0, 0);
+      m_pColorTexture = new TextureImpl_RenderTarget(m_pGraphics, ResourceType::RenderTexture, Format_Unknown, 0, 0);
       if(InlIsFailedToNewObject(m_pColorTexture)) {
         return FALSE;
       }
@@ -505,7 +505,7 @@ namespace GrapX
         return FALSE;
       }
 
-      m_pColorTexture = new TextureImpl_RenderTarget(m_pGraphics, RESTYPE_CUBERENDERTEXTURE, eColorFormat, nSize, nSize);
+      m_pColorTexture = new TextureImpl_RenderTarget(m_pGraphics, ResourceType::CubeRenderTexture, eColorFormat, nSize, nSize);
       if (InlIsFailedToNewObject(m_pColorTexture)) {
         return FALSE;
       }
@@ -530,7 +530,7 @@ namespace GrapX
       for(int n = 0; n < countof(m_pCubeFace); n++)
       {
         m_pCubeFace[n] = new // (m_CubeFaceTextureBuffer + sizeof(CubeFaceRenderTargetTextureImpl) * n)
-          CubeFaceRenderTargetTextureImpl(m_pGraphics, RESTYPE_RENDERTEXTURE, eColorFormat, nSize, nSize);
+          CubeFaceRenderTargetTextureImpl(m_pGraphics, ResourceType::RenderTexture, eColorFormat, nSize, nSize);
         m_pCubeFace[n]->AddRef();
         m_pCubeFace[n]->InitRenderTexture(m_pColorTexture->D3DTexture(), n);
 

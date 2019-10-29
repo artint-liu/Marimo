@@ -15,7 +15,7 @@ namespace GrapX
   class TextureBase : public GResource
   {
   public:
-    TextureBase(GXUINT nPriority, GXDWORD dwType) : GResource(0, dwType) {}
+    TextureBase(GXUINT nPriority, ResourceType eType) : GResource(0, eType) {}
 
   public:
     GXSTDINTERFACE(GXHRESULT    AddRef            ());
@@ -62,7 +62,7 @@ namespace GrapX
     // 放到GXImage中
     
 
-    Texture() : TextureBase(0, RESTYPE_TEXTURE2D) {}
+    Texture() : TextureBase(0, ResourceType::Texture2D) {}
     GXSTDINTERFACE(GXHRESULT    AddRef            ());
     GXSTDINTERFACE(GXHRESULT    Release           ());
 
@@ -104,7 +104,7 @@ namespace GrapX
 
 
   public:
-    Texture3D() : TextureBase(0, RESTYPE_TEXTURE3D) {}
+    Texture3D() : TextureBase(0, ResourceType::Texture3D) {}
 
     GXSTDINTERFACE(GXHRESULT    AddRef            ());
     GXSTDINTERFACE(GXHRESULT    Release           ());
@@ -141,7 +141,7 @@ namespace GrapX
     }LOCKEDRECT, *LPLOCKEDRECT;
 
   public:
-    TextureCube() : TextureBase(0, RESTYPE_TEXTURE_CUBE) {}
+    TextureCube() : TextureBase(0, ResourceType::TextureCube) {}
 
     GXSTDINTERFACE(GXHRESULT    AddRef            ());
     GXSTDINTERFACE(GXHRESULT    Release           ());

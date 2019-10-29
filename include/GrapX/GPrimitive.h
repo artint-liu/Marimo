@@ -8,7 +8,7 @@ namespace GrapX
   class Primitive : public GResource
   {
   public:
-    Primitive(GXUINT nPriority, GXDWORD dwType) : GResource(nPriority, dwType) {}
+    Primitive(GXUINT nPriority, ResourceType eType) : GResource(nPriority, eType) {}
     GXSTDINTERFACE(GXHRESULT  AddRef  ());
 
     GXSTDINTERFACE(Graphics*  GetGraphicsUnsafe   ());

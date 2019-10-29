@@ -19,7 +19,7 @@ namespace GrapX
   class CanvasCore : public GResource
   {
   public:
-    CanvasCore(GXUINT nPriority, GXDWORD dwType) : GResource(nPriority, dwType) {}
+    CanvasCore(GXUINT nPriority, ResourceType eType) : GResource(nPriority, eType) {}
     //virtual ~GXCanvasCore() = NULL;
 
     GXSTDINTERFACE(GXHRESULT        AddRef              ());
@@ -127,7 +127,7 @@ namespace GrapX
   {
   public:
     //virtual ~GXCanvas() = NULL;
-    Canvas(GXUINT nPriority, GXDWORD dwType) : CanvasCore(nPriority, dwType) {}
+    Canvas(GXUINT nPriority, ResourceType dwType) : CanvasCore(nPriority, dwType) {}
 
     GXSTDINTERFACE(GXHRESULT   Release              ());
     GXSTDINTERFACE(GXHRESULT   Invoke               (GRESCRIPTDESC* pDesc));

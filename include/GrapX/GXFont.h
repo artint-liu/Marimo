@@ -18,7 +18,7 @@ public:
   }CHARDESC, *LPCHARDESC;
 
 public:
-  GXFont() : GrapX::GResource(1, RESTYPE_FONT){}
+  GXFont() : GrapX::GResource(1, GrapX::ResourceType::Font){}
   GXSTDINTERFACE(GXBOOL   CreateFont             (const GXULONG nWidth, const GXULONG nHeight, const GXCHAR *pFileName));
   GXSTDINTERFACE(GXBOOL   GetDescW               (GXLPLOGFONTW lpLogFont) const);
   GXSTDINTERFACE(GXBOOL   GetDescA               (GXLPLOGFONTA lpLogFont) const);

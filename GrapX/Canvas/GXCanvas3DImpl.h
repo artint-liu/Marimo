@@ -10,7 +10,7 @@ namespace GrapX
   class Canvas3DCommImpl : public Canvas3D
   {
   protected:
-    Canvas3DCommImpl() : Canvas3D(2, RESTYPE_CANVAS3D) {}
+    Canvas3DCommImpl() : Canvas3D(2, ResourceType::Canvas3D) {}
   };
 }
 

@@ -20,7 +20,7 @@ protected:
 
   void CommitState();
 public:
-  CanvasCoreImpl(GraphicsImpl* pGraphics, GXUINT nPriority, GXDWORD dwType);
+  CanvasCoreImpl(GraphicsImpl* pGraphics, GXUINT nPriority, ResourceType dwType);
   virtual ~CanvasCoreImpl();
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
