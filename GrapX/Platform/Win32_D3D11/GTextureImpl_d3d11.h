@@ -172,7 +172,7 @@ namespace GrapX
 
     //////////////////////////////////////////////////////////////////////////
 
-    class TextureImpl_RenderTarget : public TextureImpl
+    class RenderTarget_TextureImpl : public TextureImpl
     {
       friend class GraphicsImpl;
       friend class TextureImpl;
@@ -182,8 +182,8 @@ namespace GrapX
       UINT m_nSlice = 0;
 
     public:
-      TextureImpl_RenderTarget(Graphics* pGraphics, ResourceType dwResType, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight);
-      virtual ~TextureImpl_RenderTarget();
+      RenderTarget_TextureImpl(Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight);
+      virtual ~RenderTarget_TextureImpl();
       GXBOOL InitRenderTexture(ID3D11Texture2D* pD3D11Texture);
       GXBOOL InitRenderTexture(ID3D11Texture2D* pD3D11Texture, int nFaceIndex);
       ID3D11RenderTargetView* D3DGetRenderTargetView() const;
@@ -191,18 +191,22 @@ namespace GrapX
       GXBOOL CopyRect         (Texture* pSrc, GXLPCPOINT lpptDestination, GXLPCRECT lprcSource) override;
     };
 
-    //class TextureImpl_CubeFaceRenderTarget : public TextureImpl
-    //{
-    //  friend class GraphicsImpl;
-    //protected:
-    //  ID3D11RenderTargetView* m_pD3D11RenderTargetView = {NULL};
+    //////////////////////////////////////////////////////////////////////////
 
-    //public:
-    //  TextureImpl_CubeFaceRenderTarget(GrapX::Graphics* pGraphics, GXFormat eFormat, GXUINT nSize);
-    //  virtual ~TextureImpl_CubeFaceRenderTarget();
-    //  GXBOOL InitRenderTexture(ID3D11Resource* pTexture, int nFaceIndex);
-    //  ID3D11RenderTargetView* D3DGetRenderTargetView() const;
-    //};
+    class CubeRenderTarget_TextureCubeImpl : public TextureCubeImpl
+    {
+      friend class GraphicsImpl;
+      friend class TextureCubeImpl;
+
+    protected:
+      ID3D11RenderTargetView* m_pD3D11RenderTargetView = NULL;
+
+    public:
+      CubeRenderTarget_TextureCubeImpl(Graphics* pGraphics, GXFormat eFormat, GXUINT nSize);
+      virtual ~CubeRenderTarget_TextureCubeImpl();
+      GXBOOL InitRenderTexture();
+      ID3D11RenderTargetView* D3DGetRenderTargetView() const;
+    };
 
     //////////////////////////////////////////////////////////////////////////
 

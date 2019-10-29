@@ -16,17 +16,17 @@ namespace GrapX
   {
     class GraphicsImpl;
 
-    template<class _TargetInterfaceT>
+    template<class _TargetInterfaceT, class _RenderTargetTextureTempl>
     class RenderTargetBase : public _TargetInterfaceT
     {
     protected:
       GraphicsImpl* m_pGraphics;
-      TextureImpl_RenderTarget* m_pColorTexture = NULL;
+      _RenderTargetTextureTempl* m_pColorTexture = NULL;
       TextureImpl_DepthStencil* m_pDepthStencilTexture = NULL;
 
     public:
       RenderTargetBase(GraphicsImpl* pGraphics);
-      RenderTargetBase(GraphicsImpl* pGraphics, TextureImpl_RenderTarget* pColorTexture, TextureImpl_DepthStencil* pDepthTexture); // 只组装，后面没有创建
+      RenderTargetBase(GraphicsImpl* pGraphics, _RenderTargetTextureTempl* pColorTexture, TextureImpl_DepthStencil* pDepthTexture); // 只组装，后面没有创建
       virtual ~RenderTargetBase();
       //GXBOOL Initialize(GXDWORD dwResType, GXUINT width, GXUINT height, GXFormat eColorFormat, GXFormat eDepthStencilFormat);
 
@@ -36,7 +36,7 @@ namespace GrapX
 
     //////////////////////////////////////////////////////////////////////////
 
-    class RenderTargetImpl : public RenderTargetBase<RenderTarget>
+    class RenderTargetImpl : public RenderTargetBase<RenderTarget, RenderTarget_TextureImpl>
     {
       friend class GraphicsImpl;
       friend class CanvasCoreImpl;
@@ -48,7 +48,7 @@ namespace GrapX
 
     public:
       RenderTargetImpl(Graphics* pGraphics, GXINT nWidth, GXINT nHeight);
-      RenderTargetImpl(Graphics* pGraphics, GXINT nWidth, GXINT nHeight, TextureImpl_RenderTarget* pColorTexture, TextureImpl_DepthStencil* pDepthTexture); // 只组装，后面没有创建
+      RenderTargetImpl(Graphics* pGraphics, GXINT nWidth, GXINT nHeight, RenderTarget_TextureImpl* pColorTexture, TextureImpl_DepthStencil* pDepthTexture); // 只组装，后面没有创建
 
       virtual ~RenderTargetImpl();
 
@@ -69,7 +69,7 @@ namespace GrapX
 
     public:
       GXBOOL Initialize(GXFormat eColorFormat, GXFormat eDepthStencilFormat);
-      TextureImpl_RenderTarget* IntGetColorTextureUnsafe();
+      RenderTarget_TextureImpl* IntGetColorTextureUnsafe();
       TextureImpl_DepthStencil* IntGetDepthStencilTextureUnsafe();
 
     protected:
@@ -77,10 +77,10 @@ namespace GrapX
 
     };
 
-    class CubeRenderTargetImpl : public RenderTargetBase<CubeRenderTarget>
+    class CubeRenderTargetImpl : public RenderTargetBase<CubeRenderTarget, CubeRenderTarget_TextureCubeImpl>
     {
       friend class GraphicsImpl;
-      typedef TextureImpl_RenderTarget CubeFaceRenderTargetTextureImpl;
+      typedef RenderTarget_TextureImpl CubeFaceRenderTargetTextureImpl;
     protected:
       CubeFaceRenderTargetTextureImpl* m_pCubeFace[6] = { NULL };
       RenderTargetImpl* m_pRenderTargetFace[countof(m_pCubeFace)] = { NULL };
@@ -101,6 +101,7 @@ namespace GrapX
 
       RenderTarget*  GetFaceUnsafe(Face face) override;
       RenderTarget** GetFacesUnsafe() override;
+      TextureCube*   GetTextureCubeUnsafe() override;
     };
 
     //////////////////////////////////////////////////////////////////////////

@@ -49,6 +49,8 @@ namespace GrapX
   public:
     GXSTDINTERFACE(RenderTarget*  GetFaceUnsafe(Face face));
     GXSTDINTERFACE(RenderTarget** GetFacesUnsafe());
+    GXSTDINTERFACE(TextureCube*   GetTextureCubeUnsafe());
+
   };
 } // namespace GrapX
 

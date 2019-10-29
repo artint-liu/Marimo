@@ -28,8 +28,8 @@
 #ifdef ENABLE_GRAPHICS_API_DX11
 #include <FreeImage.h>
 
-#define _RENDERTARGET_TEMPL template<class _TargetInterfaceT>
-#define _RENDERTARGET_IMPL RenderTargetBase<_TargetInterfaceT>
+#define _RENDERTARGET_TEMPL template<class _TargetInterfaceT, class _RenderTargetTextureTempl>
+#define _RENDERTARGET_IMPL RenderTargetBase<_TargetInterfaceT, _RenderTargetTextureTempl>
 
 namespace GrapX
 {
@@ -65,7 +65,7 @@ namespace GrapX
 
 
     _RENDERTARGET_TEMPL
-      _RENDERTARGET_IMPL::RenderTargetBase(GraphicsImpl* pGraphics, TextureImpl_RenderTarget* pColorTexture, TextureImpl_DepthStencil* pDepthTexture)
+      _RENDERTARGET_IMPL::RenderTargetBase(GraphicsImpl* pGraphics, _RenderTargetTextureTempl* pColorTexture, TextureImpl_DepthStencil* pDepthTexture)
       : m_pGraphics(pGraphics)
       , m_pColorTexture(pColorTexture)
       , m_pDepthStencilTexture(pDepthTexture)
@@ -137,7 +137,7 @@ namespace GrapX
     {
     }
 
-    RenderTargetImpl::RenderTargetImpl(Graphics* pGraphics, GXINT nWidth, GXINT nHeight, TextureImpl_RenderTarget* pColorTexture, TextureImpl_DepthStencil* pDepthTexture)
+    RenderTargetImpl::RenderTargetImpl(Graphics* pGraphics, GXINT nWidth, GXINT nHeight, RenderTarget_TextureImpl* pColorTexture, TextureImpl_DepthStencil* pDepthTexture)
       : RenderTargetBase(static_cast<GraphicsImpl*>(pGraphics), pColorTexture, pDepthTexture)
       , m_nWidth(nWidth)
       , m_nHeight(nHeight)
@@ -298,7 +298,7 @@ namespace GrapX
         return FALSE;
       }
 
-      m_pColorTexture = new TextureImpl_RenderTarget(m_pGraphics, ResourceType::RenderTexture, eColorFormat, nWidth, nHeight);
+      m_pColorTexture = new RenderTarget_TextureImpl(m_pGraphics, eColorFormat, nWidth, nHeight);
       if (InlIsFailedToNewObject(m_pColorTexture)) {
         return FALSE;
       }
@@ -314,7 +314,7 @@ namespace GrapX
       return TRUE;
     }
 
-    TextureImpl_RenderTarget* RenderTargetImpl::IntGetColorTextureUnsafe()
+    RenderTarget_TextureImpl* RenderTargetImpl::IntGetColorTextureUnsafe()
     {
       return m_pColorTexture;
     }
@@ -367,6 +367,7 @@ namespace GrapX
     //}
 
     //////////////////////////////////////////////////////////////////////////
+#pragma region BackBuffer
 
     GXHRESULT RenderTargetImpl_BackBuffer::Release()
     {
@@ -394,7 +395,7 @@ namespace GrapX
         return FALSE;
       }
 
-      m_pColorTexture = new TextureImpl_RenderTarget(m_pGraphics, ResourceType::RenderTexture, Format_Unknown, 0, 0);
+      m_pColorTexture = new RenderTarget_TextureImpl(m_pGraphics, /*ResourceType::RenderTexture, */Format_Unknown, 0, 0);
       if(InlIsFailedToNewObject(m_pColorTexture)) {
         return FALSE;
       }
@@ -448,7 +449,7 @@ namespace GrapX
       //if(FAILED(hval))
       //  return hval;
     }
-
+#pragma endregion BackBuffer
     //////////////////////////////////////////////////////////////////////////
 
     CubeRenderTargetImpl::CubeRenderTargetImpl(Graphics* pGraphics)
@@ -505,12 +506,12 @@ namespace GrapX
         return FALSE;
       }
 
-      m_pColorTexture = new TextureImpl_RenderTarget(m_pGraphics, ResourceType::CubeRenderTexture, eColorFormat, nSize, nSize);
+      m_pColorTexture = new CubeRenderTarget_TextureCubeImpl(m_pGraphics, /*ResourceType::CubeRenderTexture, */eColorFormat, nSize);
       if (InlIsFailedToNewObject(m_pColorTexture)) {
         return FALSE;
       }
 
-      if (_CL_NOT_(m_pColorTexture->InitRenderTexture(NULL))) {
+      if (_CL_NOT_(m_pColorTexture->InitRenderTexture())) {
         SAFE_RELEASE(m_pColorTexture);
         return FALSE;
       }
@@ -530,7 +531,7 @@ namespace GrapX
       for(int n = 0; n < countof(m_pCubeFace); n++)
       {
         m_pCubeFace[n] = new // (m_CubeFaceTextureBuffer + sizeof(CubeFaceRenderTargetTextureImpl) * n)
-          CubeFaceRenderTargetTextureImpl(m_pGraphics, ResourceType::RenderTexture, eColorFormat, nSize, nSize);
+          CubeFaceRenderTargetTextureImpl(m_pGraphics, eColorFormat, nSize, nSize);
         m_pCubeFace[n]->AddRef();
         m_pCubeFace[n]->InitRenderTexture(m_pColorTexture->D3DTexture(), n);
 
@@ -549,6 +550,11 @@ namespace GrapX
     RenderTarget** CubeRenderTargetImpl::GetFacesUnsafe()
     {
       return reinterpret_cast<RenderTarget**>(m_pRenderTargetFace);
+    }
+
+    TextureCube* CubeRenderTargetImpl::GetTextureCubeUnsafe()
+    {
+      return m_pColorTexture;
     }
 
   } // namespace D3D11

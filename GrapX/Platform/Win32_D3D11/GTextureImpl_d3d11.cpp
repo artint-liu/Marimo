@@ -380,9 +380,9 @@ namespace GrapX
 
       if(pSrc->m_eResType == ResourceType::RenderTexture)
       {
-        ASSERT(dynamic_cast<TextureImpl_RenderTarget*>(pSrc) != NULL);
+        ASSERT(dynamic_cast<RenderTarget_TextureImpl*>(pSrc) != NULL);
 
-        TextureImpl_RenderTarget* pRT = static_cast<TextureImpl_RenderTarget*>(pSrc);
+        RenderTarget_TextureImpl* pRT = static_cast<RenderTarget_TextureImpl*>(pSrc);
         pD3D11Context->CopySubresourceRegion(
           m_pD3D11Texture, 0, x, y, 0,
           pRT->m_pD3D11Texture, pRT->m_nSlice, &box);
@@ -604,19 +604,19 @@ namespace GrapX
 
     //////////////////////////////////////////////////////////////////////////
 
-    TextureImpl_RenderTarget::TextureImpl_RenderTarget(Graphics* pGraphics, ResourceType dwResType, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight)
+    RenderTarget_TextureImpl::RenderTarget_TextureImpl(Graphics* pGraphics/*, ResourceType dwResType*/, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight)
       : TextureImpl(pGraphics, eFormat, nWidth, nHeight, 1, GXResUsage::Default)
     {
-      ASSERT(dwResType == ResourceType::RenderTexture || dwResType == ResourceType::CubeRenderTexture);
-      m_eResType = dwResType;
+      //ASSERT(dwResType == ResourceType::RenderTexture || dwResType == ResourceType::CubeRenderTexture);
+      m_eResType = ResourceType::RenderTexture;
     }
 
-    TextureImpl_RenderTarget::~TextureImpl_RenderTarget()
+    RenderTarget_TextureImpl::~RenderTarget_TextureImpl()
     {
       SAFE_RELEASE(m_pD3D11RenderTargetView);
     }
 
-    GXBOOL TextureImpl_RenderTarget::InitRenderTexture(ID3D11Texture2D* pD3D11Texture)
+    GXBOOL RenderTarget_TextureImpl::InitRenderTexture(ID3D11Texture2D* pD3D11Texture)
     {
       if(pD3D11Texture)
       {
@@ -640,21 +640,13 @@ namespace GrapX
       ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
 
       D3D11_RENDER_TARGET_VIEW_DESC TarDesc = { GrapXToDX11::FormatFrom(m_Format) };
-      if (m_eResType == ResourceType::RenderTexture)
-      {
-        TarDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-      }
-      else
-      {
-        TarDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
-        TarDesc.Texture2DArray.ArraySize = 6;
-      }
+      TarDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 
       HRESULT hval = pd3dDevice->CreateRenderTargetView(m_pD3D11Texture, &TarDesc, &m_pD3D11RenderTargetView);
       return SUCCEEDED(hval);
     }
 
-    GXBOOL TextureImpl_RenderTarget::InitRenderTexture(ID3D11Texture2D* pD3D11Texture, int nFaceIndex)
+    GXBOOL RenderTarget_TextureImpl::InitRenderTexture(ID3D11Texture2D* pD3D11Texture, int nFaceIndex)
     {
       m_pD3D11Texture = pD3D11Texture;
       pD3D11Texture->AddRef();
@@ -669,49 +661,54 @@ namespace GrapX
       return SUCCEEDED(hval);
     }
 
-    ID3D11RenderTargetView* TextureImpl_RenderTarget::D3DGetRenderTargetView() const
+    ID3D11RenderTargetView* RenderTarget_TextureImpl::D3DGetRenderTargetView() const
     {
       return m_pD3D11RenderTargetView;
     }
 
-    GXBOOL TextureImpl_RenderTarget::CopyRect(Texture* pSrc, GXLPCPOINT lpptDestination, GXLPCRECT lprcSource)
+    GXBOOL RenderTarget_TextureImpl::CopyRect(Texture* pSrc, GXLPCPOINT lpptDestination, GXLPCRECT lprcSource)
     {
+      CLBREAK;
       return TRUE;
     }
 
     //////////////////////////////////////////////////////////////////////////
+#pragma region Cube Render Target Texture
 
-    //TextureImpl_CubeFaceRenderTarget::TextureImpl_CubeFaceRenderTarget(Graphics* pGraphics, GXFormat eFormat, GXUINT nSize)
-    //  : TextureImpl(pGraphics, eFormat, nSize, nSize, 1, GXResUsage::Default)
-    //{
-    //  m_dwResType = RESTYPE_CUBERENDERTARGET;
-    //}
+    CubeRenderTarget_TextureCubeImpl::CubeRenderTarget_TextureCubeImpl(Graphics* pGraphics, GXFormat eFormat, GXUINT nSize)
+      : TextureCubeImpl(pGraphics, eFormat, nSize, 1, GXResUsage::Default)
+    {
+      //ASSERT(dwResType == ResourceType::RenderTexture || dwResType == ResourceType::CubeRenderTexture);
+      m_eResType = ResourceType::CubeRenderTexture;
+    }
 
-    //TextureImpl_CubeFaceRenderTarget::~TextureImpl_CubeFaceRenderTarget()
-    //{
-    //  SAFE_RELEASE(m_pD3D11RenderTargetView);
-    //}
+    CubeRenderTarget_TextureCubeImpl::~CubeRenderTarget_TextureCubeImpl()
+    {
+      SAFE_RELEASE(m_pD3D11RenderTargetView);
+    }
 
-    //GXBOOL TextureImpl_CubeFaceRenderTarget::InitRenderTexture(ID3D11Resource* pTexture, int nFaceIndex)
-    //{
-    //  //if (_CL_NOT_(TextureImpl::InitTexture(TRUE, NULL, 0))) {
-    //  //  return FALSE;
-    //  //}
+    GXBOOL CubeRenderTarget_TextureCubeImpl::InitRenderTexture()
+    {
+      if(_CL_NOT_(TextureCubeImpl::InitTexture(TRUE, m_nSize, m_nSize, NULL, 0))) {
+        return FALSE;
+      }
 
-    //  ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
+      ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
 
-    //  D3D11_RENDER_TARGET_VIEW_DESC TarDesc = { GrapXToDX11::FormatFrom(m_Format) };
-    //  ASSERT(m_dwResType == RESTYPE_CUBERENDERTARGET);
-    //  TarDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-    //  TarDesc.Texture2DArray.FirstArraySlice = nFaceIndex;
-    //  HRESULT hval = pd3dDevice->CreateRenderTargetView(m_pD3D11Texture, &TarDesc, &m_pD3D11RenderTargetView);
-    //  return SUCCEEDED(hval);
-    //}
+      D3D11_RENDER_TARGET_VIEW_DESC TarDesc = { GrapXToDX11::FormatFrom(m_Format) };
+      TarDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
+      TarDesc.Texture2DArray.ArraySize = 6;
 
-    //ID3D11RenderTargetView* TextureImpl_CubeFaceRenderTarget::D3DGetRenderTargetView() const
-    //{
-    //  return m_pD3D11RenderTargetView;
-    //}
+      HRESULT hval = pd3dDevice->CreateRenderTargetView(m_pD3D11Texture, &TarDesc, &m_pD3D11RenderTargetView);
+      return SUCCEEDED(hval);
+    }
+
+    ID3D11RenderTargetView* CubeRenderTarget_TextureCubeImpl::D3DGetRenderTargetView() const
+    {
+      return m_pD3D11RenderTargetView;
+    }
+
+#pragma endregion
 
     //////////////////////////////////////////////////////////////////////////
 
