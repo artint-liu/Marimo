@@ -6,7 +6,7 @@ namespace GrapX
   class RenderTarget : public GResource
   {
   public:
-    RenderTarget() : GResource(0, RESTYPE_RENDERTEXTURE) {}
+    RenderTarget() : GResource(0, RESTYPE_RENDERTARGET) {}
 
     GXSTDINTERFACE(GXHRESULT    AddRef            ());
     GXSTDINTERFACE(GXHRESULT    Release           ());
@@ -41,7 +41,7 @@ namespace GrapX
       NegativeZ,
     };
   public:
-    CubeRenderTarget() : GResource(2, RESTYPE_RENDERTEXTURE) {}
+    CubeRenderTarget() : GResource(2, RESTYPE_CUBERENDERTARGET) {}
 
     GXSTDINTERFACE(GXHRESULT    AddRef            ());
     GXSTDINTERFACE(GXHRESULT    Release           ());

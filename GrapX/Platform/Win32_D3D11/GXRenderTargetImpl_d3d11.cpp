@@ -198,8 +198,9 @@ namespace GrapX
         TextureImpl_GPUReadBack* pReadBackTexture = NULL;
         if(IntCreateReadBackTexture(&pReadBackTexture))
         {
-          ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
-          pD3D11Context->CopyResource(pReadBackTexture->D3DTexture(), m_pColorTexture->D3DTexture());
+          pReadBackTexture->CopyRect(m_pColorTexture, NULL, NULL);
+          //ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
+          //pD3D11Context->CopyResource(pReadBackTexture->D3DTexture(), m_pColorTexture->D3DTexture());
           *ppColorTexture = pReadBackTexture;
           pReadBackTexture = NULL;
           return GX_OK;
@@ -218,8 +219,9 @@ namespace GrapX
       {
         if(m_pReadBackTexture || IntCreateReadBackTexture(&m_pReadBackTexture))
         {
-          ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
-          pD3D11Context->CopyResource(m_pReadBackTexture->D3DTexture(), m_pColorTexture->D3DTexture());
+          //ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
+          //pD3D11Context->CopyResource(m_pReadBackTexture->D3DTexture(), m_pColorTexture->D3DTexture());
+          m_pReadBackTexture->CopyRect(m_pColorTexture, NULL, NULL);
           return m_pReadBackTexture;
         }
       }
@@ -334,11 +336,11 @@ namespace GrapX
         return FALSE;
       }
 
-      D3D11_TEXTURE2D_DESC desc = {0};
-      m_pColorTexture->D3DTexture()->GetDesc(&desc);
+      //D3D11_TEXTURE2D_DESC desc = {0};
+      //m_pColorTexture->D3DTexture()->GetDesc(&desc);
 
       //ASSERT(m_pColorTexture->m_dwResType == RESTYPE_RENDERTEXTURE || m_pColorTexture->m_dwResType == RESTYPE_CUBERENDERTARGET);
-      if(_CL_NOT_(pReadBackTexture->InitReadBackTexture(desc.ArraySize)))
+      if(_CL_NOT_(pReadBackTexture->InitReadBackTexture()))
       {
         CLOG_ERROR("%s(%d): ≥ı ºªØŒ∆¿Ì ß∞‹", __FUNCTION__, __LINE__);
         SAFE_RELEASE(pReadBackTexture);
@@ -503,7 +505,7 @@ namespace GrapX
         return FALSE;
       }
 
-      m_pColorTexture = new TextureImpl_RenderTarget(m_pGraphics, RESTYPE_CUBERENDERTARGET, eColorFormat, nSize, nSize);
+      m_pColorTexture = new TextureImpl_RenderTarget(m_pGraphics, RESTYPE_CUBERENDERTEXTURE, eColorFormat, nSize, nSize);
       if (InlIsFailedToNewObject(m_pColorTexture)) {
         return FALSE;
       }

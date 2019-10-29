@@ -84,8 +84,8 @@ namespace GrapX
     protected:
       CubeFaceRenderTargetTextureImpl* m_pCubeFace[6] = { NULL };
       RenderTargetImpl* m_pRenderTargetFace[countof(m_pCubeFace)] = { NULL };
-      u8                m_CubeFaceTextureBuffer[countof(m_pCubeFace) * sizeof(CubeFaceRenderTargetTextureImpl)];
-      u8                m_CubeFaceRenderTargetBuffer[countof(m_pCubeFace) * sizeof(RenderTargetImpl)];
+      //u8                m_CubeFaceTextureBuffer[countof(m_pCubeFace) * sizeof(CubeFaceRenderTargetTextureImpl)];
+      //u8                m_CubeFaceRenderTargetBuffer[countof(m_pCubeFace) * sizeof(RenderTargetImpl)];
 
       TextureImpl_GPUReadBack*  m_pReadBackTexture = NULL;
 

@@ -499,7 +499,7 @@ GXHRESULT GVScene::SaveToFileW(GXLPCWSTR szFilename)
   return GX_FAIL;
 }
 
-GXHRESULT GVScene::Generate( Canvas3D* pCanvas, GVSequence* pRenderSequence, int nRenderCate, GXDWORD dwLayerMask, GXDWORD dwRequired )
+GXHRESULT GVScene::Generate( Canvas3D* pCanvas, GVSequence* pRenderSequence, int nRenderCate, GXDWORD dwCullingMask, GXDWORD dwRequired )
 {
   GVNode::AABB          aabbAbs;
   //GVRENDERDESC          Desc;
@@ -521,7 +521,7 @@ GXHRESULT GVScene::Generate( Canvas3D* pCanvas, GVSequence* pRenderSequence, int
       const GXDWORD dwFlags = pNode->GetFlags();
       const GXDWORD dwLayer = pNode->GetLayer();
 
-      if(_CL_NOT_(TEST_FLAGS_ALL(dwFlags, dwRequired)) || (dwLayerMask & dwLayer)) {
+      if(_CL_NOT_(TEST_FLAGS_ALL(dwFlags, dwRequired)) || (dwCullingMask & dwLayer)) {
         // 准备下一次循环
         pNode = pNode->GetNext();
         continue;

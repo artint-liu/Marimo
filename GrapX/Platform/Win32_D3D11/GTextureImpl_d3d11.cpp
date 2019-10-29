@@ -153,7 +153,7 @@ namespace GrapX
       TexDesc.SampleDesc.Count = 1;
       TexDesc.SampleDesc.Quality = 0;
 
-      if(m_dwResType == RESTYPE_TEXTURE_CUBE || m_dwResType == RESTYPE_CUBERENDERTARGET)
+      if(m_dwResType == RESTYPE_TEXTURE_CUBE || m_dwResType == RESTYPE_CUBERENDERTEXTURE)
       {
         TexDesc.ArraySize = 6;
         TexDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
@@ -378,9 +378,21 @@ namespace GrapX
         box.bottom = lprcSource->bottom;
       }
 
-      pD3D11Context->CopySubresourceRegion(
-        m_pD3D11Texture, 0, x, y, 0,
-        static_cast<TextureImpl*>(pSrc)->m_pD3D11Texture, 0, &box);
+      if(pSrc->m_dwResType == RESTYPE_RENDERTEXTURE)
+      {
+        ASSERT(dynamic_cast<TextureImpl_RenderTarget*>(pSrc) != NULL);
+
+        TextureImpl_RenderTarget* pRT = static_cast<TextureImpl_RenderTarget*>(pSrc);
+        pD3D11Context->CopySubresourceRegion(
+          m_pD3D11Texture, 0, x, y, 0,
+          pRT->m_pD3D11Texture, pRT->m_nSlice, &box);
+      }
+      else
+      {
+        pD3D11Context->CopySubresourceRegion(
+          m_pD3D11Texture, 0, x, y, 0,
+          static_cast<TextureImpl*>(pSrc)->m_pD3D11Texture, 0, &box);
+      }
       return TRUE;
     }
 
@@ -595,7 +607,7 @@ namespace GrapX
     TextureImpl_RenderTarget::TextureImpl_RenderTarget(Graphics* pGraphics, GXDWORD dwResType, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight)
       : TextureImpl(pGraphics, eFormat, nWidth, nHeight, 1, GXResUsage::Default)
     {
-      ASSERT(dwResType == RESTYPE_RENDERTEXTURE || dwResType == RESTYPE_CUBERENDERTARGET);
+      ASSERT(dwResType == RESTYPE_RENDERTEXTURE || dwResType == RESTYPE_CUBERENDERTEXTURE);
       m_dwResType = dwResType;
     }
 
@@ -648,8 +660,9 @@ namespace GrapX
       pD3D11Texture->AddRef();
       D3D11_RENDER_TARGET_VIEW_DESC TarDesc = { GrapXToDX11::FormatFrom(m_Format) };
       //ASSERT(m_dwResType == RESTYPE_CUBERENDERTARGET);
-      TarDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-      TarDesc.Texture2DArray.FirstArraySlice = nFaceIndex;
+      TarDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
+      TarDesc.Texture2DArray.FirstArraySlice = m_nSlice = nFaceIndex;
+      TarDesc.Texture2DArray.ArraySize = 1;
       
       ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
       HRESULT hval = pd3dDevice->CreateRenderTargetView(m_pD3D11Texture, &TarDesc, &m_pD3D11RenderTargetView);
@@ -659,6 +672,11 @@ namespace GrapX
     ID3D11RenderTargetView* TextureImpl_RenderTarget::D3DGetRenderTargetView() const
     {
       return m_pD3D11RenderTargetView;
+    }
+
+    GXBOOL TextureImpl_RenderTarget::CopyRect(Texture* pSrc, GXLPCPOINT lpptDestination, GXLPCRECT lprcSource)
+    {
+      return TRUE;
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -734,19 +752,19 @@ namespace GrapX
     {
     }
 
-    GXBOOL TextureImpl_GPUReadBack::InitReadBackTexture(int count)
+    GXBOOL TextureImpl_GPUReadBack::InitReadBackTexture()
     {
       ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
 
       D3D11_TEXTURE2D_DESC TexDesc;
-      D3D11_SUBRESOURCE_DATA TexInitData;
+      //D3D11_SUBRESOURCE_DATA TexInitData;
       InlSetZeroT(TexDesc);
-      InlSetZeroT(TexInitData);
+      //InlSetZeroT(TexInitData);
 
       TexDesc.Width = m_nWidth;
       TexDesc.Height = m_nHeight;
       TexDesc.MipLevels = m_nMipLevels;
-      TexDesc.ArraySize = count;
+      TexDesc.ArraySize = 1;
       TexDesc.Format = GrapXToDX11::FormatFrom(m_Format);
       TexDesc.SampleDesc.Count = 1;
       TexDesc.SampleDesc.Quality = 0;

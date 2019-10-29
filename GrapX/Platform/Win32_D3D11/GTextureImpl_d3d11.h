@@ -175,8 +175,11 @@ namespace GrapX
     class TextureImpl_RenderTarget : public TextureImpl
     {
       friend class GraphicsImpl;
+      friend class TextureImpl;
+
     protected:
       ID3D11RenderTargetView* m_pD3D11RenderTargetView = NULL;
+      UINT m_nSlice = 0;
 
     public:
       TextureImpl_RenderTarget(GrapX::Graphics* pGraphics, GXDWORD dwResType, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight);
@@ -184,6 +187,8 @@ namespace GrapX
       GXBOOL InitRenderTexture(ID3D11Texture2D* pD3D11Texture);
       GXBOOL InitRenderTexture(ID3D11Texture2D* pD3D11Texture, int nFaceIndex);
       ID3D11RenderTargetView* D3DGetRenderTargetView() const;
+      
+      GXBOOL CopyRect         (Texture* pSrc, GXLPCPOINT lpptDestination, GXLPCRECT lprcSource) override;
     };
 
     //class TextureImpl_CubeFaceRenderTarget : public TextureImpl
@@ -220,7 +225,7 @@ namespace GrapX
     protected:
     public:
       TextureImpl_GPUReadBack(GrapX::Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight);
-      GXBOOL InitReadBackTexture(int count);
+      GXBOOL InitReadBackTexture();
 
       GXBOOL Map    (MAPPED* pMappedRect, GXResMap eResMap) override;
       GXBOOL Unmap  () override;
