@@ -102,6 +102,7 @@ namespace GrapX
       RenderTarget*  GetFaceUnsafe(Face face) override;
       RenderTarget** GetFacesUnsafe() override;
       TextureCube*   GetTextureCubeUnsafe() override;
+      GXBOOL         GetTextureCube(TextureCube** ppTextureCube) override;
     };
 
     //////////////////////////////////////////////////////////////////////////

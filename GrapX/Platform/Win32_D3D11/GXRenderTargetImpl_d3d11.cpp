@@ -557,6 +557,13 @@ namespace GrapX
       return m_pColorTexture;
     }
 
+    GXBOOL CubeRenderTargetImpl::GetTextureCube(TextureCube** ppTextureCube)
+    {
+      *ppTextureCube = m_pColorTexture;
+      m_pColorTexture->AddRef();
+      return TRUE;
+    }
+
   } // namespace D3D11
 } // namespace GrapX
 

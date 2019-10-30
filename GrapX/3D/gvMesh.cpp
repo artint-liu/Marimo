@@ -349,13 +349,23 @@ GXBOOL GVMesh::SetMaterial(GrapX::Material* pMtlInst, int nRenderCate)
   }
   m_Renderer.materials[nRenderCate] = pMtlInst;
 
-  if(nRenderCate == 0)
-  {
-    m_Renderer.RenderQueue = pMtlInst->GetRenderQueue();
-  }
+  //if(nRenderCate == 0)
+  //{
+  //  m_Renderer.RenderQueue = pMtlInst->GetRenderQueue();
+  //}
 
   return TRUE;
   //return InlSetNewObjectT(m_pMtlInst, pMtlInst);
+}
+
+GrapX::Material* GVMesh::SetMaterial(GrapX::Shader* pShader, int nRenderCate)
+{
+  GrapX::Material* pMaterial = NULL;
+  pShader->GetGraphicsUnsafe()->CreateMaterial(&pMaterial, pShader);
+
+  GXBOOL bval = SetMaterial(pMaterial, nRenderCate);
+  pMaterial->Release();
+  return bval ? pMaterial : NULL;
 }
 
 GXBOOL GVMesh::GetMaterial(int nRenderCate, GrapX::Material** ppMtlInst)
@@ -366,12 +376,11 @@ GXBOOL GVMesh::GetMaterial(int nRenderCate, GrapX::Material** ppMtlInst)
     return TRUE;
   }
   return FALSE;
-  //if(m_pMtlInst != NULL) {
-  //  *ppMtlInst = m_pMtlInst;
-  //  m_pMtlInst->AddRef();
-  //  return GX_OK;
-  //}
-  //return GX_FAIL;
+}
+
+GrapX::Material* GVMesh::GetMaterialUnsafe(int nRenderCate)
+{
+  return (nRenderCate < (int)m_Renderer.materials.size()) ? m_Renderer.materials[nRenderCate].operator GrapX::Material*() : NULL;
 }
 
 GXBOOL GVMesh::GetMaterialFilename(int nRenderCate, clStringW* pstrFilename)

@@ -126,8 +126,10 @@ public:
   // 文件存取相关的
   virtual GXHRESULT SaveFile (clSmartRepository* pStorage);
   virtual GXBOOL SetMaterial    (GrapX::Material* pMtlInst, int nRenderCate) override;
+  virtual GrapX::Material* SetMaterial               (GrapX::Shader* pShader, int nRenderCate) override;
 
   virtual GXBOOL GetMaterial          (int nRenderCate, GrapX::Material** ppMtlInst) override;
+  virtual GrapX::Material* GetMaterialUnsafe  (int nRenderCate) override;
   //virtual GXHRESULT SetMaterialInst         (GXMaterialInst* pMtlInst, GXDWORD dwFlags);
   virtual GXBOOL GetMaterialFilename(int nRenderCate, clStringW* pstrFilename) override;
   //virtual GXHRESULT SetMaterialInstFromFileW(GXLPCWSTR szFilename, GXDWORD dwFlags);

@@ -371,6 +371,7 @@ GXHRESULT GVScene::RenderRecursive(GrapX::Canvas3D* pCanvas, GVNode* pParent, in
 
     if(TEST_FLAG_NOT(Desc.dwFlags, GVNF_CONTAINER) && Desc.PrimitiveCount != 0)
     {
+#if 0
       if(TEST_FLAG(Desc.dwFlags, GVNF_UPDATEWORLDMAT)) {
         pCanvas->SetWorldMatrix(Desc.matWorld);
       }
@@ -400,6 +401,10 @@ GXHRESULT GVScene::RenderRecursive(GrapX::Canvas3D* pCanvas, GVNode* pParent, in
       if(TEST_FLAG(Desc.dwFlags, GVNF_UPDATEWORLDMAT)) {
         pCanvas->SetWorldMatrix(float4x4::Identity);
       }
+#else
+      pCanvas->Draw(Desc.pMaterial, pModel, &Desc.matWorld);
+      ++m_uDrawCallCount;
+#endif
     }
 
     if(pModel->GetFirstChild() != NULL) {

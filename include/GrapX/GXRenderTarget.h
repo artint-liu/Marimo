@@ -50,6 +50,7 @@ namespace GrapX
     GXSTDINTERFACE(RenderTarget*  GetFaceUnsafe(Face face));
     GXSTDINTERFACE(RenderTarget** GetFacesUnsafe());
     GXSTDINTERFACE(TextureCube*   GetTextureCubeUnsafe());
+    GXSTDINTERFACE(GXBOOL         GetTextureCube(TextureCube** ppTextureCube));
 
   };
 } // namespace GrapX

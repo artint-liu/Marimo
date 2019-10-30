@@ -17,16 +17,11 @@
   virtual GXHRESULT Present             () override;
   virtual GXHRESULT Resize              (int nWidth, int nHeight) override;
 
-  //virtual GXBOOL    OldRegisterResource    (GResource* pResource);
-  //virtual GXUINT    OldUnregisterResource  (GResource* pResource);
 
   virtual GXHRESULT RegisterResource    (GResource* pResource, LPCRESKETCH pSketch) override;
-  //virtual GXHRESULT RegisterResourceEx  (LPCRESKETCH pDesc, GResource* pResource);
   virtual GXHRESULT UnregisterResource  (GResource* pResource) override;
 
-  virtual GXHRESULT SetPrimitive        (GrapX::Primitive* pPrimitive, GXUINT uStreamSource = 0) override;
-  //virtual GXHRESULT SetPrimitiveV       (GPrimitiveV* pPrimitive, GXUINT uStreamSource = 0) override;
-  //virtual GXHRESULT SetPrimitiveVI      (GPrimitiveVI* pPrimitive, GXUINT uStreamSource = 0) override;
+  GXHRESULT SetPrimitive        (GrapX::Primitive* pPrimitive, GXUINT uStreamSource = 0);
 
   // 理论上GXGraphics没有 Set** 类函数, SetTexture 例外, 因为 SetTexture 同时肩负这清空指定设备纹理的任务
   virtual GXBOOL    SetTexture            (TextureBase* pTexture, GXUINT uStage = 0) override;
@@ -38,8 +33,8 @@
 
 
   virtual GXHRESULT Clear               (const GXRECT*lpRects, GXUINT nCount, GXDWORD dwFlags, const GXColor& crClear, GXFLOAT z, GXDWORD dwStencil) override;
-  virtual GXHRESULT DrawPrimitive       (const GXPrimitiveType eType, const GXUINT StartVertex, const GXUINT PrimitiveCount) override;
-  virtual GXHRESULT DrawPrimitive       (const GXPrimitiveType eType, const GXINT BaseVertexIndex, const GXUINT MinIndex, const GXUINT NumVertices, const GXUINT StartIndex, const GXUINT PrimitiveCount) override;
+  GXHRESULT DrawPrimitive       (const GXPrimitiveType eType, const GXUINT StartVertex, const GXUINT PrimitiveCount);
+  GXHRESULT DrawPrimitive       (const GXPrimitiveType eType, const GXINT BaseVertexIndex, const GXUINT MinIndex, const GXUINT NumVertices, const GXUINT StartIndex, const GXUINT PrimitiveCount);
 
   //////////////////////////////////////////////////////////////////////////
   // 低级函数

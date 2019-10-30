@@ -298,11 +298,21 @@ GXBOOL GVNode::SetMaterial(GrapX::Material* pMtlInst, int nRenderCate)
   return GX_OK;
 }
 
+GrapX::Material* GVNode::SetMaterial(GrapX::Shader* pShader, int nRenderCate /*= DefaultRenderCategory*/)
+{
+  return NULL;
+}
+
 GXBOOL GVNode::GetMaterial(int nRenderCate, GrapX::Material** ppMtlInst)
 {
   *ppMtlInst = NULL;
   CLBREAK;
   return GX_FAIL;
+}
+
+GrapX::Material* GVNode::GetMaterialUnsafe(int nRenderCate)
+{
+  return NULL;
 }
 
 GXBOOL GVNode::GetMaterialFilename(int nRenderCate, clStringW* pstrFilename)

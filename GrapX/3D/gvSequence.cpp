@@ -72,7 +72,8 @@ const GVSequence::RenderDescArray& GVSequence::GetArray(int nIndex)
 
 int GVSequence::Add(GVRENDERDESC2* pDesc)
 {
-  int nRenderQueue = pDesc->RenderQueue & 0xffff;
+  //int nRenderQueue = pDesc->RenderQueue & 0xffff;
+  int nRenderQueue = pDesc->materials[m_nRenderCate]->GetRenderQueue();
   ASSERT(nRenderQueue >= 0 && nRenderQueue <= (int)GrapX::RenderQueue_Max);
 
   if(pDesc->pPrimitive) {

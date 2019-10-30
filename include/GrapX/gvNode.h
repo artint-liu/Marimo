@@ -129,7 +129,7 @@ struct GVRENDERDESC2
   MaterialArray     materials;
   //float4x4          matWorld = float4x4::Identity;             // 全局变换, 这个应该返回TRANSFORM::GlobalMatrix, 否则裁剪会有问题
 
-  GXUINT            RenderQueue = GrapX::RenderQueue_Geometry;          // 渲染队列, 尚未使用, 这个默认取自Material中的记录
+  //GXUINT            RenderQueue = GrapX::RenderQueue_Geometry;          // 渲染队列, 尚未使用, 这个默认取自Material中的记录
   GXINT             BaseVertexIndex = 0;      // StartVertex
   GXUINT            MinIndex = 0;
   GXUINT            NumVertices = 0;
@@ -231,7 +231,9 @@ public:
   virtual GVRENDERDESC2* GetRenderDesc         (int nRenderCate);
   virtual GXBOOL    RayTrace                  (const Ray& ray, NODERAYTRACE* pRayTrace);
   virtual GXBOOL    SetMaterial               (GrapX::Material* pMtlInst, int nRenderCate = DefaultRenderCategory);
+  virtual GrapX::Material* SetMaterial               (GrapX::Shader* pShader, int nRenderCate = DefaultRenderCategory); // 从shader创建一个全新材质
   virtual GXBOOL    GetMaterial               (int nRenderCate, GrapX::Material** ppMtlInst);
+  virtual GrapX::Material* GetMaterialUnsafe  (int nRenderCate);
   virtual GXBOOL    GetMaterialFilename       (int nRenderCate, clStringW* pstrFilename); // 参数可以为NULL, 此时用来探测是否含有材质, 返回值决定了是否含有材质
   virtual GXHRESULT Clone                     (GVNode** ppClonedNode/*, GXBOOL bRecursive*/); // 写的不好，要重构，1.继承类应该可以直接使用基类的clone函数，对扩展的成员变量进行处理 2.支持递归
 

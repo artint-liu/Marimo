@@ -108,7 +108,7 @@ namespace GrapX
     GXSTDINTERFACE(GXHRESULT UnregisterResource (GResource* pResource));
 
 
-    GXSTDINTERFACE(GXHRESULT SetPrimitive       (Primitive* pPrimitive, GXUINT uStreamSource = 0));
+    //GXSTDINTERFACE(GXHRESULT SetPrimitive       (Primitive* pPrimitive, GXUINT uStreamSource = 0));
     //GXSTDINTERFACE(GXHRESULT SetPrimitiveV      (GPrimitiveV* pPrimitive, GXUINT uStreamSource = 0));
     //GXSTDINTERFACE(GXHRESULT SetPrimitiveVI     (GPrimitiveVI* pPrimitive, GXUINT uStreamSource = 0));
 
@@ -121,8 +121,8 @@ namespace GrapX
     GXSTDINTERFACE(GXBOOL    SetSamplerState      (GXUINT nStartSlot, GXUINT nSamplerCount, SamplerState** pSamplerStateArray));
 
     GXSTDINTERFACE(GXHRESULT Clear              (const GXRECT*lpRects, GXUINT nCount, GXDWORD dwFlags, const GXColor& crClear, GXFLOAT z, GXDWORD dwStencil));
-    GXSTDINTERFACE(GXHRESULT DrawPrimitive      (const GXPrimitiveType eType, const GXUINT StartVertex, const GXUINT PrimitiveCount));
-    GXSTDINTERFACE(GXHRESULT DrawPrimitive      (const GXPrimitiveType eType, const GXINT BaseVertexIndex, const GXUINT MinIndex, const GXUINT NumVertices, const GXUINT StartIndex, const GXUINT PrimitiveCount));
+    //GXSTDINTERFACE(GXHRESULT DrawPrimitive      (const GXPrimitiveType eType, const GXUINT StartVertex, const GXUINT PrimitiveCount));
+    //GXSTDINTERFACE(GXHRESULT DrawPrimitive      (const GXPrimitiveType eType, const GXINT BaseVertexIndex, const GXUINT MinIndex, const GXUINT NumVertices, const GXUINT StartIndex, const GXUINT PrimitiveCount));
 
     //////////////////////////////////////////////////////////////////////////
     // 低级函数
@@ -236,27 +236,6 @@ namespace GrapX
       GXLPCVOID           pIndexInitData = NULL   // 索引初始化数据
     ));
 
-    //GXSTDINTERFACE(GXHRESULT CreatePrimitiveV(
-    //  GPrimitiveV**       pPrimitive,           // 返回对象
-    //  GXLPCSTR            szName,               // 资源名, NULL为匿名对象, 具名对象仅在第一次创建时使用下面的参数
-    //  LPCGXVERTEXELEMENT  pVertexDecl,          // 顶点声明
-    //  GXDWORD             ResUsage,             // 资源类型/属性
-    //  GXUINT              uVertexCount,         // 顶点数
-    //  GXUINT              uVertexStride = 0,    // 每个顶点的字节数
-    //  GXLPVOID            pVertInitData = NULL  // 初始化数据
-    //  ));
-
-    //GXSTDINTERFACE(GXHRESULT CreatePrimitiveVI(
-    //  GPrimitiveVI**      pPrimitive, 
-    //  GXLPCSTR            szName, 
-    //  LPCGXVERTEXELEMENT  pVertexDecl,
-    //  GXDWORD             ResUsage, 
-    //  GXUINT              uIndexCount,          // 索引数量
-    //  GXUINT              uVertexCount,
-    //  GXUINT              uVertexStride = 0,
-    //  GXLPCVOID           pIdxInitData = NULL,  // 索引初始化数据
-    //  GXLPCVOID           pVertInitData = NULL  // 顶点和索引初始化数据必须同时有效或者同时为NULL.
-    //  ));
 
     // GSahder
     GXSTDINTERFACE(GXHRESULT    CreateShaderFromSource      (GrapX::Shader** ppShader, const GXSHADER_SOURCE_DESC* pShaderDescs, GXUINT nCount));
@@ -316,7 +295,7 @@ namespace GrapX
     //GXSTDINTERFACE(GTexture*  GetBackBufferTex             ());
     GXSTDINTERFACE(GXHRESULT  GetBackBuffer                (RenderTarget** ppTarget));
     GXSTDINTERFACE(Texture*   GetDeviceOriginTex           ());
-    GXSTDINTERFACE(GXBOOL     ScrollTexture                (const SCROLLTEXTUREDESC* lpScrollTexDesc));
+    GXSTDINTERFACE(GXBOOL     ScrollTexture                (const SCROLLTEXTUREDESC* lpScrollTexDesc)); // TODO: 移除
 
     GXSTDINTERFACE(GXBOOL     GetDesc                      (GXGRAPHICSDEVICE_DESC* pDesc));
     GXSTDINTERFACE(GXBOOL     GetRenderStatistics          (RENDER_STATISTICS* pStat));
