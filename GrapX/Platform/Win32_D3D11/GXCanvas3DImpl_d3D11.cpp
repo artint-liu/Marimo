@@ -353,7 +353,6 @@ namespace GrapX
       //vTime.z = (float)(dwTick % 10000) * 1e-3f * CL_2PI;
       //vTime.x = sin(vTime.z);
       //vTime.y = cos(vTime.z);
-      SetWorldMatrix(float4x4::Identity);
       m_StdCanvasUniform._CameraWorldPos = m_pCamera->GetPos();
       m_StdCanvasUniform._CameraWorldDir = m_pCamera->GetFront();
 
@@ -362,8 +361,13 @@ namespace GrapX
       m_StdCanvasUniform._Time.z = cos(m_StdCanvasUniform._Time.y);
       m_StdCanvasUniform._Time.w = sin(m_StdCanvasUniform._Time.y);
 
+      m_StdCanvasUniform.MARIMO_MATRIX_VP = CameraCtx.matView * CameraCtx.matProjection;
+      m_StdCanvasUniform.MARIMO_MATRIX_I_VP = m_StdCanvasUniform.MARIMO_MATRIX_VP;
+      m_StdCanvasUniform.MARIMO_MATRIX_I_VP.inverse();
+
       m_ViewFrustum.set(m_StdCanvasUniform.MARIMO_MATRIX_VP);
 
+      SetWorldMatrix(float4x4::Identity);
       return GX_OK;
     }
 
@@ -462,11 +466,6 @@ namespace GrapX
 
     void Canvas3DImpl::SetWorldMatrix(const float4x4& matWorld)
     {
-#ifdef REFACTOR_SHADER
-      //GXLPBYTE pConstBuf = (GXLPBYTE)m_CanvasUniformBuf.GetPtr();
-      //ACCESS_AS(float4x4, id_matWorldViewProj) = matWorld * ACCESS_AS(float4x4, id_matViewProj);
-      //ACCESS_AS(float4x4, id_matWorld)         = matWorld;
-      //ACCESS_AS(float4x4, id_matWorldView)     = matWorld * ACCESS_AS(float4x4, id_matView);
       GCAMERACONETXT CameraCtx;
       m_pCamera->GetContext(&CameraCtx);
 
@@ -474,22 +473,8 @@ namespace GrapX
       m_StdCanvasUniform.MARIMO_MATRIX_V = CameraCtx.matView;
       m_StdCanvasUniform.MARIMO_MATRIX_P = CameraCtx.matProjection;
       m_StdCanvasUniform.MARIMO_MATRIX_MVP = matWorld * CameraCtx.matView * CameraCtx.matProjection;
-      m_StdCanvasUniform.MARIMO_MATRIX_VP = CameraCtx.matView * CameraCtx.matProjection;
-      
-      m_StdCanvasUniform.MARIMO_MATRIX_I_VP = m_StdCanvasUniform.MARIMO_MATRIX_VP;
-      m_StdCanvasUniform.MARIMO_MATRIX_I_VP.inverse();
-
-#else
-      m_StdUniforms.g_matWorldViewProj = matWorld * m_StdUniforms.g_matViewProj;
-      m_StdUniforms.g_matWorld = matWorld;
-      m_StdUniforms.g_matWorldView = matWorld * m_StdUniforms.g_matView;
-#endif // #ifdef REFACTOR_SHADER
 
       m_pGraphicsImpl->D3DGetDeviceContext()->UpdateSubresource(m_pD3DCanvasBuffer, 0, NULL, &m_StdCanvasUniform, 0, 0);
-
-      //m_StdUniforms.g_matWorldViewProjInv;
-      //m_StdUniforms.g_matWorldInv;
-      //m_StdUniforms.g_matWorldViewInv;
     }
 
 #ifdef REFACTOR_SHADER

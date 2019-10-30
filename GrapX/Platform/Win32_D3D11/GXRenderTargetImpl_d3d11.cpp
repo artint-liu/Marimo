@@ -530,13 +530,11 @@ namespace GrapX
 
       for(int n = 0; n < countof(m_pCubeFace); n++)
       {
-        m_pCubeFace[n] = new // (m_CubeFaceTextureBuffer + sizeof(CubeFaceRenderTargetTextureImpl) * n)
-          CubeFaceRenderTargetTextureImpl(m_pGraphics, eColorFormat, nSize, nSize);
+        m_pCubeFace[n] = new CubeFaceRenderTargetTextureImpl(m_pGraphics, eColorFormat, nSize, nSize);
         m_pCubeFace[n]->AddRef();
         m_pCubeFace[n]->InitRenderTexture(m_pColorTexture->D3DTexture(), n);
 
-        m_pRenderTargetFace[n] = new // (m_CubeFaceRenderTargetBuffer + sizeof(RenderTargetImpl) * n)
-          RenderTargetImpl(m_pGraphics, nSize, nSize, m_pCubeFace[n], m_pDepthStencilTexture);
+        m_pRenderTargetFace[n] = new RenderTargetImpl(m_pGraphics, nSize, nSize, m_pCubeFace[n], m_pDepthStencilTexture);
         m_pRenderTargetFace[n]->AddRef();
       }
       return TRUE;
