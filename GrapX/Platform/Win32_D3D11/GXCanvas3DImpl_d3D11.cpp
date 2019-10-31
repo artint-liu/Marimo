@@ -381,8 +381,14 @@ namespace GrapX
       for (int nArrayIndex = 0; nArrayIndex < nArrayCount; nArrayIndex++)
       {
         const RenderDescArray& aDesc = pSequence->GetArray(nArrayIndex);
-        for(const GVRENDERDESC2* pRenderer : aDesc)
+#ifdef ENABLE_MULTIMAP_RENDERING_SORTING
+        for(const clpair<int, GVRENDERDESC2*>& r_pair : aDesc)
         {
+          const GVRENDERDESC2* pRenderer = r_pair.second;
+#else
+        for (const GVRENDERDESC2* pRenderer : aDesc)
+        {
+#endif
           const GXDWORD dwFlags = pRenderer->pNode->GetFlags();
           if (TEST_FLAG(dwFlags, GVNF_UPDATEWORLDMAT)) {
             SetWorldMatrix(pRenderer->pNode->GetTransform().GlobalMatrix);

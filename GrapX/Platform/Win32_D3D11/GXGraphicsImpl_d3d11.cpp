@@ -389,11 +389,11 @@ namespace GrapX
       else {
         RESET_FLAG(m_dwFlags, F_ACTIVATE);
 
-        // TODO: 忘了这里为什么必须要恢复原来的BackBuffer
-        //if(m_pCurRenderTarget != m_pDeviceOriginTex) {
-        //  InlSetCanvas(NULL);
-        //}
-        // 忘了就先注释了
+        // 如果不还原为默认RenderTarget，在新的一帧开始可能会错误的改写旧的RenderTarget
+        // 常见的就是Clear()会把之前内容清理掉
+        if(m_pCurRenderTarget != m_pBackBufferRenderTarget) {
+          InlSetCanvas(NULL);
+        }
 
 #if defined(_DEBUG) && 0
         LPDIRECT3DSURFACE9 lpRenderTar;

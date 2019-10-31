@@ -83,24 +83,45 @@ int GVSequence::Add(GVRENDERDESC2* pDesc)
   //ASSERT(pDesc->pMaterial);
   //pDesc->pMaterial->AddRef();
 
-  if(nRenderQueue < GrapX::RenderQueue_Background) {
+#ifdef ENABLE_MULTIMAP_RENDERING_SORTING
+  if (nRenderQueue < GrapX::RenderQueue_Background) {
+    m_aRenderDesc[0].emplace(nRenderQueue, pDesc);
+  }
+  else if (nRenderQueue < GrapX::RenderQueue_Geometry) {
+    m_aRenderDesc[1].emplace(nRenderQueue, pDesc);
+  }
+  else if (nRenderQueue < GrapX::RenderQueue_AlphaTest) {
+    m_aRenderDesc[2].emplace(nRenderQueue, pDesc);
+  }
+  else if (nRenderQueue < GrapX::RenderQueue_Transparent) {
+    m_aRenderDesc[3].emplace(nRenderQueue, pDesc);
+  }
+  else if (nRenderQueue < GrapX::RenderQueue_Overlay) {
+    m_aRenderDesc[4].emplace(nRenderQueue, pDesc);
+  }
+  else if (nRenderQueue < GrapX::RenderQueue_Max) {
+    m_aRenderDesc[5].emplace(nRenderQueue, pDesc);
+  }
+#else
+  if (nRenderQueue < GrapX::RenderQueue_Background) {
     m_aRenderDesc[0].push_back(pDesc);
   }
-  else if(nRenderQueue < GrapX::RenderQueue_Geometry) {
+  else if (nRenderQueue < GrapX::RenderQueue_Geometry) {
     m_aRenderDesc[1].push_back(pDesc);
   }
-  else if(nRenderQueue < GrapX::RenderQueue_AlphaTest) {
+  else if (nRenderQueue < GrapX::RenderQueue_AlphaTest) {
     m_aRenderDesc[2].push_back(pDesc);
   }
-  else if(nRenderQueue < GrapX::RenderQueue_Transparent) {
+  else if (nRenderQueue < GrapX::RenderQueue_Transparent) {
     m_aRenderDesc[3].push_back(pDesc);
   }
-  else if(nRenderQueue < GrapX::RenderQueue_Overlay) {
+  else if (nRenderQueue < GrapX::RenderQueue_Overlay) {
     m_aRenderDesc[4].push_back(pDesc);
   }
-  else if(nRenderQueue < GrapX::RenderQueue_Max) {
+  else if (nRenderQueue < GrapX::RenderQueue_Max) {
     m_aRenderDesc[5].push_back(pDesc);
   }
+#endif
 
   return 0;
 }

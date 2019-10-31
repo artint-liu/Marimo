@@ -286,6 +286,7 @@ typedef uintptr_t         CLULONG_PTR;
 
 #define clvector        std::vector
 #define clmap           std::map
+#define clmultimap      std::multimap
 #define clstack         std::stack
 #define clset           std::set
 #define clqueue         std::queue
