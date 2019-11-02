@@ -46,6 +46,8 @@ namespace GrapX
     {
       // 1.按资源特征注册
       // $1.分类节点
+      clstd::ScopedLocker lock(m_locker);
+
       CateDict::iterator itCate = m_CategoryDict.find(pDesc->dwCategoryId);
 
       if(itCate == m_CategoryDict.end()) // 分类还没有创建
@@ -82,6 +84,8 @@ namespace GrapX
 
     GXHRESULT GXResourceMgr::Unregister(GResource* pResource, GXBOOL bStrictness)
     {
+      clstd::ScopedLocker lock(m_locker);
+
       ResDict::iterator itRes = m_ResourceDict.find(pResource);
       if(itRes == m_ResourceDict.end())
       {
@@ -151,12 +155,14 @@ namespace GrapX
       return GX_OK;
     }
 
-    GResource* GXResourceMgr::Find(LPCRESKETCH pDesc) const
+    GResource* GXResourceMgr::Find(LPCRESKETCH pDesc)
     {
       // 无效或者大众资源则直接返回
       if(pDesc == NULL || pDesc->dwCategoryId == NULL) {
         return NULL;
       }
+
+      clstd::ScopedLocker lock(m_locker);
 
       CateDict::const_iterator itCate = m_CategoryDict.find(pDesc->dwCategoryId);
       if(itCate != m_CategoryDict.end())
@@ -171,8 +177,10 @@ namespace GrapX
       return NULL;
     }
 
-    GXHRESULT GXResourceMgr::Find(GResource** ppResource, LPCRESKETCH pDesc) const
+    GXHRESULT GXResourceMgr::Find(GResource** ppResource, LPCRESKETCH pDesc)
     {
+      clstd::ScopedLocker lock(m_locker);
+
       GResource* pResource = Find(pDesc);
       if(pResource) {
         *ppResource = pResource;
@@ -181,8 +189,9 @@ namespace GrapX
       return GX_FAIL;
     }
 
-    LPCRESKETCH GXResourceMgr::Find(GResource* pResource) const
+    LPCRESKETCH GXResourceMgr::Find(GResource* pResource)
     {
+      clstd::ScopedLocker lock(m_locker);
       ResDict::const_iterator it = m_ResourceDict.find(pResource);
       if(it != m_ResourceDict.end())
       {

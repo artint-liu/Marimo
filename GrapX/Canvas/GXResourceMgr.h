@@ -23,7 +23,7 @@ namespace GrapX
     private:
       CateDict      m_CategoryDict;
       ResDict       m_ResourceDict;
-
+      clstd::Locker m_locker;
     public:
       GXResourceMgr ();
       ~GXResourceMgr();
@@ -34,9 +34,9 @@ namespace GrapX
       //GXHRESULT       BroadcastDeviceEvent  (DeviceEvent eEvent);
       GXHRESULT       BroadcastScriptCommand    (GRESCRIPTDESC* pDesc);
       GXHRESULT       BroadcastCategoryMessage  (GXDWORD dwCategoryId, GRESCRIPTDESC* pDesc);
-      GResource*      Find                      (LPCRESKETCH pDesc) const;
-      GXHRESULT       Find                      (GResource** ppResource, LPCRESKETCH pDesc) const;
-      LPCRESKETCH     Find                      (GResource* pResource) const;
+      GResource*      Find                      (LPCRESKETCH pDesc);
+      GXHRESULT       Find                      (GResource** ppResource, LPCRESKETCH pDesc);
+      LPCRESKETCH     Find                      (GResource* pResource);
       GXHRESULT       RegisterUnfeatured        (GResource* pResource);
       GXHRESULT       Register                  (LPCRESKETCH pDesc, GResource* pResource);
       GXHRESULT       Unregister                (GResource* pResource, GXBOOL bStrictness = TRUE);

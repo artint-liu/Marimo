@@ -70,6 +70,36 @@ namespace GrapX
       Same = 1,
     };
 
+    struct DEVICECONTEXT
+    {
+    private:
+    public:
+      ID3D11DeviceContext*    pContext = NULL;
+      RenderTargetImpl*       pRenderTarget = NULL;
+      Shader*                 pShader = NULL;
+      TexBaseImpl*            pTextures[MAX_TEXTURE_STAGE] = { NULL };
+      CanvasCore*             pCanvasCore = NULL;
+      
+      BlendStateImpl*         pBlendState = NULL;
+      SamplerStateImpl*       pSamplerState = NULL;
+      RasterizerStateImpl*    pRasterizerState = NULL;
+      DepthStencilStateImpl*  pDepthStencilState = NULL;
+
+      D3D_PRIMITIVE_TOPOLOGY  eTopology = D3D_PRIMITIVE_TOPOLOGY_UNDEFINED;
+      VertexDeclImpl*         pVertexDecl = NULL;
+      Primitive*              pPrimitive = NULL;
+
+      // State Object - 状态对象
+      ID3D11RenderTargetView* pD3D11RenderTargetView = NULL;
+      ID3D11DepthStencilView* pD3D11DepthStencilView = NULL;
+
+    public:
+      inline ID3D11DeviceContext* D3DGetDeviceContext ()
+      {
+        return pContext;
+      }
+    };
+
     class GraphicsImpl : public GraphicsBaseImpl
     {
       //friend class GPrimImpl;
@@ -132,16 +162,12 @@ namespace GrapX
       Shader*                 m_pBasicShader;
       Effect*                 m_pBasicEffect;
 
-      // State define - 状态定义
-      D3D_PRIMITIVE_TOPOLOGY  m_eCurTopology;
 
-      // State Object - 状态对象
-      ID3D11RenderTargetView* m_pCurRenderTargetView;
-      ID3D11DepthStencilView* m_pCurDepthStencilView;
       ID3D11InputLayout*      m_pVertexLayout;
       GXDWORD                 m_dwBackBufferStencil;  // m_pDeviceOriginTex 使用的模板 [1, 255]
 
       GXINT                   m_nGraphicsCount;
+      DWORD                   m_idCreationThread = 0;   // 创建时所在线程
       DWORD                   m_dwThreadId; // 用来检测Begin()和End()是否调用自同一个线程
     };
 

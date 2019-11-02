@@ -328,7 +328,7 @@ namespace GrapX
           IntClear(&rcClip, 1, dwFlags, 0xff0000ff, 0, 0); // 防止stencil值重复, 先清零
           IntClear(lpRects, nRectCount, dwFlags, 0xff00ff00, 0, m_dwStencil);
 
-          m_pCanvasStencil[1]->SetStencilRef(m_dwStencil);
+          m_pCanvasStencil[1]->SetStencilRef(this, m_dwStencil);
           m_pGraphics->InlSetDepthStencilState(m_pCanvasStencil[1]);
         }
         IntUpdateClip(rcClip);
@@ -482,16 +482,16 @@ namespace GrapX
     {
       // 确保全是预知状态
       ASSERT(m_pGraphics->IsActiveCanvas(this));
-      ASSERT(m_pGraphics->m_pCurShader == m_CurrentEffect.pEffectImpl->GetShaderUnsafe());
-      ASSERT(m_pGraphics->m_pCurPrimitive == m_pPrimitive);
-      ASSERT(m_pGraphics->m_pCurBlendState == m_pBlendStateImpl);
+      ASSERT(m_pGraphics->m_CurState.pShader == m_CurrentEffect.pEffectImpl->GetShaderUnsafe());
+      ASSERT(m_pGraphics->m_CurState.pPrimitive == m_pPrimitive);
+      ASSERT(m_pGraphics->m_CurState.pBlendState == m_pBlendStateImpl);
       ASSERT(
-        (m_pClipRegion == NULL && m_pGraphics->m_pCurDepthStencilState == m_pCanvasStencil[0]) ||
-        (m_pClipRegion != NULL && m_pGraphics->m_pCurDepthStencilState == m_pCanvasStencil[1]) ||
-        (m_pClipRegion != NULL && m_pGraphics->m_pCurDepthStencilState == m_pCanvasStencil[0]) ); // UpdateStencil 中间状态
+        (m_pClipRegion == NULL && m_pGraphics->m_CurState.pDepthStencilState == m_pCanvasStencil[0]) ||
+        (m_pClipRegion != NULL && m_pGraphics->m_CurState.pDepthStencilState == m_pCanvasStencil[1]) ||
+        (m_pClipRegion != NULL && m_pGraphics->m_CurState.pDepthStencilState == m_pCanvasStencil[0]) ); // UpdateStencil 中间状态
       
       m_pGraphics->IntSetEffect(m_ClearEffect.pEffectImpl);
-      m_pWriteStencil->SetStencilRef(dwStencil);
+      m_pWriteStencil->SetStencilRef(this, dwStencil);
       m_pGraphics->InlSetDepthStencilState(m_pWriteStencil);
       m_pGraphics->InlSetBlendState(TEST_FLAG(dwFlags, GXCLEAR_TARGET) ? m_pOMOpaque : m_pOMNoColor);
 

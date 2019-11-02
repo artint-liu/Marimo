@@ -22,6 +22,7 @@
 #include "Platform/Win32_D3D11/GXGraphicsImpl_D3D11.h"
 #include "User/GrapX.Hxx"
 #include "GrapX/gxError.h"
+#include "grapX/GXCanvas.h"
 
 #ifdef ENABLE_GRAPHICS_API_DX11
 namespace GrapX
@@ -157,17 +158,17 @@ namespace GrapX
       return TRUE;
     }
 
-    GXBOOL RasterizerStateImpl::Activate(GXUINT slot, RasterizerStateImpl* pPrevState)
+    GXBOOL RasterizerStateImpl::Activate(DEVICECONTEXT* pContext, GXUINT slot, RasterizerStateImpl* pPrevState)
     {
       ASSERT(slot == 0);
       ASSERT(m_pGraphicsImpl->InlIsActiveRasterizerState(this));
-      InlSetRasterizerState();
+      InlSetRasterizerState(pContext);
       return TRUE;
     }
 
-    inline void RasterizerStateImpl::InlSetRasterizerState()
+    inline void RasterizerStateImpl::InlSetRasterizerState(DEVICECONTEXT* pContext)
     {
-      ID3D11DeviceContext* pd3dContext = m_pGraphicsImpl->D3DGetDeviceContext();
+      ID3D11DeviceContext* pd3dContext = pContext->D3DGetDeviceContext();
       //GXColor crBlendFactor = m_BlendFactor;
       pd3dContext->RSSetState(m_pRasterizerState);
     }
@@ -260,29 +261,29 @@ namespace GrapX
       return TRUE;
     }
 
-    void BlendStateImpl::InlSetBlendState()
+    void BlendStateImpl::InlSetBlendState(ID3D11DeviceContext* pd3dContext)
     {
-      ID3D11DeviceContext* pd3dContext = m_pGraphicsImpl->D3DGetDeviceContext();
+      //ID3D11DeviceContext* pd3dContext = pContext->D3DGetDeviceContext();
       GXColor crBlendFactor = m_BlendFactor;
       pd3dContext->OMSetBlendState(m_pBlendState, (float*)&crBlendFactor, 0xffffffff);
     }
 
-    GXBOOL BlendStateImpl::Activate(GXUINT slot, BlendStateImpl* pPrevState)
+    GXBOOL BlendStateImpl::Activate(DEVICECONTEXT* pContext, GXUINT slot, BlendStateImpl* pPrevState)
     {
       ASSERT(slot == 0);
       ASSERT(m_pGraphicsImpl->InlIsActiveBlendState(this));
-      InlSetBlendState();
+      InlSetBlendState(pContext->D3DGetDeviceContext());
       return TRUE;
     }
 
-    GXDWORD BlendStateImpl::SetBlendFactor(GXDWORD dwBlendFactor)
+    GXDWORD BlendStateImpl::SetBlendFactor(CanvasCore* pCanvasCore, GXDWORD dwBlendFactor)
     {
       const GXDWORD dwPrevFactor = m_BlendFactor;
       m_BlendFactor = dwBlendFactor;
 
       if(m_pGraphicsImpl->InlIsActiveBlendState(this))
       {
-        InlSetBlendState();
+        InlSetBlendState(static_cast<GraphicsImpl*>(pCanvasCore->GetGraphicsUnsafe())->D3DGetDeviceContext());
       }
       return dwPrevFactor;
     }
@@ -340,22 +341,36 @@ namespace GrapX
       return SUCCEEDED(hval);
     }
 
-    GXBOOL DepthStencilStateImpl::Activate(GXUINT slot, DepthStencilStateImpl* pPrevState)
+    GXBOOL DepthStencilStateImpl::Activate(DEVICECONTEXT* pContext, GXUINT slot, DepthStencilStateImpl* pPrevState)
     {
       ASSERT(slot == 0);
-      ID3D11DeviceContext* const pImmediateContext = m_pGraphicsImpl->D3DGetDeviceContext();
+      ID3D11DeviceContext* const pImmediateContext = pContext->D3DGetDeviceContext();
       pImmediateContext->OMSetDepthStencilState(m_pDepthStencilState, m_StencilRef);
       return TRUE;
     }
 
-    GXDWORD DepthStencilStateImpl::SetStencilRef(GXDWORD dwStencilRef)
+    GXDWORD DepthStencilStateImpl::SetStencilRef(CanvasCore* pCanvasCore, GXDWORD dwStencilRef)
+    {
+      //const GXDWORD dwPrevStencilReft = m_StencilRef;
+      //m_StencilRef = dwStencilRef;
+      //if(m_pGraphicsImpl->InlIsActiveDepthStencilState(this))
+      //{
+      //  ID3D11DeviceContext* const pImmediateContext = static_cast<GraphicsImpl*>(pCanvasCore->GetGraphicsUnsafe())->D3DGetDeviceContext();
+      //  pImmediateContext->OMSetDepthStencilState(m_pDepthStencilState, m_StencilRef);
+      //}
+      //return dwPrevStencilReft;
+      ID3D11DeviceContext* const pd3dContext = static_cast<GraphicsImpl*>(pCanvasCore->GetGraphicsUnsafe())->D3DGetDeviceContext();
+      return SetStencilRef(pd3dContext, dwStencilRef);
+    }
+
+    GXDWORD DepthStencilStateImpl::SetStencilRef(ID3D11DeviceContext* pd3dContext, GXDWORD dwStencilRef)
     {
       const GXDWORD dwPrevStencilReft = m_StencilRef;
       m_StencilRef = dwStencilRef;
-      if(m_pGraphicsImpl->InlIsActiveDepthStencilState(this))
+      if (m_pGraphicsImpl->InlIsActiveDepthStencilState(this))
       {
-        ID3D11DeviceContext* const pImmediateContext = m_pGraphicsImpl->D3DGetDeviceContext();
-        pImmediateContext->OMSetDepthStencilState(m_pDepthStencilState, m_StencilRef);
+        //ID3D11DeviceContext* const pImmediateContext = static_cast<GraphicsImpl*>(pCanvasCore->GetGraphicsUnsafe())->D3DGetDeviceContext();
+        pd3dContext->OMSetDepthStencilState(m_pDepthStencilState, m_StencilRef);
       }
       return dwPrevStencilReft;
     }
@@ -390,7 +405,7 @@ namespace GrapX
 #endif // #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
 
   
-    SamplerStateImpl::SamplerStateImpl(GrapX::Graphics* pGraphics)
+    SamplerStateImpl::SamplerStateImpl(Graphics* pGraphics)
       : SamplerState   ()
       , m_pGraphicsImpl (static_cast<GraphicsImpl*>(pGraphics))
       , m_pD3D11SamplerState(NULL)
@@ -409,11 +424,11 @@ namespace GrapX
     }
 
 
-    GXBOOL SamplerStateImpl::Activate(GXUINT slot, SamplerStateImpl* pPrevSamplerState)
+    GXBOOL SamplerStateImpl::Activate(DEVICECONTEXT* pContext, GXUINT slot, SamplerStateImpl* pPrevSamplerState)
     {
       ASSERT(m_pGraphicsImpl->InlIsActiveSamplerState(this)); // 确定已经放置到Graphics上
 
-      ID3D11DeviceContext* const pd3dDeviceContext = m_pGraphicsImpl->D3DGetDeviceContext();
+      ID3D11DeviceContext* const pd3dDeviceContext = pContext->D3DGetDeviceContext();
       pd3dDeviceContext->PSSetSamplers(slot, 1, &m_pD3D11SamplerState);
       return TRUE;
     }

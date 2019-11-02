@@ -24,6 +24,7 @@ namespace GrapX
   {
     class GraphicsImpl;
     class SamplerStateImpl;
+    struct DEVICECONTEXT;
 
     class RasterizerStateImpl : public RasterizerState
     {
@@ -42,8 +43,8 @@ namespace GrapX
     public:
       RasterizerStateImpl(GraphicsImpl* pGraphicsImpl);
       GXBOOL  Initialize  (GXRASTERIZERDESC* pDesc);
-      GXBOOL  Activate    (GXUINT slot, RasterizerStateImpl* pPrevState);
-      inline  void    InlSetRasterizerState();
+      GXBOOL  Activate    (DEVICECONTEXT* pContext, GXUINT slot, RasterizerStateImpl* pPrevState);
+      inline  void    InlSetRasterizerState(DEVICECONTEXT* pContext);
     };
 
     class BlendStateImpl : public BlendState
@@ -65,11 +66,11 @@ namespace GrapX
     public:
       BlendStateImpl(GraphicsImpl* pGraphicsImpl);
       GXBOOL  Initialize  (GXBLENDDESC* pDesc, GXUINT nNum);
-      GXBOOL  Activate    (GXUINT slot, BlendStateImpl* pPrevState);
+      GXBOOL  Activate    (DEVICECONTEXT* pContext, GXUINT slot, BlendStateImpl* pPrevState);
 
-      virtual GXDWORD SetBlendFactor  (GXDWORD dwBlendFactor);
+      GXDWORD SetBlendFactor  (CanvasCore* pCanvasCore, GXDWORD dwBlendFactor) override;
 
-      inline  void    InlSetBlendState();
+      inline  void    InlSetBlendState(ID3D11DeviceContext* pd3dContext);
     };
     //////////////////////////////////////////////////////////////////////////
     class DepthStencilStateImpl : public DepthStencilState
@@ -93,9 +94,10 @@ namespace GrapX
     public:
       DepthStencilStateImpl(GraphicsImpl* pGraphicsImpl);
       GXBOOL  Initialize  (GXDEPTHSTENCILDESC* pDesc);
-      GXBOOL  Activate    (GXUINT slot, DepthStencilStateImpl* pPrevState);
+      GXBOOL  Activate    (DEVICECONTEXT* pContext, GXUINT slot, DepthStencilStateImpl* pPrevState);
 
-      virtual GXDWORD SetStencilRef  (GXDWORD dwStencilRef);
+      GXDWORD SetStencilRef  (CanvasCore* pCanvasCore, GXDWORD dwStencilRef) override;
+      GXDWORD SetStencilRef  (ID3D11DeviceContext* pd3dContext, GXDWORD dwStencilRef);
     };
     //////////////////////////////////////////////////////////////////////////
     class SamplerStateImpl : public SamplerState
@@ -107,11 +109,11 @@ namespace GrapX
       ID3D11SamplerState*   m_pD3D11SamplerState;
       GXSAMPLERDESC         m_SamplerDesc;
 
-    private:
+    protected:
       SamplerStateImpl(Graphics* pGraphics);
       virtual ~SamplerStateImpl();
       GXBOOL            Initialize        (const GXSAMPLERDESC* pDesc);
-      GXBOOL            Activate          (GXUINT slot, SamplerStateImpl* pPrevSamplerState);  // 这个只能被Graphics调用!
+      GXBOOL            Activate          (DEVICECONTEXT* pContext, GXUINT slot, SamplerStateImpl* pPrevSamplerState);  // 这个只能被Graphics调用!
 
     public:
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE

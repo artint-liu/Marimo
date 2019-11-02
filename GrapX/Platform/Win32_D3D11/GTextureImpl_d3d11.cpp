@@ -109,7 +109,7 @@ namespace GrapX
       SAFE_DELETE_ARRAY(m_pTextureData);
     }
 
-    GXBOOL TextureImpl::InitTexture(GXBOOL bRenderTarget, GXLPCVOID pInitData, GXUINT nPitch)
+    GXBOOL TextureImpl::Initialize(GXBOOL bRenderTarget, GXLPCVOID pInitData, GXUINT nPitch)
     {
       const GXUINT nMinPitch = GetMinPitchSize();
       nPitch = clMax(nPitch, nMinPitch);
@@ -632,7 +632,7 @@ namespace GrapX
       }
       else
       {
-        if(_CL_NOT_(TextureImpl::InitTexture(TRUE, NULL, 0))) {
+        if(_CL_NOT_(TextureImpl::Initialize(TRUE, NULL, 0))) {
           return FALSE;
         }
       }
@@ -726,7 +726,7 @@ namespace GrapX
 
     GXBOOL TextureImpl_DepthStencil::InitDepthStencil()
     {
-      if(_CL_NOT_(TextureImpl::InitTexture(FALSE, NULL, 0))) {
+      if(_CL_NOT_(TextureImpl::Initialize(FALSE, NULL, 0))) {
         return FALSE;
       }
 

@@ -16,19 +16,19 @@
   MaterialImpl::InitializeMtlStateDict();
   //IntCreateRenderState(&m_pCurRenderState);
 
-  ASSERT(m_pCurRasterizerState == NULL);
+  ASSERT(m_CurState.pRasterizerState == NULL);
   ASSERT(m_pDefaultBlendState == NULL);
   ASSERT(m_pDefaultDepthStencilState == NULL);
-  ASSERT(m_pCurBlendState == NULL);
-  ASSERT(m_pCurDepthStencilState == NULL);
+  ASSERT(m_CurState.pBlendState == NULL);
+  ASSERT(m_CurState.pDepthStencilState == NULL);
 
   // Rasterizer State
   GXRASTERIZERDESC RasterizerDesc;
   if(GXFAILED(CreateRasterizerState((RasterizerState**)&m_pDefaultRasterizerState, &RasterizerDesc))) {
     CLOG_ERROR("%s : Create rasterizer state error.\n", __FUNCTION__);
   }
-  m_pCurRasterizerState = m_pDefaultRasterizerState;
-  m_pCurRasterizerState->AddRef();
+  m_CurState.pRasterizerState = m_pDefaultRasterizerState;
+  m_CurState.pRasterizerState->AddRef();
   // --Rasterizer State
 
   // Blend State
@@ -36,21 +36,21 @@
   if(GXFAILED(CreateBlendState((BlendState**)&m_pDefaultBlendState, &BlendDesc, 1))) {
     CLOG_ERROR("%s : Create default blend state error.\n", __FUNCTION__);
   }
-  m_pCurBlendState = m_pDefaultBlendState;
-  m_pCurBlendState->AddRef();
+  m_CurState.pBlendState = m_pDefaultBlendState;
+  m_CurState.pBlendState->AddRef();
   // --Blend State
 
   GXDEPTHSTENCILDESC DepthStencilDesc(TRUE, FALSE);
   if(GXFAILED(CreateDepthStencilState((DepthStencilState**)&m_pDefaultDepthStencilState, &DepthStencilDesc))) {
     CLOG_ERROR("%s : Create depth stencil state error.\n", __FUNCTION__);
   }
-  m_pCurDepthStencilState = m_pDefaultDepthStencilState;
-  m_pCurDepthStencilState->AddRef();
+  m_CurState.pDepthStencilState = m_pDefaultDepthStencilState;
+  m_CurState.pDepthStencilState->AddRef();
 
   GXSamplerDesc sampler_desc;
   IntCreateSamplerState(&m_pDefaultSamplerState, sampler_desc);
-  m_pCurSamplerState = m_pDefaultSamplerState;
-  m_pCurSamplerState->AddRef();
+  m_CurState.pSamplerState = m_pDefaultSamplerState;
+  m_CurState.pSamplerState->AddRef();
 
 
   //CreateTexture(&m_pBackBufferTex, NULL, TEXSIZE_SAME, TEXSIZE_SAME, 1, GXFMT_A8R8G8B8, GXRU_TEX_RENDERTARGET);
@@ -80,10 +80,10 @@ GXBOOL GraphicsImpl::ReleaseCommon()
   SAFE_RELEASE(m_pDefaultDepthStencilState);
   SAFE_RELEASE(m_pDefaultSamplerState);
 
-  SAFE_RELEASE(m_pCurRasterizerState);
-  SAFE_RELEASE(m_pCurBlendState);
-  SAFE_RELEASE(m_pCurDepthStencilState);
-  SAFE_RELEASE(m_pCurSamplerState);
+  SAFE_RELEASE(m_CurState.pRasterizerState);
+  SAFE_RELEASE(m_CurState.pBlendState);
+  SAFE_RELEASE(m_CurState.pDepthStencilState);
+  SAFE_RELEASE(m_CurState.pSamplerState);
 
   SAFE_DELETE(m_pShaderConstName);
   SAFE_RELEASE(m_pWhiteTexture8x8);
@@ -164,48 +164,56 @@ GXBOOL GraphicsImpl::ConvertToRelativePathA(clStringA& strFilename)
 
 GXHRESULT GraphicsImpl::IntCreateRasterizerState(RasterizerStateImpl** ppRasterizerState, GXRASTERIZERDESC* pRazDesc)
 {
-  RasterizerStateImpl* pRasterizerState = new RasterizerStateImpl(this);
-  if(! InlCheckNewAndIncReference(pRasterizerState)) {
-    return GX_FAIL;
-  }
-  if( ! pRasterizerState->Initialize(pRazDesc))
-  {
-    pRasterizerState->Release();
-    pRasterizerState = NULL;
-    return GX_FAIL;
-  }
+  //RasterizerStateImpl* pRasterizerState = new RasterizerStateImpl();
+  //if(! InlCheckNewAndIncReference(pRasterizerState)) {
+  //  return GX_FAIL;
+  //}
+  //if( ! pRasterizerState->Initialize(pRazDesc))
+  //{
+  //  pRasterizerState->Release();
+  //  pRasterizerState = NULL;
+  //  return GX_FAIL;
+  //}
+  RasterizerStateImpl* pRasterizerState = InitResourceT(NewResourceT<RasterizerStateImpl>(this), pRazDesc);
   *ppRasterizerState = pRasterizerState;
-  return GX_OK;
+  return pRasterizerState ? GX_OK : GX_FAIL;
 }
 
 GXHRESULT GraphicsImpl::IntCreateBlendState(BlendStateImpl** ppBlendState, GXBLENDDESC* pState, GXUINT nNum)
 {
-  BlendStateImpl* pBlendState = new BlendStateImpl(this);
-  if(pBlendState != NULL)
-  {
-    pBlendState->AddRef();
-    if(pBlendState->Initialize(pState, nNum)) {
-      *ppBlendState = pBlendState;
-      return GX_OK;
-    }
-    SAFE_RELEASE(pBlendState);
-  }
-  return GX_FAIL;
+  //BlendStateImpl* pBlendState = new BlendStateImpl(this);
+  //if(pBlendState != NULL)
+  //{
+  //  pBlendState->AddRef();
+  //  if(pBlendState->Initialize(pState, nNum)) {
+  //    *ppBlendState = pBlendState;
+  //    return GX_OK;
+  //  }
+  //  SAFE_RELEASE(pBlendState);
+  //}
+  //return GX_FAIL;
+  BlendStateImpl* pBlendState = InitResourceT(NewResourceT<BlendStateImpl>(this), pState, nNum);
+  *ppBlendState = pBlendState;
+  return pBlendState ? GX_OK : GX_FAIL;
 }
 
 GXHRESULT GraphicsImpl::IntCreateDepthStencilState(DepthStencilStateImpl** ppDepthStencilState, GXDEPTHSTENCILDESC* pState)
 {
-  DepthStencilStateImpl* pDepthStencilState = new DepthStencilStateImpl(this);
-  if(pDepthStencilState != NULL)
-  {
-    pDepthStencilState->AddRef();
-    if(pDepthStencilState->Initialize(pState)) {
-      *ppDepthStencilState = pDepthStencilState;
-      return GX_OK;
-    }
-    SAFE_RELEASE(pDepthStencilState);
-  }
-  return GX_FAIL;
+  //DepthStencilStateImpl* pDepthStencilState = new DepthStencilStateImpl(this);
+  //if(pDepthStencilState != NULL)
+  //{
+  //  pDepthStencilState->AddRef();
+  //  if(pDepthStencilState->Initialize(pState)) {
+  //    *ppDepthStencilState = pDepthStencilState;
+  //    return GX_OK;
+  //  }
+  //  SAFE_RELEASE(pDepthStencilState);
+  //}
+  //return GX_FAIL;
+
+  DepthStencilStateImpl* pDepthStencilState = InitResourceT(NewResourceT<DepthStencilStateImpl>(this), pState);
+  *ppDepthStencilState = pDepthStencilState;
+  return pDepthStencilState ? GX_OK : GX_FAIL;
 }
 
 GXHRESULT GraphicsImpl::CreateRasterizerState(RasterizerState** ppRasterizerState, GXRASTERIZERDESC* pRazDesc)
@@ -648,78 +656,6 @@ GXFont* GraphicsImpl::CreateFont(const GXULONG nWidth, const GXULONG nHeight, GX
 #include "Canvas/GXCanvas3DImpl.h"
 #include "Canvas/GXCanvas3DImpl.inl"
 
-GXBOOL GraphicsImpl::CreateCanvas3D(Canvas3D** ppCanvas3D, RenderTarget** pTargetArray, GXUINT nCount, LPCREGN lpRegn, float fNear, float fFar)
-{
-  GXREGN    regn = 0;
-  //GXHRESULT hval = GX_OK;
-  GXBOOL bret = TRUE;
-  GXLPCSTR  c_szError_NoSameSize = __FUNCTION__": Image and DepthStencil-texture must be in same size.\n";
-
-  if(nCount > 1)
-  {
-    for(size_t i = 0; i < nCount; i++)
-    {
-      if(pTargetArray[i] == NULL) {
-        CLOG_ERROR("%s(%d): 默认缓冲不能与离屏缓冲混用", __FUNCTION__, __LINE__);
-        return FALSE;
-      }
-    }
-  }
-
-  // 获得 Image 的尺寸, 如果是 NULL 则取后台缓冲的尺寸
-  if(pTargetArray && nCount > 0 && pTargetArray[0]) {
-    GXSIZE sDimension;
-    pTargetArray[0]->GetDimension(&sDimension);
-    regn.width  = sDimension.cx;
-    regn.height = sDimension.cy;
-
-    for(size_t i = 1; i < nCount; i++)
-    {
-      pTargetArray[i]->GetDimension(&sDimension);
-      if(regn.width != sDimension.cx || regn.height != sDimension.cy) {
-        CLOG_ERROR("%s(%d): 多缓冲目标的尺寸不一致", __FUNCTION__, __LINE__);
-        return FALSE;
-      }
-    }
-  }
-  else// if(pImage == NULL && pDepthStencil == NULL) 
-  {
-    GXGRAPHICSDEVICE_DESC Desc;
-    GetDesc(&Desc);
-    regn.width  = Desc.BackBufferWidth;
-    regn.height = Desc.BackBufferHeight;
-    //pTarget = m_pBackBufferRenderTarget;
-    pTargetArray = NULL;
-    nCount = 0;
-  }
-  //else
-  //{
-  //  //(pImage == NULL && pDepthStencil != NULL) ||
-  //  //(pImage != NULL && pDepthStencil == NULL)
-  //  CLOG_ERROR(MOERROR_FMT_INVALIDPARAM, __FUNCTION__);
-  //  return GX_FAIL;
-  //}
-
-  if(lpRegn != NULL) {
-    regn = *lpRegn;
-  }
-
-  Canvas3DImpl* pCanvas3D = new Canvas3DImpl(this);
-  if( ! InlCheckNewAndIncReference(pCanvas3D)) {
-    return GX_FAIL;
-  }
-
-  GXVIEWPORT Viewport(&regn, fNear, fFar);
-  if( ! pCanvas3D->Initialize(pTargetArray, nCount, &Viewport))
-  {
-    pCanvas3D->Release();
-    pCanvas3D = NULL;
-    bret = FALSE;
-  }
-  *ppCanvas3D = pCanvas3D;
-  return bret;
-}
-
 GXBOOL GraphicsImpl::CreateCanvas3D(Canvas3D** ppCanvas3D, RenderTarget* pTarget, LPCREGN lpRegn, float fNear, float fFar)
 {
   return CreateCanvas3D(ppCanvas3D, &pTarget, 1, lpRegn, fNear, fFar);
@@ -765,17 +701,20 @@ GXHRESULT GraphicsImpl::IntCreateSamplerState(SamplerStateImpl** ppSamplerState,
     return hr;
   }
 
-  SamplerStateImpl* pSampleStateImpl = new SamplerStateImpl(this);
-  if(InlCheckNewAndIncReference(pSampleStateImpl)) {
-    if(pSampleStateImpl->Initialize(pDesc)) {
-      *ppSamplerState = pSampleStateImpl;
-      RegisterResource(pSampleStateImpl, &ResFeatDesc);
-      return GX_OK;
-    }
-  }
+  //SamplerStateImpl* pSampleStateImpl = new SamplerStateImpl(this);
+  //if(InlCheckNewAndIncReference(pSampleStateImpl)) {
+  //  if(pSampleStateImpl->Initialize(pDesc)) {
+  //    *ppSamplerState = pSampleStateImpl;
+  //    RegisterResource(pSampleStateImpl, &ResFeatDesc);
+  //    return GX_OK;
+  //  }
+  //}
 
-  SAFE_RELEASE(pSampleStateImpl);
-  return GX_FAIL;
+  //SAFE_RELEASE(pSampleStateImpl);
+
+  SamplerStateImpl* pSamplerStateImpl = InitResourceT(NewResourceT<SamplerStateImpl>(this), pDesc);
+  *ppSamplerState = pSamplerStateImpl;
+  return pSamplerStateImpl ? GX_OK : GX_FAIL;
 }
 
 void GraphicsImpl::IntAttachComposerSdrDesc(MOSHADER_ELEMENT_SOURCE* pSdrElementSrc)

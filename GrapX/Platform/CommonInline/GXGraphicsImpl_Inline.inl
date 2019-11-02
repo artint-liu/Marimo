@@ -62,20 +62,20 @@ GXBOOL GraphicsImpl::InlSetRenderTarget(GTexture* pTexture, GXDWORD uRenderTarge
 #if defined(_GXGRAPHICS_INLINE_CANVAS_D3D9_) || defined(_GXGRAPHICS_INLINE_CANVAS_D3D11_) || defined(_GXGRAPHICS_INLINE_CANVAS_GLES2_)
 GXHRESULT GraphicsImpl::InlSetCanvas(CanvasCore *pCanvasCore)
 {
-  if(m_pCurCanvasCore == (CanvasCore*)pCanvasCore) {
+  if(m_CurState.pCanvasCore == (CanvasCore*)pCanvasCore) {
     return GX_OK;
   }
 
   // 释放上一个对象
-  SAFE_RELEASE(m_pCurCanvasCore);
+  SAFE_RELEASE(m_CurState.pCanvasCore);
 
   // 引用这个对象
   GXHRESULT hr = 0;
-  m_pCurCanvasCore = (CanvasCore*)pCanvasCore;
+  m_CurState.pCanvasCore = (CanvasCore*)pCanvasCore;
   if(pCanvasCore != NULL)
   {
     ASSERT(TEST_FLAG(m_dwFlags, F_ACTIVATE) != 0);
-    hr = m_pCurCanvasCore->AddRef();
+    hr = m_CurState.pCanvasCore->AddRef();
     if(pCanvasCore->GetType() == ResourceType::Canvas3D)
     {
       Canvas3DImpl* pCanvas3DImpl = reinterpret_cast<Canvas3DImpl*>(pCanvasCore);
@@ -84,7 +84,7 @@ GXHRESULT GraphicsImpl::InlSetCanvas(CanvasCore *pCanvasCore)
     else
     {
       RenderTarget* pTarget = pCanvasCore->GetTargetUnsafe();
-      if(m_pCurRenderTarget != pTarget) {
+      if(m_CurState.pRenderTarget != pTarget) {
         InlSetRenderTarget(pTarget, 0);
       }
     }
@@ -107,52 +107,22 @@ GXBOOL GraphicsImpl::InlSetTexture(GTexBaseImpl* pTexture, GXUINT uStage)
   }
 #endif // #ifdef _DEBUG
 
-  if(pTexture == m_pCurTexture[uStage])
+  if(pTexture == pTexture[uStage])
     return TRUE;
 
-  SAFE_RELEASE(m_pCurTexture[uStage]);
-  m_pCurTexture[uStage] = pTexture;
+  SAFE_RELEASE(pTexture[uStage]);
+  pTexture[uStage] = pTexture;
 
-  if(m_pCurTexture[uStage] == NULL)
+  if(pTexture[uStage] == NULL)
   {
     m_pd3dDevice->SetTexture(uStage, NULL);
     return TRUE;
   }
-  m_pCurTexture[uStage]->AddRef();
+  pTexture[uStage]->AddRef();
   m_pd3dDevice->SetTexture(uStage, pTexture->D3DTexture());
   return TRUE;
 }
 #endif // _GXGRAPHICS_INLINE_TEXTURE_
-
-//#ifdef _GXGRAPHICS_INLINE_TEXTURE_D3D11_
-//GXBOOL GraphicsImpl::InlSetTexture(TexBaseImpl* pTexture, GXUINT uStage)
-//{
-//#ifdef _DEBUG
-//  if(uStage >= MAX_TEXTURE_STAGE) {
-//    TRACE("Error: Stage out of range.\n");
-//    return FALSE;
-//  }
-//#endif // #ifdef _DEBUG
-//
-//  if(pTexture == m_pCurTexture[uStage])
-//    return TRUE;
-//
-//  SAFE_RELEASE(m_pCurTexture[uStage]);
-//  m_pCurTexture[uStage] = pTexture;
-//
-//  if(m_pCurTexture[uStage] == NULL)
-//  {
-//    //m_pImmediateContext->PSSetShaderResources(uStage, 1, );
-//    //m_pd3dDevice->SetTexture(uStage, NULL);
-//    return TRUE;
-//  }
-//  m_pCurTexture[uStage]->AddRef();
-//  //m_pd3dDevice->SetTexture(uStage, pTexture->D3DTexture());
-//  ASSERT(pTexture->D3DResourceView());
-//  m_pImmediateContext->PSSetShaderResources(uStage, 1, &pTexture->D3DResourceView());
-//  return TRUE;
-//}
-//#endif // #ifdef _GXGRAPHICS_INLINE_TEXTURE_D3D11_
 
 #ifdef _GXGRAPHICS_INLINE_SHADER_D3D9_
 GXBOOL GraphicsImpl::InlSetShader(GShader* pShader)
@@ -218,17 +188,16 @@ GXHRESULT GraphicsImpl::InlSetVertexDecl(VertexDeclImpl* pVertexDecl)
 #ifdef _GXGRAPHICS_INLINE_SET_VERTEX_DECLARATION_D3D11_
 GXHRESULT GraphicsImpl::InlSetVertexDecl(VertexDeclImpl* pVertexDecl)
 {
-  if(m_pCurVertexDecl == pVertexDecl) {
+  if(m_CurState.pVertexDecl == pVertexDecl) {
     return GX_OK;
   }
 
-  SAFE_RELEASE(m_pCurVertexDecl);
+  SAFE_RELEASE(m_CurState.pVertexDecl);
   SAFE_RELEASE(m_pVertexLayout);
 
-  m_pCurVertexDecl = pVertexDecl;
-  if(m_pCurVertexDecl != NULL) {
-    m_pCurVertexDecl->AddRef();
-    //return m_pCurVertexDecl->Activate();
+  m_CurState.pVertexDecl = pVertexDecl;
+  if(m_CurState.pVertexDecl != NULL) {
+    m_CurState.pVertexDecl->AddRef();
   }
   return GX_OK;
 }
@@ -362,7 +331,7 @@ inline GXBOOL GraphicsImpl::InlSetStateT(GXUINT slot, _TState*& pCurState, _TSta
   }
   _TState* pPrevState = pCurState;
   pCurState = pState;
-  if(pCurState->Activate(slot, pPrevState)) // slot为了模板兼容，并不是所有对象都使用这个
+  if(pCurState->Activate(&m_CurState, slot, pPrevState)) // slot为了模板兼容，并不是所有对象都使用这个
   {
     SAFE_RELEASE(pPrevState);
     pCurState->AddRef();
@@ -377,21 +346,7 @@ inline GXBOOL GraphicsImpl::InlSetStateT(GXUINT slot, _TState*& pCurState, _TSta
 #ifdef _GXGRAPHICS_INLINE_SET_RASTERIZER_STATE_
 inline GXBOOL GraphicsImpl::InlSetRasterizerState(RasterizerStateImpl* pRasterizerState)
 {
-  return InlSetStateT<RasterizerStateImpl>(0, m_pCurRasterizerState, pRasterizerState);
-  //ASSERT(pRasterizerState);
-  //if(m_pCurRasterizerState == pRasterizerState) {
-  //  return TRUE;
-  //}
-  //GRasterizerStateImpl* pPrevRasterizerState = m_pCurRasterizerState;
-  //m_pCurRasterizerState = pRasterizerState;
-  //if(m_pCurRasterizerState->Activate(pPrevRasterizerState))
-  //{
-  //  SAFE_RELEASE(pPrevRasterizerState);
-  //  m_pCurRasterizerState->AddRef();
-  //  return TRUE;
-  //}
-  //m_pCurRasterizerState = pPrevRasterizerState;
-  //return FALSE;
+  return InlSetStateT<RasterizerStateImpl>(0, m_CurState.pRasterizerState, pRasterizerState);
 }
 #endif // #ifdef _GXGRAPHICS_INLINE_SET_RASTERIZER_STATE_
 
@@ -399,52 +354,14 @@ inline GXBOOL GraphicsImpl::InlSetRasterizerState(RasterizerStateImpl* pRasteriz
 // TODO: 这个可以和InlSetDepthStencilState合并为模板
 GXBOOL GraphicsImpl::InlSetBlendState(BlendStateImpl* pBlendState)
 {
-  return InlSetStateT(0, m_pCurBlendState, pBlendState);
-  //ASSERT(pBlendState != NULL); // 不能为空
-
-  //if(m_pCurBlendState == pBlendState) {
-  //  return TRUE;
-  //}
-
-  //GBlendStateImpl* pPrevState = m_pCurBlendState;
-  //m_pCurBlendState = pBlendState;
-
-  //if(m_pCurBlendState->Activate(pPrevState))
-  //{
-  //  SAFE_RELEASE(pPrevState);
-  //  m_pCurBlendState->AddRef();
-  //  return TRUE;
-  //}
-
-  //// 如果失败就换回来
-  //m_pCurBlendState = pPrevState;
-  //return FALSE;
+  return InlSetStateT(0, m_CurState.pBlendState, pBlendState);
 }
 #endif // #ifdef _GXGRAPHICS_INLINE_SET_BLEND_STATE_
 
 #ifdef _GXGRAPHICS_INLINE_SET_DEPTHSTENCIL_STATE_
 inline GXBOOL GraphicsImpl::InlSetDepthStencilState(DepthStencilStateImpl* pDepthStencilState)
 {
-  return InlSetStateT(0, m_pCurDepthStencilState, pDepthStencilState);
-  //ASSERT(pDepthStencilState != NULL); // 不能为空
-
-  //if(m_pCurDepthStencilState == pDepthStencilState) {
-  //  return TRUE;
-  //}
-
-  //GDepthStencilStateImpl* pPrevState = m_pCurDepthStencilState;
-  //m_pCurDepthStencilState = pDepthStencilState;
-
-  //if(m_pCurDepthStencilState->Activate(pPrevState))
-  //{
-  //  SAFE_RELEASE(pPrevState);
-  //  m_pCurDepthStencilState->AddRef();
-  //  return TRUE;
-  //}
-
-  //// 如果失败就换回来
-  //m_pCurDepthStencilState = pPrevState;
-  //return FALSE;
+  return InlSetStateT(0, m_CurState.pDepthStencilState, pDepthStencilState);
 }
 #endif // #ifdef _GXGRAPHICS_INLINE_SET_DEPTHSTENCIL_STATE_
 
@@ -452,53 +369,33 @@ inline GXBOOL GraphicsImpl::InlSetDepthStencilState(DepthStencilStateImpl* pDept
 #ifdef _GXGRAPHICS_INLINE_SET_SAMPLER_STATE_
 GXBOOL GraphicsImpl::InlSetSamplerState(GXUINT slot, SamplerStateImpl* pSamplerState)
 {
-  return InlSetStateT(slot, m_pCurSamplerState, pSamplerState);
-  //ASSERT(pSamplerState != NULL);
-
-  //if(pSamplerState == m_pCurSamplerState)
-  //  return TRUE;
-
-  //// 放置新的 SamplerState 到 Graphics 上
-  //GSamplerStateImpl* pPrevSamplerState = m_pCurSamplerState;
-  //m_pCurSamplerState = pSamplerState;
-
-  //if(pSamplerState->Activate(pPrevSamplerState) != FALSE)
-  //{
-  //  // 成功的话,释放之前的,对新的增加引用
-  //  SAFE_RELEASE(pPrevSamplerState);
-  //  m_pCurSamplerState->AddRef();
-  //  return TRUE;
-  //}
-
-  //// 如果失败就换回来
-  //m_pCurSamplerState = pPrevSamplerState;
-  //return FALSE;
+  return InlSetStateT(slot, m_CurState.pSamplerState, pSamplerState);
 }
 #endif // #ifdef _GXGRAPHICS_INLINE_SET_SAMPLER_STATE_
 
 inline GXBOOL GraphicsImpl::IsActiveCanvas(CanvasCore* pCanvasCore)
 {
-  return m_pCurCanvasCore == pCanvasCore;
+  return m_CurState.pCanvasCore == pCanvasCore;
 }
 
 inline GXBOOL GraphicsImpl::InlIsActiveSamplerState(SamplerStateImpl* pSamplerState)
 {
-  return m_pCurSamplerState == pSamplerState;
+  return m_CurState.pSamplerState == pSamplerState;
 }
 
 inline GXBOOL GraphicsImpl::InlIsActiveRasterizerState(RasterizerStateImpl* pRasterizerState)
 {
-  return m_pCurRasterizerState == pRasterizerState;
+  return m_CurState.pRasterizerState == pRasterizerState;
 }
 
 inline GXBOOL GraphicsImpl::InlIsActiveBlendState(BlendStateImpl* pBlendState)
 {
-  return m_pCurBlendState == pBlendState;
+  return m_CurState.pBlendState == pBlendState;
 }
 
 inline GXBOOL GraphicsImpl::InlIsActiveDepthStencilState(DepthStencilStateImpl* pDepthStencilState)
 {
-  return m_pCurDepthStencilState == pDepthStencilState;
+  return m_CurState.pDepthStencilState == pDepthStencilState;
 }
 
 //inline GXBOOL GXGraphicsImpl::IsActiveRenderState(GRenderStateImpl* pRenderState)

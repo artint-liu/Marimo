@@ -94,7 +94,7 @@ namespace GrapX
       TextureImpl(GrapX::Graphics* pGraphics, GXFormat eFormat, GXUINT nWidth, GXUINT nHeight, GXUINT nMipLevels, GXResUsage eResUsage);
       virtual ~TextureImpl();
 
-      GXBOOL InitTexture(GXBOOL bRenderTarget, GXLPCVOID pInitData, GXUINT nPitch);
+      GXBOOL Initialize(GXBOOL bRenderTarget, GXLPCVOID pInitData, GXUINT nPitch);
       //void   CalcTextureActualDimension();  // TODO: D3D9 也提出这个函数
       //GXBOOL           IntGetHelpTexture();
       //ID3D11Texture2D* IntCreateHelpTexture(int nWidth, int nHeight, GXLPVOID pData);

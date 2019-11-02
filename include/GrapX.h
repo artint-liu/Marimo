@@ -5245,6 +5245,39 @@ inline GXHRESULT InlGetSafeObjectT(_TInterface** ppInterface, _TInterface* pHold
   return pHolding->AddRef();
 }
 
+template<class _ObjTempl, typename... _params>
+_ObjTempl* NewResourceT(_params... args)
+{
+  class CWrapper : public _ObjTempl
+  {
+  public: CWrapper(_params... args) : _ObjTempl(args...) {}
+          virtual ~CWrapper(){}
+  };
+
+  CWrapper* pResource = new CWrapper(args...);
+  if (InlIsFailedToNewObject(pResource)) {
+    return NULL;
+  }
+  return static_cast<_ObjTempl*>(pResource);
+}
+
+template<class _ObjTempl, typename... _params>
+_ObjTempl* InitResourceT(_ObjTempl* pResource, _params... args)
+{
+  class CWrapper : public _ObjTempl
+  {
+  public: GXBOOL Initialize(_params... args) { return _ObjTempl::Initialize(args...); }
+  };
+
+  if (pResource && _CL_NOT_(static_cast<CWrapper*>(pResource)->Initialize(args...)))
+  {
+    pResource->Release();
+    return NULL;
+  }
+  return pResource;
+}
+
+
 
 // TODO: 是不是以后要加上"Gph"前缀呢?
 GXDLL GXINT         GetAdaptedSize        (GXINT nSize);

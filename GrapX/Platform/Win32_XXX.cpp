@@ -431,7 +431,7 @@ GXHRESULT IMOPlatform_Win32Base::QueryFeature(GXDWORD dwFeatureCode, GXVOID** pp
     }
     return GX_OK;
   case GXMAKEFOURCC('H','W','N','D'):
-    return (GXHRESULT)m_hWnd;
+    return (GXHRESULT)(size_t)m_hWnd;
   case GXMAKEFOURCC('L','O','G','R'):
     *ppUnknown = m_pLogger;
     if(m_pLogger) {
@@ -599,6 +599,9 @@ i32 GXUIMsgThread::StartRoutine()
   GrapX::Graphics* pGraphics = pApp->GetGraphicsUnsafe();
   GXLPSTATION lpStation = GXSTATION_PTR(GXUIGetStation());
 
+  GRESCRIPTDESC sScriptDesc = { "SetCurrentContext" };
+
+  pGraphics->Invoke(&sScriptDesc);
   pGraphics->Activate(TRUE);  // ¿ªÊ¼²¶»ñGraphics×´Ì¬
   GXHRESULT hval = pApp->OnCreate();
   if(GetWindowLong(lpStation->hBindWin32Wnd, GWL_STYLE) & WS_THICKFRAME)

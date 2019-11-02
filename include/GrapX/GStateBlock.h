@@ -3,6 +3,7 @@
 
 namespace GrapX
 {
+  class CanvasCore;
   class RasterizerState : public GResource
   {
   public:
@@ -13,7 +14,7 @@ namespace GrapX
   {
   public:
     BlendState() : GResource(0, ResourceType::BlendState) {}
-    GXSTDINTERFACE(GXDWORD SetBlendFactor  (GXDWORD dwBlendFactor));
+    GXSTDINTERFACE(GXDWORD SetBlendFactor  (CanvasCore* pCanvasCore, GXDWORD dwBlendFactor));
   };
 
   //////////////////////////////////////////////////////////////////////////
@@ -21,7 +22,7 @@ namespace GrapX
   {
   public:
     DepthStencilState() : GResource(0, ResourceType::DepthStencilState) {}
-    GXSTDINTERFACE(GXDWORD SetStencilRef  (GXDWORD dwStencilRef));
+    GXSTDINTERFACE(GXDWORD SetStencilRef  (CanvasCore* pCanvasCore, GXDWORD dwStencilRef));
   };
 
   //////////////////////////////////////////////////////////////////////////

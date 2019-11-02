@@ -214,18 +214,18 @@ private:  // 状态对象
   DepthStencilStateImpl*  m_pDefaultDepthStencilState;
   SamplerStateImpl*       m_pDefaultSamplerState;
 
-  Primitive*              m_pCurPrimitive;
-  TexBaseImpl*            m_pCurTexture[MAX_TEXTURE_STAGE];
-  RenderTargetImpl*       m_pCurRenderTarget;
-  //GTextureImpl*           m_pCurDepthStencil;
-  Shader*                 m_pCurShader;
-  CanvasCore*             m_pCurCanvasCore;
-  //GRenderStateImpl*       m_pCurRenderState;
-  RasterizerStateImpl*    m_pCurRasterizerState;
-  BlendStateImpl*         m_pCurBlendState;
-  DepthStencilStateImpl*  m_pCurDepthStencilState;
-  SamplerStateImpl*       m_pCurSamplerState;
-  VertexDeclImpl*         m_pCurVertexDecl;
+  DEVICECONTEXT           m_CurState;
+
+  //Primitive*              m_pCurPrimitive;
+  //TexBaseImpl*            m_pCurTexture[MAX_TEXTURE_STAGE];
+  //RenderTargetImpl*       m_pCurRenderTarget;
+  //Shader*                 m_pCurShader;
+  //CanvasCore*             m_pCurCanvasCore;
+  //RasterizerStateImpl*    m_pCurRasterizerState;
+  //BlendStateImpl*         m_pCurBlendState;
+  //DepthStencilStateImpl*  m_pCurDepthStencilState;
+  //SamplerStateImpl*       m_pCurSamplerState;
+  //VertexDeclImpl*         m_pCurVertexDecl;
 
   Texture*                m_pWhiteTexture8x8;
 
