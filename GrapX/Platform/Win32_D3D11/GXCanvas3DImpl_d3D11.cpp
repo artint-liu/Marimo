@@ -310,9 +310,9 @@ namespace GrapX
       if(pMtlInstImpl->GetDataPoolUnsafe() && ((pMtlInstImpl->GetFlags() & MATERIAL_FLAG_UNIFORM_CHANGED) || r != StateResult::Same))
       {
         if(pMtlInstImpl->GetFlags() & MATERIAL_FLAG_UNIFORM_CHANGED) {
-          pShaderImpl->UploadConstBuffer(pMtlInstImpl->GetDeviceDependBuffer(), pMtlInstImpl->GetDataPoolUnsafe());
+          pShaderImpl->UploadConstBuffer(m_pContext, pMtlInstImpl->GetDeviceDependBuffer(), pMtlInstImpl->GetDataPoolUnsafe());
         }
-        pShaderImpl->CommitConstantBuffer(pMtlInstImpl->GetDeviceDependBuffer(), m_pD3DCanvasBuffer);
+        pShaderImpl->CommitConstantBuffer(m_pContext, pMtlInstImpl->GetDeviceDependBuffer(), m_pD3DCanvasBuffer);
       }
       pMtlInstImpl->ClearFlags();
 
@@ -552,12 +552,14 @@ namespace GrapX
         //m_pGraphicsImpl->InlSetDepthStencil(m_pTarget->IntGetDepthStencilTextureUnsafe());
         m_pGraphicsImpl->InlSetDepthStencilState(m_pCurDepthStencilState);
         m_CurMaterialImpl = NULL;
+        m_pContext = m_pGraphicsImpl->GetCurrentContext();
       }
       return TRUE;
     }
 
     GXBOOL Canvas3DImpl::End()
     {
+      m_pContext = NULL;
       return TRUE;
     }
 

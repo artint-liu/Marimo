@@ -105,6 +105,7 @@ namespace GrapX
     GXBOOL CanvasImpl::Initialize(RenderTarget* pTarget, const REGN* pRegn)
     {
       ASSERT(m_Commands.GetSize() == 0);
+      m_pContext = m_pGraphics->GetCurrentContext();
 
       if(CanvasCoreImpl::Initialize(pTarget) == TRUE)
       {
@@ -627,10 +628,10 @@ namespace GrapX
       EffectImpl* pEffectImpl = m_CurrentEffect.pEffectImpl;
       
       static_cast<ShaderImpl*>
-        (pEffectImpl->GetShaderUnsafe())->UploadConstBuffer(pEffectImpl->GetDeviceDependBuffer(), pEffectImpl->GetDataPoolUnsafe());
+        (pEffectImpl->GetShaderUnsafe())->UploadConstBuffer(m_pContext, pEffectImpl->GetDeviceDependBuffer(), pEffectImpl->GetDataPoolUnsafe());
 
       static_cast<ShaderImpl*>
-        (pEffectImpl->GetShaderUnsafe())->CommitConstantBuffer(pEffectImpl->GetDeviceDependBuffer());
+        (pEffectImpl->GetShaderUnsafe())->CommitConstantBuffer(m_pContext, pEffectImpl->GetDeviceDependBuffer());
     }
 
     Graphics* CanvasImpl::GetGraphicsUnsafe() const

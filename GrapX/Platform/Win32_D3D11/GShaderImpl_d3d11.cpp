@@ -780,9 +780,9 @@ namespace GrapX
       //}
     }
 
-    GXBOOL ShaderImpl::Activate()
+    GXBOOL ShaderImpl::Activate(DEVICECONTEXT* pContext)
     {
-      ID3D11DeviceContext* const pImmediateContext = m_pGraphicsImpl->D3DGetDeviceContext();
+      ID3D11DeviceContext* const pImmediateContext = pContext->D3DGetDeviceContext();
       pImmediateContext->VSSetShader(m_pD3D11VertexShader, NULL, 0);
       pImmediateContext->PSSetShader(m_pD3D11PixelShader, NULL, 0);
       return TRUE;
@@ -1000,9 +1000,9 @@ namespace GrapX
       return TRUE;
     }
 
-    void ShaderImpl::UploadConstBuffer(clstd::MemBuffer* pD3DCBPool, Marimo::DataPool* pDataPool)
+    void ShaderImpl::UploadConstBuffer(DEVICECONTEXT* pContext, clstd::MemBuffer* pD3DCBPool, Marimo::DataPool* pDataPool)
     {
-      ID3D11DeviceContext* const pImmediateContext = m_pGraphicsImpl->D3DGetDeviceContext();
+      ID3D11DeviceContext* const pd3dContext = pContext->D3DGetDeviceContext();
       ID3D11Buffer** pD3D11CB = reinterpret_cast<ID3D11Buffer**>(pD3DCBPool->GetPtr());
       ID3D11Buffer** pD3D11CBEnd = pD3D11CB + m_nVertexCBOffset;
       D3D11CB_DESC* pDesc = reinterpret_cast<D3D11CB_DESC*>(&m_D11ResDescPool.front());
@@ -1013,15 +1013,15 @@ namespace GrapX
         // 只有Canvas Uniform D3D11 Buffer位置才是空的
         ASSERT((pDesc->type == 0 && *pD3D11CB != NULL) || (pDesc->type == 1 && *pD3D11CB == NULL));
         if (*pD3D11CB != NULL) {
-          pImmediateContext->UpdateSubresource(*pD3D11CB, 0, NULL, pSourceBuffer, 0, 0);
+          pd3dContext->UpdateSubresource(*pD3D11CB, 0, NULL, pSourceBuffer, 0, 0);
         }
         pSourceBuffer += pDesc->cbSize;
       }
     }
 
-    GXBOOL ShaderImpl::CommitConstantBuffer(const clstd::MemBuffer* pD3DCBPool, ID3D11Buffer* pCanvasUniform)
+    GXBOOL ShaderImpl::CommitConstantBuffer(DEVICECONTEXT* pContext, const clstd::MemBuffer* pD3DCBPool, ID3D11Buffer* pCanvasUniform)
     {
-      ID3D11DeviceContext* const pImmediateContext = m_pGraphicsImpl->D3DGetDeviceContext();
+      ID3D11DeviceContext* const pd3dContext = pContext->D3DGetDeviceContext();
       ID3D11Buffer** pD3D11VertexCB = reinterpret_cast<ID3D11Buffer**>(pD3DCBPool->GetPtr()) + m_nVertexCBOffset;
       ID3D11Buffer** pD3D11PixelCB  = reinterpret_cast<ID3D11Buffer**>(pD3DCBPool->GetPtr()) + m_nPixelCBOffset;
       ID3D11Buffer** pD3D11EndCB    = reinterpret_cast<ID3D11Buffer**>(pD3DCBPool->GetEnd());
@@ -1038,12 +1038,12 @@ namespace GrapX
 
       UINT count = (UINT)(pD3D11PixelCB - pD3D11VertexCB);
       if(count > 0) {
-        pImmediateContext->VSSetConstantBuffers(0, count, pD3D11VertexCB);
+        pd3dContext->VSSetConstantBuffers(0, count, pD3D11VertexCB);
       }
 
       count = (UINT)(pD3D11EndCB - pD3D11PixelCB);
       if (count > 0) {
-        pImmediateContext->PSSetConstantBuffers(0, count, pD3D11PixelCB);
+        pd3dContext->PSSetConstantBuffers(0, count, pD3D11PixelCB);
       }
 
 #if 0

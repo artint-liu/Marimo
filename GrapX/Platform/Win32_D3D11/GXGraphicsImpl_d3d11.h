@@ -136,6 +136,7 @@ namespace GrapX
       void                        IntGetDimension     (GXUINT& nWidth, GXUINT& nHeight);  // 
       inline ID3D11Device*        D3DGetDevice        ();
       inline ID3D11DeviceContext* D3DGetDeviceContext ();
+      DEVICECONTEXT*              GetCurrentContext   ();
       //GXBOOL                      D3DGetSwapChainDesc  (DXGI_SWAP_CHAIN_DESC* pSwapChainDesc);
       inline clstd::Locker*       GetLocker           ();
     private:
@@ -175,10 +176,12 @@ namespace GrapX
     {
       return m_pd3dDevice;
     }
+
     inline ID3D11DeviceContext* GraphicsImpl::D3DGetDeviceContext()
     {
       return m_pImmediateContext;
     }
+
     inline clstd::Locker* GraphicsImpl::GetLocker()
     {
       return m_pGraphicsLocker;

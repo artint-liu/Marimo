@@ -8,6 +8,7 @@ namespace GrapX
   class Canvas3DCommImpl;
   namespace D3D11
   {
+    struct DEVICECONTEXT;
 #define MRT_SUPPORT_COUNT D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT
 
     class Canvas3DImpl : public Canvas3DCommImpl
@@ -15,7 +16,8 @@ namespace GrapX
       friend class GraphicsImpl;
     protected:
       GraphicsImpl*             m_pGraphicsImpl;
-      GXSIZE                    m_sExtent = {0, 0};    // RenderTarget尺寸决定
+      DEVICECONTEXT*            m_pContext = NULL;
+      GXSIZE                    m_sExtent = {0, 0};    // DEVICECONTEXT* pContext, RenderTarget尺寸决定
 
       ObjectT<RenderTargetImpl> m_pTargets[MRT_SUPPORT_COUNT];
       GXUINT                    m_nTargetCount = NULL;

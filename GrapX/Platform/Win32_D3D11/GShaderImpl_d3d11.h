@@ -20,6 +20,7 @@ namespace GrapX
     typedef clvector<Marimo::DATAPOOL_TYPE_DEFINITION>  DataPoolTypeDefinition_T;
     struct DATAPOOL_MAPPER;
     class VertexDeclImpl;
+    struct DEVICECONTEXT;
 
     class ShaderImpl : public Shader
     {
@@ -106,15 +107,15 @@ namespace GrapX
       GXBOOL Reflect_ConstantBuffer(DataPoolDeclaration_T& aArray, DATAPOOL_MAPPER& aStructDesc, ID3D11ShaderReflectionConstantBuffer* pReflectionConstantBuffer, const D3D11_SHADER_BUFFER_DESC& buffer_desc);
       GXLPCSTR Reflect_MakeTypename(DATAPOOL_MAPPER& aStructDesc, D3D11_SHADER_TYPE_DESC& type_desc, ID3D11ShaderReflectionType* pReflectionType);
 
-      GXBOOL Activate();
+      GXBOOL Activate(DEVICECONTEXT* pContext);
       GXBOOL BuildIndexedCBTable(const DATAPOOL_MAPPER& combine, const DATAPOOL_MAPPER* pMapper, clvector<size_t>* pIndexTab); // 因为没有大小，只生成vs或者ps CB与合集的索引关系
       static void   SetCBDesc(D3D11CB_DESC& desc, GXLPCSTR name, size_t cbSize);
       GXBOOL GenerateCBTable();
       GXBOOL BuildCBTable(clstd::MemBuffer& sD3DCBPool) const;
       //GXBOOL ReleaseCBTable(clstd::MemBuffer& sD3DCBPool) const;
 
-      void UploadConstBuffer(clstd::MemBuffer* pD3DCBPool, Marimo::DataPool* pDataPool);
-      GXBOOL CommitConstantBuffer(const clstd::MemBuffer* pD3DCBPool, ID3D11Buffer* pCanvasUniform = NULL);
+      void UploadConstBuffer(DEVICECONTEXT* pContext, clstd::MemBuffer* pD3DCBPool, Marimo::DataPool* pDataPool);
+      GXBOOL CommitConstantBuffer(DEVICECONTEXT* pContext, const clstd::MemBuffer* pD3DCBPool, ID3D11Buffer* pCanvasUniform = NULL);
       const BINDRESOURCE_DESC* GetBindResource(GXUINT nIndex) const;
       const BINDRESOURCE_DESC* FindBindResource(GXLPCSTR szName) const;
 

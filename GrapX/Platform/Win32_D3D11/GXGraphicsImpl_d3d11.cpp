@@ -283,6 +283,11 @@ namespace GrapX
       }
     }
 
+    DEVICECONTEXT* GraphicsImpl::GetCurrentContext()
+    {
+       return &m_CurState;
+    }
+
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
     GXHRESULT GraphicsImpl::AddRef()
     {
@@ -1447,7 +1452,7 @@ namespace GrapX
       if(m_CurState.pShader != NULL)
       {
         m_CurState.pShader->AddRef();
-        ((ShaderImpl*)m_CurState.pShader)->Activate();
+        ((ShaderImpl*)m_CurState.pShader)->Activate(&m_CurState);
       }
       return StateResult::Ok;
     }
