@@ -161,7 +161,7 @@ namespace GrapX
     GXBOOL RasterizerStateImpl::Activate(DEVICECONTEXT* pContext, GXUINT slot, RasterizerStateImpl* pPrevState)
     {
       ASSERT(slot == 0);
-      ASSERT(m_pGraphicsImpl->InlIsActiveRasterizerState(this));
+      ASSERT(pContext->InlIsActiveRasterizerState(this));
       InlSetRasterizerState(pContext);
       return TRUE;
     }
@@ -271,7 +271,7 @@ namespace GrapX
     GXBOOL BlendStateImpl::Activate(DEVICECONTEXT* pContext, GXUINT slot, BlendStateImpl* pPrevState)
     {
       ASSERT(slot == 0);
-      ASSERT(m_pGraphicsImpl->InlIsActiveBlendState(this));
+      ASSERT(pContext->InlIsActiveBlendState(this));
       InlSetBlendState(pContext->D3DGetDeviceContext());
       return TRUE;
     }
@@ -280,10 +280,10 @@ namespace GrapX
     {
       const GXDWORD dwPrevFactor = m_BlendFactor;
       m_BlendFactor = dwBlendFactor;
-
-      if(m_pGraphicsImpl->InlIsActiveBlendState(this))
+      DEVICECONTEXT* pContext = static_cast<GraphicsImpl*>(pCanvasCore->GetGraphicsUnsafe())->GetCurrentContext();
+      if(pContext->InlIsActiveBlendState(this))
       {
-        InlSetBlendState(static_cast<GraphicsImpl*>(pCanvasCore->GetGraphicsUnsafe())->D3DGetDeviceContext());
+        InlSetBlendState(pContext->D3DGetDeviceContext());
       }
       return dwPrevFactor;
     }
@@ -359,18 +359,19 @@ namespace GrapX
       //  pImmediateContext->OMSetDepthStencilState(m_pDepthStencilState, m_StencilRef);
       //}
       //return dwPrevStencilReft;
-      ID3D11DeviceContext* const pd3dContext = static_cast<GraphicsImpl*>(pCanvasCore->GetGraphicsUnsafe())->D3DGetDeviceContext();
-      return SetStencilRef(pd3dContext, dwStencilRef);
+      //ID3D11DeviceContext* const pd3dContext = static_cast<GraphicsImpl*>(pCanvasCore->GetGraphicsUnsafe())->D3DGetDeviceContext();
+      DEVICECONTEXT* pContext = static_cast<GraphicsImpl*>(pCanvasCore->GetGraphicsUnsafe())->GetCurrentContext();
+      return SetStencilRef(pContext, dwStencilRef);
     }
 
-    GXDWORD DepthStencilStateImpl::SetStencilRef(ID3D11DeviceContext* pd3dContext, GXDWORD dwStencilRef)
+    GXDWORD DepthStencilStateImpl::SetStencilRef(DEVICECONTEXT* pContext, GXDWORD dwStencilRef)
     {
       const GXDWORD dwPrevStencilReft = m_StencilRef;
       m_StencilRef = dwStencilRef;
-      if (m_pGraphicsImpl->InlIsActiveDepthStencilState(this))
+      if (pContext->InlIsActiveDepthStencilState(this))
       {
         //ID3D11DeviceContext* const pImmediateContext = static_cast<GraphicsImpl*>(pCanvasCore->GetGraphicsUnsafe())->D3DGetDeviceContext();
-        pd3dContext->OMSetDepthStencilState(m_pDepthStencilState, m_StencilRef);
+        pContext->D3DGetDeviceContext()->OMSetDepthStencilState(m_pDepthStencilState, m_StencilRef);
       }
       return dwPrevStencilReft;
     }
@@ -426,7 +427,7 @@ namespace GrapX
 
     GXBOOL SamplerStateImpl::Activate(DEVICECONTEXT* pContext, GXUINT slot, SamplerStateImpl* pPrevSamplerState)
     {
-      ASSERT(m_pGraphicsImpl->InlIsActiveSamplerState(this)); // 确定已经放置到Graphics上
+      ASSERT(pContext->InlIsActiveSamplerState(this)); // 确定已经放置到Graphics上
 
       ID3D11DeviceContext* const pd3dDeviceContext = pContext->D3DGetDeviceContext();
       pd3dDeviceContext->PSSetSamplers(slot, 1, &m_pD3D11SamplerState);

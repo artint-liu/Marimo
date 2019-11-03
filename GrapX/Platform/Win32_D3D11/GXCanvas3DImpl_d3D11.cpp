@@ -232,28 +232,6 @@ namespace GrapX
 
     GXBOOL Canvas3DImpl::Initialize(RenderTarget** pTargetArray, GXUINT nCount, GXLPCVIEWPORT pViewport)
     {
-      //Texture* pTexture = NULL;
-      //if (pTargetArray == NULL || nCount == 0 || pTargetArray[0] == NULL)
-      //{
-      //  RenderTarget* pTarget = NULL;
-      //  m_pGraphicsImpl->GetBackBuffer(&pTarget);
-      //  m_pTargets[0] = static_cast<RenderTargetImpl*>(pTarget);
-      //  m_nTargetCount = 1;
-      //  SAFE_RELEASE(pTarget);
-      //}
-      //else
-      //{
-      //  for (size_t i = 0; i < nCount; i++)
-      //  {
-      //    m_pTargets[i] = static_cast<RenderTargetImpl*>(pTargetArray[i]);
-      //  }
-      //  m_nTargetCount = (int)nCount;
-      //}
-
-      //ShaderImpl::D3D11CB_DESC desc;
-      //ShaderImpl::D3D11CreateBuffer(m_pGraphicsImpl->D3DGetDevice(), desc, "cb_MarimoCommon", sizeof(STD_CANVAS_UNIFORM));
-      //m_pD3DCanvasBuffer = desc.pD3D11ConstantBuffer;
-
       D3D11_BUFFER_DESC bd = {sizeof(STD_CANVAS_UNIFORM), D3D11_USAGE_DEFAULT, D3D11_BIND_CONSTANT_BUFFER, 0, 0};
       HRESULT hr = m_pGraphicsImpl->D3DGetDevice()->CreateBuffer(&bd, NULL, &m_pD3DCanvasBuffer);
 

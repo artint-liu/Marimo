@@ -346,7 +346,7 @@ inline GXBOOL GraphicsImpl::InlSetStateT(GXUINT slot, _TState*& pCurState, _TSta
 #ifdef _GXGRAPHICS_INLINE_SET_RASTERIZER_STATE_
 inline GXBOOL GraphicsImpl::InlSetRasterizerState(RasterizerStateImpl* pRasterizerState)
 {
-  return InlSetStateT<RasterizerStateImpl>(0, m_CurState.pRasterizerState, pRasterizerState);
+  return InlSetStateT(0, m_CurState.pRasterizerState, pRasterizerState);
 }
 #endif // #ifdef _GXGRAPHICS_INLINE_SET_RASTERIZER_STATE_
 
@@ -378,25 +378,25 @@ inline GXBOOL GraphicsImpl::IsActiveCanvas(CanvasCore* pCanvasCore)
   return m_CurState.pCanvasCore == pCanvasCore;
 }
 
-inline GXBOOL GraphicsImpl::InlIsActiveSamplerState(SamplerStateImpl* pSamplerState)
-{
-  return m_CurState.pSamplerState == pSamplerState;
-}
-
-inline GXBOOL GraphicsImpl::InlIsActiveRasterizerState(RasterizerStateImpl* pRasterizerState)
-{
-  return m_CurState.pRasterizerState == pRasterizerState;
-}
-
-inline GXBOOL GraphicsImpl::InlIsActiveBlendState(BlendStateImpl* pBlendState)
-{
-  return m_CurState.pBlendState == pBlendState;
-}
-
-inline GXBOOL GraphicsImpl::InlIsActiveDepthStencilState(DepthStencilStateImpl* pDepthStencilState)
-{
-  return m_CurState.pDepthStencilState == pDepthStencilState;
-}
+//inline GXBOOL GraphicsImpl::InlIsActiveSamplerState(SamplerStateImpl* pSamplerState)
+//{
+//  return m_CurState.pSamplerState == pSamplerState;
+//}
+//
+//inline GXBOOL GraphicsImpl::InlIsActiveRasterizerState(RasterizerStateImpl* pRasterizerState)
+//{
+//  return m_CurState.pRasterizerState == pRasterizerState;
+//}
+//
+//inline GXBOOL GraphicsImpl::InlIsActiveBlendState(BlendStateImpl* pBlendState)
+//{
+//  return m_CurState.pBlendState == pBlendState;
+//}
+//
+//inline GXBOOL GraphicsImpl::InlIsActiveDepthStencilState(DepthStencilStateImpl* pDepthStencilState)
+//{
+//  return m_CurState.pDepthStencilState == pDepthStencilState;
+//}
 
 //inline GXBOOL GXGraphicsImpl::IsActiveRenderState(GRenderStateImpl* pRenderState)
 //{

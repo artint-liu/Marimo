@@ -714,7 +714,7 @@ namespace GrapX
 
         InlSetDepthStencilState(static_cast<DepthStencilStateImpl*>(pDepthStencil));
         InlSetShader(m_pBasicShader);
-        static_cast<DepthStencilStateImpl*>(pDepthStencil)->SetStencilRef(D3DGetDeviceContext(), dwStencil);
+        static_cast<DepthStencilStateImpl*>(pDepthStencil)->SetStencilRef(GetCurrentContext(), dwStencil);
 
         //GXRASTERIZERDESC ras_desc;
         //CreateRasterizerState()

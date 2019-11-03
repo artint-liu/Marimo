@@ -97,13 +97,14 @@ namespace GrapX
       GXBOOL  Activate    (DEVICECONTEXT* pContext, GXUINT slot, DepthStencilStateImpl* pPrevState);
 
       GXDWORD SetStencilRef  (CanvasCore* pCanvasCore, GXDWORD dwStencilRef) override;
-      GXDWORD SetStencilRef  (ID3D11DeviceContext* pd3dContext, GXDWORD dwStencilRef);
+      GXDWORD SetStencilRef  (DEVICECONTEXT* pContext, GXDWORD dwStencilRef);
     };
     //////////////////////////////////////////////////////////////////////////
     class SamplerStateImpl : public SamplerState
     {
       friend class GraphicsImpl;
       friend class Canvas;
+
     private:
       GraphicsImpl*       m_pGraphicsImpl;
       ID3D11SamplerState*   m_pD3D11SamplerState;
@@ -113,7 +114,6 @@ namespace GrapX
       SamplerStateImpl(Graphics* pGraphics);
       virtual ~SamplerStateImpl();
       GXBOOL            Initialize        (const GXSAMPLERDESC* pDesc);
-      GXBOOL            Activate          (DEVICECONTEXT* pContext, GXUINT slot, SamplerStateImpl* pPrevSamplerState);  // 这个只能被Graphics调用!
 
     public:
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
@@ -123,6 +123,7 @@ namespace GrapX
       GXHRESULT Invoke    (GRESCRIPTDESC* pDesc) override { return GX_OK; }
 
       GXHRESULT  GetDesc         (GXSAMPLERDESC* pSamplerDesc) override;
+      GXBOOL     Activate        (DEVICECONTEXT* pContext, GXUINT slot, SamplerStateImpl* pPrevSamplerState);  // 这个只能被Graphics调用!
 
       static void InterfaceDescToD3D11Desc(D3D11_SAMPLER_DESC& D3D11Desc, const GXSAMPLERDESC& desc);
       static void D3D11DescToInterfaceDesc(GXSAMPLERDESC& desc, const D3D11_SAMPLER_DESC& D3D11Desc);

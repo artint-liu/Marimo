@@ -70,7 +70,61 @@ namespace GrapX
       Same = 1,
     };
 
-    struct DEVICECONTEXT
+    template<
+      class BlendStateTempl,
+      class SamplerStateTempl,
+      class RasterizerStateTempl,
+      class DepthStencilStateTempl>
+    struct DEVICECONTEXT_TEMPL
+    {
+      BlendStateTempl*         pBlendState = NULL;
+      SamplerStateTempl*       pSamplerState = NULL;
+      RasterizerStateTempl*    pRasterizerState = NULL;
+      DepthStencilStateTempl*  pDepthStencilState = NULL;
+
+      inline GXBOOL InlIsActiveSamplerState(SamplerStateTempl* _pSamplerState)
+      {
+        return this->pSamplerState == _pSamplerState;
+      }
+
+      inline GXBOOL InlIsActiveRasterizerState(RasterizerStateTempl* _pRasterizerState)
+      {
+        return this->pRasterizerState == _pRasterizerState;
+      }
+
+      inline GXBOOL InlIsActiveBlendState(BlendStateTempl* _pBlendState)
+      {
+        return this->pBlendState == _pBlendState;
+      }
+
+      inline GXBOOL InlIsActiveDepthStencilState(DepthStencilStateTempl* _pDepthStencilState)
+      {
+        return this->pDepthStencilState == _pDepthStencilState;
+      }
+
+      //template<class _TDrive, class _TStateObject>
+      //inline GXBOOL InlSetStateT(GXUINT slot, _TStateObject*& pCurState, _TStateObject* pState)
+      //{
+      //  ASSERT(pState);
+      //  if(pCurState == pState) {
+      //    return TRUE;
+      //  }
+      //  _TStateObject* pPrevState = pCurState;
+      //  pCurState = pState;
+      //  if(pCurState->Activate(static_cast<_TDrive*>(this), slot, pPrevState)) // slot为了模板兼容，并不是所有对象都使用这个
+      //  {
+      //    SAFE_RELEASE(pPrevState);
+      //    pCurState->AddRef();
+      //    return TRUE;
+      //  }
+
+      //  // 如果失败就换回来
+      //  pCurState = pPrevState;
+      //  return FALSE;
+      //}
+    }; // struct DEVICECONTEXT_TEMPL
+
+    struct DEVICECONTEXT : public DEVICECONTEXT_TEMPL<BlendStateImpl, SamplerStateImpl, RasterizerStateImpl, DepthStencilStateImpl>
     {
     private:
     public:
@@ -80,10 +134,10 @@ namespace GrapX
       TexBaseImpl*            pTextures[MAX_TEXTURE_STAGE] = { NULL };
       CanvasCore*             pCanvasCore = NULL;
       
-      BlendStateImpl*         pBlendState = NULL;
-      SamplerStateImpl*       pSamplerState = NULL;
-      RasterizerStateImpl*    pRasterizerState = NULL;
-      DepthStencilStateImpl*  pDepthStencilState = NULL;
+      //BlendStateImpl*         pBlendState = NULL;
+      //SamplerStateImpl*       pSamplerState = NULL;
+      //RasterizerStateImpl*    pRasterizerState = NULL;
+      //DepthStencilStateImpl*  pDepthStencilState = NULL;
 
       D3D_PRIMITIVE_TOPOLOGY  eTopology = D3D_PRIMITIVE_TOPOLOGY_UNDEFINED;
       VertexDeclImpl*         pVertexDecl = NULL;

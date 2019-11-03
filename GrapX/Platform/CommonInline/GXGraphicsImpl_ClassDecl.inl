@@ -193,10 +193,10 @@ private:
   static GXVOID     IncreaseStencil         (GXDWORD* pdwStencil);
 
 public:
-  inline GXBOOL     InlIsActiveRasterizerState    (RasterizerStateImpl* pRasterizerState);
-  inline GXBOOL     InlIsActiveBlendState         (BlendStateImpl* pBlendState);
-  inline GXBOOL     InlIsActiveDepthStencilState  (DepthStencilStateImpl* pDepthStencilState);
-  inline GXBOOL     InlIsActiveSamplerState       (SamplerStateImpl* pSamplerState);
+  //inline GXBOOL     InlIsActiveRasterizerState    (RasterizerStateImpl* pRasterizerState);
+  //inline GXBOOL     InlIsActiveBlendState         (BlendStateImpl* pBlendState);
+  //inline GXBOOL     InlIsActiveDepthStencilState  (DepthStencilStateImpl* pDepthStencilState);
+  //inline GXBOOL     InlIsActiveSamplerState       (SamplerStateImpl* pSamplerState);
   inline Marimo::ShaderConstName* InlGetShaderConstantNameObj()
   {
     return m_pShaderConstName;
