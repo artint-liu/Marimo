@@ -456,6 +456,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\include\GrapX\gxUtility.h">
       <Filter>Include\GrapX</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonBase\DeviceContext.hpp">
+      <Filter>Platform\CommonBase</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\Console.cpp">

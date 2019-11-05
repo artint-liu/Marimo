@@ -3,8 +3,12 @@
 #define _GXGRAPHICS_INLINE_RENDERTARGET_D3D11_
 #define _GXGRAPHICS_INLINE_TEXTURE_D3D11_
 #define _GXGRAPHICS_INLINE_SET_VERTEX_DECLARATION_D3D11_
-#define _GXGRAPHICS_INLINE_SET_RASTERIZER_STATE_
 #define _GXGRAPHICS_INLINE_SHADER_D3D11_
+
+#define _GXGRAPHICS_INLINE_SET_BLEND_STATE_
+#define _GXGRAPHICS_INLINE_SET_SAMPLER_STATE_
+#define _GXGRAPHICS_INLINE_SET_RASTERIZER_STATE_
+#define _GXGRAPHICS_INLINE_SET_DEPTHSTENCIL_STATE_
 
 // 全局头文件
 #include <GrapX.h>
@@ -86,6 +90,7 @@ namespace GrapX
   {
     extern const char* g_szBaseShader;
     typedef LPD3DINCLUDE LPD3DXINCLUDE;
+    thread_local DEVICECONTEXT* g_pDeviceContext = NULL;
 
 #include "Platform/CommonInline/GXGraphicsImpl_Inline.inl"
 #include "Platform/CommonInline/GXGraphicsImpl.inl"
@@ -119,7 +124,7 @@ namespace GrapX
       , m_pBasicEffect          (NULL)
       //, m_pCurRenderTargetView  (NULL)
       //, m_pCurDepthStencilView  (NULL)
-      , m_pVertexLayout         (NULL)
+      //, m_pVertexLayout         (NULL)
       //, m_eCurTopology          (D3D_PRIMITIVE_TOPOLOGY_UNDEFINED)
       //, m_pCurPrimitive         (NULL)
       //, m_pCurRenderTarget      (NULL)
@@ -285,7 +290,12 @@ namespace GrapX
 
     DEVICECONTEXT* GraphicsImpl::GetCurrentContext()
     {
-       return &m_CurState;
+      if(gxGetCurrentThreadId() == m_dwThreadId) {
+        return &m_CurState;
+      }
+      else {
+        return g_pDeviceContext;
+      }
     }
 
 #ifdef ENABLE_VIRTUALIZE_ADDREF_RELEASE
@@ -323,7 +333,7 @@ namespace GrapX
       SAFE_RELEASE(m_CurState.pVertexDecl);
       INVOKE_LOST_DEVICE;
 
-      SAFE_RELEASE(m_pVertexLayout);
+      SAFE_RELEASE(m_CurState.pD3DVertexLayout);
       SAFE_RELEASE(m_CurState.pD3D11DepthStencilView);
       SAFE_RELEASE(m_CurState.pD3D11RenderTargetView);
       SAFE_RELEASE(m_pImmediateContext);
@@ -497,8 +507,9 @@ namespace GrapX
 
     GXHRESULT GraphicsImpl::SetPrimitive(Primitive* pPrimitive, GXUINT uStreamSource)
     {
-      if(m_CurState.pPrimitive == pPrimitive)
+      if(m_CurState.pPrimitive == pPrimitive) {
         return S_OK;
+      }
 
       SAFE_RELEASE(m_CurState.pPrimitive);
       m_CurState.pPrimitive = pPrimitive;
@@ -517,8 +528,7 @@ namespace GrapX
 
       GPrimitiveVertexIndexImpl* pPrimitiveImpl = (GPrimitiveVertexIndexImpl*)pPrimitive;
       UINT offset = 0;
-      m_pImmediateContext->IASetVertexBuffers(0, 1, &pPrimitiveImpl->m_pD3D11VertexBuffer,
-        &pPrimitiveImpl->m_uVertexStride, &offset);
+      m_pImmediateContext->IASetVertexBuffers(0, 1, &pPrimitiveImpl->m_pD3D11VertexBuffer, &pPrimitiveImpl->m_uVertexStride, &offset);
 
       if(pPrimitiveImpl->GetIndexCount()) {
         m_pImmediateContext->IASetIndexBuffer(pPrimitiveImpl->m_pD3D11IndexBuffer, pPrimitiveImpl->m_D3DIndexFormat, offset);
@@ -712,7 +722,7 @@ namespace GrapX
         DepthStencilStateImpl* pSavedDepthStencilState = m_CurState.pDepthStencilState;
         pSavedDepthStencilState->AddRef();
 
-        InlSetDepthStencilState(static_cast<DepthStencilStateImpl*>(pDepthStencil));
+        m_CurState.InlSetDepthStencilState(static_cast<DepthStencilStateImpl*>(pDepthStencil));
         InlSetShader(m_pBasicShader);
         static_cast<DepthStencilStateImpl*>(pDepthStencil)->SetStencilRef(GetCurrentContext(), dwStencil);
 
@@ -780,7 +790,7 @@ namespace GrapX
           SetPrimitive(NULL);
         }
 
-        InlSetDepthStencilState(pSavedDepthStencilState);
+        m_CurState.InlSetDepthStencilState(pSavedDepthStencilState);
         SAFE_RELEASE(pSavedDepthStencilState);
 
         //SAFE_RELEASE(m_pCurPrimitive);
@@ -799,13 +809,13 @@ namespace GrapX
     GXVOID GraphicsImpl::BuildInputLayout()
     {
       // 更新shader和顶点声明都会清空m_pVertexLayout
-      ASSERT(m_pVertexLayout == NULL);
+      ASSERT(m_CurState.pD3DVertexLayout == NULL);
       ShaderImpl* pShaderImpl = static_cast<ShaderImpl*>(m_CurState.pShader);
 
       ID3D11InputLayout* pInputLayout = pShaderImpl->D3D11GetInputLayout(m_CurState.pVertexDecl);
-      m_pVertexLayout = pInputLayout;
-      m_pVertexLayout->AddRef();
-      m_pImmediateContext->IASetInputLayout(m_pVertexLayout);
+      m_CurState.pD3DVertexLayout = pInputLayout;
+      m_CurState.pD3DVertexLayout->AddRef();
+      m_pImmediateContext->IASetInputLayout(m_CurState.pD3DVertexLayout);
     }
 
     void GraphicsImpl::IntEnumAdapter()
@@ -843,7 +853,7 @@ namespace GrapX
       GXUINT nVertCount = 0;
       InlUpdateTopology(eType, PrimitiveCount, &nVertCount);
 
-      if(m_pVertexLayout == NULL) {
+      if(m_CurState.pD3DVertexLayout == NULL) {
         BuildInputLayout();
       }
 
@@ -885,11 +895,11 @@ namespace GrapX
       UINT nIndexCount = 0;
       InlUpdateTopology(eType, PrimitiveCount, &nIndexCount);
 
-      if(m_pVertexLayout == NULL) {
+      if(m_CurState.pD3DVertexLayout == NULL) {
         BuildInputLayout();
       }
       else {
-        m_pImmediateContext->IASetInputLayout(m_pVertexLayout);
+        m_pImmediateContext->IASetInputLayout(m_CurState.pD3DVertexLayout);
       }
 
       ShaderImpl* pShaderImpl = static_cast<ShaderImpl*>(m_CurState.pShader);
@@ -1437,7 +1447,7 @@ namespace GrapX
       return StateResult::Ok;
     }
 
-    StateResult GraphicsImpl::InlSetShader(Shader* pShader) // 没有改变返回 FALSE
+    StateResult GraphicsImpl::InlSetShader(Shader* pShader)
     {
       if(m_CurState.pShader == pShader)
       {
@@ -1446,7 +1456,7 @@ namespace GrapX
 
       ASSERT(pShader != NULL);
       SAFE_RELEASE(m_CurState.pShader);
-      SAFE_RELEASE(m_pVertexLayout);
+      SAFE_RELEASE(m_CurState.pD3DVertexLayout);
       m_CurState.pShader = pShader;
 
       if(m_CurState.pShader != NULL)

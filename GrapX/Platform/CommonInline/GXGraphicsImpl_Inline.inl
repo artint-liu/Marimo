@@ -193,7 +193,7 @@ GXHRESULT GraphicsImpl::InlSetVertexDecl(VertexDeclImpl* pVertexDecl)
   }
 
   SAFE_RELEASE(m_CurState.pVertexDecl);
-  SAFE_RELEASE(m_pVertexLayout);
+  SAFE_RELEASE(m_CurState.pD3DVertexLayout);
 
   m_CurState.pVertexDecl = pVertexDecl;
   if(m_CurState.pVertexDecl != NULL) {
@@ -322,56 +322,56 @@ GXHRESULT GraphicsImpl::InlSetVertexDecl(VertexDeclImpl* pVertexDecl)
 //  return FALSE;
 //}
 //#endif // #ifdef _GXGRAPHICS_INLINE_SET_RENDER_STATE_
-template<class _TState>
-inline GXBOOL GraphicsImpl::InlSetStateT(GXUINT slot, _TState*& pCurState, _TState* pState)
-{
-  ASSERT(pState);
-  if(pCurState == pState) {
-    return TRUE;
-  }
-  _TState* pPrevState = pCurState;
-  pCurState = pState;
-  if(pCurState->Activate(&m_CurState, slot, pPrevState)) // slot为了模板兼容，并不是所有对象都使用这个
-  {
-    SAFE_RELEASE(pPrevState);
-    pCurState->AddRef();
-    return TRUE;
-  }
+//template<class _TState>
+//inline GXBOOL GraphicsImpl::InlSetStateT(GXUINT slot, _TState*& pCurState, _TState* pState)
+//{
+//  ASSERT(pState);
+//  if(pCurState == pState) {
+//    return TRUE;
+//  }
+//  _TState* pPrevState = pCurState;
+//  pCurState = pState;
+//  if(pCurState->Activate(&m_CurState, slot, pPrevState)) // slot为了模板兼容，并不是所有对象都使用这个
+//  {
+//    SAFE_RELEASE(pPrevState);
+//    pCurState->AddRef();
+//    return TRUE;
+//  }
+//
+//  // 如果失败就换回来
+//  pCurState = pPrevState;
+//  return FALSE;
+//}
 
-  // 如果失败就换回来
-  pCurState = pPrevState;
-  return FALSE;
-}
-
-#ifdef _GXGRAPHICS_INLINE_SET_RASTERIZER_STATE_
-inline GXBOOL GraphicsImpl::InlSetRasterizerState(RasterizerStateImpl* pRasterizerState)
-{
-  return InlSetStateT(0, m_CurState.pRasterizerState, pRasterizerState);
-}
-#endif // #ifdef _GXGRAPHICS_INLINE_SET_RASTERIZER_STATE_
-
-#ifdef _GXGRAPHICS_INLINE_SET_BLEND_STATE_
-// TODO: 这个可以和InlSetDepthStencilState合并为模板
-GXBOOL GraphicsImpl::InlSetBlendState(BlendStateImpl* pBlendState)
-{
-  return InlSetStateT(0, m_CurState.pBlendState, pBlendState);
-}
-#endif // #ifdef _GXGRAPHICS_INLINE_SET_BLEND_STATE_
-
-#ifdef _GXGRAPHICS_INLINE_SET_DEPTHSTENCIL_STATE_
-inline GXBOOL GraphicsImpl::InlSetDepthStencilState(DepthStencilStateImpl* pDepthStencilState)
-{
-  return InlSetStateT(0, m_CurState.pDepthStencilState, pDepthStencilState);
-}
-#endif // #ifdef _GXGRAPHICS_INLINE_SET_DEPTHSTENCIL_STATE_
-
-
-#ifdef _GXGRAPHICS_INLINE_SET_SAMPLER_STATE_
-GXBOOL GraphicsImpl::InlSetSamplerState(GXUINT slot, SamplerStateImpl* pSamplerState)
-{
-  return InlSetStateT(slot, m_CurState.pSamplerState, pSamplerState);
-}
-#endif // #ifdef _GXGRAPHICS_INLINE_SET_SAMPLER_STATE_
+//#ifdef _GXGRAPHICS_INLINE_SET_RASTERIZER_STATE_
+//inline GXBOOL GraphicsImpl::InlSetRasterizerState(RasterizerStateImpl* pRasterizerState)
+//{
+//  return m_CurState.InlSetStateT<DEVICECONTEXT>(0, m_CurState.pRasterizerState, pRasterizerState);
+//}
+//#endif // #ifdef _GXGRAPHICS_INLINE_SET_RASTERIZER_STATE_
+//
+//#ifdef _GXGRAPHICS_INLINE_SET_BLEND_STATE_
+//// TODO: 这个可以和InlSetDepthStencilState合并为模板
+//GXBOOL GraphicsImpl::InlSetBlendState(BlendStateImpl* pBlendState)
+//{
+//  return m_CurState.InlSetStateT<DEVICECONTEXT>(0, m_CurState.pBlendState, pBlendState);
+//}
+//#endif // #ifdef _GXGRAPHICS_INLINE_SET_BLEND_STATE_
+//
+//#ifdef _GXGRAPHICS_INLINE_SET_DEPTHSTENCIL_STATE_
+//inline GXBOOL GraphicsImpl::InlSetDepthStencilState(DepthStencilStateImpl* pDepthStencilState)
+//{
+//  return m_CurState.InlSetStateT<DEVICECONTEXT>(0, m_CurState.pDepthStencilState, pDepthStencilState);
+//}
+//#endif // #ifdef _GXGRAPHICS_INLINE_SET_DEPTHSTENCIL_STATE_
+//
+//
+//#ifdef _GXGRAPHICS_INLINE_SET_SAMPLER_STATE_
+//GXBOOL GraphicsImpl::InlSetSamplerState(GXUINT slot, SamplerStateImpl* pSamplerState)
+//{
+//  return m_CurState.InlSetStateT<DEVICECONTEXT>(slot, m_CurState.pSamplerState, pSamplerState);
+//}
+//#endif // #ifdef _GXGRAPHICS_INLINE_SET_SAMPLER_STATE_
 
 inline GXBOOL GraphicsImpl::IsActiveCanvas(CanvasCore* pCanvasCore)
 {

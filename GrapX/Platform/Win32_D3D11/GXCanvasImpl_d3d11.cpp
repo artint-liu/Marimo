@@ -291,7 +291,7 @@ namespace GrapX
       if(m_pClipRegion == NULL)
       {
         rcClip = m_rcAbsClip;
-        m_pGraphics->InlSetDepthStencilState(m_pCanvasStencil[0]);
+        m_pContext->InlSetDepthStencilState(m_pCanvasStencil[0]);
       }
       else
       {
@@ -300,14 +300,14 @@ namespace GrapX
         {
         case RC_ERROR:
           rcClip = m_rcAbsClip;
-          m_pGraphics->InlSetDepthStencilState(m_pCanvasStencil[0]);
+          m_pContext->InlSetDepthStencilState(m_pCanvasStencil[0]);
           break;
         case RC_NULL:
           m_pClipRegion->GetBounding(&rcClip);
           break;
         case RC_SIMPLE:
           m_pClipRegion->GetBounding(&rcClip);
-          m_pGraphics->InlSetDepthStencilState(m_pCanvasStencil[0]);
+          m_pContext->InlSetDepthStencilState(m_pCanvasStencil[0]);
           break;
         case RC_COMPLEX:
         {
@@ -330,7 +330,7 @@ namespace GrapX
           IntClear(lpRects, nRectCount, dwFlags, 0xff00ff00, 0, m_dwStencil);
 
           m_pCanvasStencil[1]->SetStencilRef(this, m_dwStencil);
-          m_pGraphics->InlSetDepthStencilState(m_pCanvasStencil[1]);
+          m_pContext->InlSetDepthStencilState(m_pCanvasStencil[1]);
         }
         IntUpdateClip(rcClip);
         return (GXINT)eCompx;
@@ -493,8 +493,8 @@ namespace GrapX
       
       m_pGraphics->IntSetEffect(m_ClearEffect.pEffectImpl);
       m_pWriteStencil->SetStencilRef(this, dwStencil);
-      m_pGraphics->InlSetDepthStencilState(m_pWriteStencil);
-      m_pGraphics->InlSetBlendState(TEST_FLAG(dwFlags, GXCLEAR_TARGET) ? m_pOMOpaque : m_pOMNoColor);
+      m_pContext->InlSetDepthStencilState(m_pWriteStencil);
+      m_pContext->InlSetBlendState(TEST_FLAG(dwFlags, GXCLEAR_TARGET) ? m_pOMOpaque : m_pOMNoColor);
 
 
       Primitive* pPrimitive = NULL;
@@ -525,8 +525,8 @@ namespace GrapX
       // 状态恢复
       m_pGraphics->SetPrimitive(static_cast<Primitive*>(m_pPrimitive));
       m_pGraphics->IntSetEffect(m_CurrentEffect.pEffectImpl);
-      m_pGraphics->InlSetDepthStencilState(m_pCanvasStencil[m_pClipRegion == NULL ? 0 : 1]);
-      m_pGraphics->InlSetBlendState(m_pBlendStateImpl);
+      m_pContext->InlSetDepthStencilState(m_pCanvasStencil[m_pClipRegion == NULL ? 0 : 1]);
+      m_pContext->InlSetBlendState(m_pBlendStateImpl);
 
       SAFE_RELEASE(pPrimitive);
     }
@@ -584,8 +584,8 @@ namespace GrapX
         CanvasCoreImpl::CommitState();
 
         m_pGraphics->SetPrimitive(m_pPrimitive);
-        m_pGraphics->InlSetRasterizerState(m_pRasterizerState);
-        m_pGraphics->InlSetSamplerState(0, m_pSamplerState);
+        m_pContext->InlSetRasterizerState(m_pRasterizerState);
+        m_pContext->InlSetSamplerState(0, m_pSamplerState);
         //m_pGraphics->InlSetDepthStencil(NULL);
 
         if(m_CurrentEffect.transform.IsValid()) { // TODO: 改为不判断形式
@@ -805,7 +805,7 @@ namespace GrapX
         case CF_SetSamplerState:
         {
           STATESWITCHING_SAMPLERSTATE* pSamplerStateCmd = const_cast<STATESWITCHING_SAMPLERSTATE*>(pCmdPtr->cast_to<STATESWITCHING_SAMPLERSTATE>());
-          m_pGraphics->InlSetSamplerState(pSamplerStateCmd->sampler_slot, static_cast<SamplerStateImpl*>(pSamplerStateCmd->pSamplerState));
+          m_pContext->InlSetSamplerState(pSamplerStateCmd->sampler_slot, static_cast<SamplerStateImpl*>(pSamplerStateCmd->pSamplerState));
           SAFE_RELEASE(pSamplerStateCmd->pSamplerState);
         }
         break;
@@ -847,7 +847,7 @@ namespace GrapX
           const STATESWITCHING_COMPOSITINGMODE* pCompositingModeCmd = pCmdPtr->cast_to<STATESWITCHING_COMPOSITINGMODE>();
 
           BlendStateImpl* pBlendState = IntGetBlendStateUnsafe(pCompositingModeCmd->mode);
-          m_pGraphics->InlSetBlendState(pBlendState);
+          m_pContext->InlSetBlendState(pBlendState);
 
           SAFE_RELEASE(m_pBlendStateImpl);
           m_pBlendStateImpl = pBlendState;
@@ -917,7 +917,7 @@ namespace GrapX
           GXRECT rcClip = pClipBoxCmd->rect;
           SAFE_RELEASE(m_pClipRegion);
 
-          m_pGraphics->InlSetDepthStencilState(m_pCanvasStencil[0]);
+          m_pContext->InlSetDepthStencilState(m_pCanvasStencil[0]);
 
           gxRectToRegn(&rgClip, &rcClip);
           m_pGraphics->SetSafeClip(&rgClip);

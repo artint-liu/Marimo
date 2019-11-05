@@ -68,7 +68,7 @@ namespace GrapX
     template<class _Interface>
     GXHRESULT TextureBaseImplT<_Interface>::Release()
     {
-      clstd::ScopedLocker sl(m_pGraphics->GetLocker());
+      clstd::ScopedLocker sl(m_pGraphicsImpl->GetLocker());
       GXLONG nRefCount = gxInterlockedDecrement(&m_nRefCount);
       if(nRefCount == 0)
       {
@@ -76,7 +76,7 @@ namespace GrapX
         INVOKE_LOST_DEVICE;
         if((m_pD3D11Texture && m_pD3D11ShaderView) &&
           (m_eResType == ResourceType::Texture2D || m_eResType == ResourceType::Texture3D || m_eResType == ResourceType::TextureCube)) {
-          m_pGraphics->UnregisterResource(this);
+          m_pGraphicsImpl->UnregisterResource(this);
         }
         delete this;
         return GX_OK;
@@ -141,7 +141,7 @@ namespace GrapX
     template<class _Interface>
     GXBOOL TextureBaseImplT<_Interface>::IntD3D11CreateResource(GXBOOL bRenderTarget, GXUINT nWidth, GXUINT nHeight, GXLPCVOID pInitData, GXUINT nPitch)
     {
-      ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
+      ID3D11Device* pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
 
       D3D11_TEXTURE2D_DESC TexDesc;
       InlSetZeroT(TexDesc);
@@ -271,7 +271,7 @@ namespace GrapX
         hval = pd3dDevice->CreateShaderResourceView(m_pD3D11Texture, (m_eResType == ResourceType::TextureCube) ? &sResourceViewDesc : NULL, &m_pD3D11ShaderView);
         if(m_nMipLevels == 0 && pInitData) {
           ASSERT(nPitch);
-          ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
+          ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->D3DGetDeviceContext();
           pD3D11Context->UpdateSubresource(m_pD3D11Texture, 0, NULL, pInitData, nPitch, 0);
           pD3D11Context->GenerateMips(m_pD3D11ShaderView);
         }
@@ -306,7 +306,7 @@ namespace GrapX
     //////////////////////////////////////////////////////////////////////////
     GXBOOL TextureImpl::Clear(GXColor color)
     {
-      ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
+      ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->D3DGetDeviceContext();
 
       if(m_eResUsage == GXResUsage::Write || m_eResUsage == GXResUsage::ReadWrite ||
         m_eResUsage == GXResUsage::SystemMem || m_eResUsage == GXResUsage::Default)
@@ -362,7 +362,7 @@ namespace GrapX
 
     GXBOOL TextureImpl::CopyRect(Texture* pSrc, GXLPCPOINT lpptDestination, GXLPCRECT lprcSource)
     {
-      ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
+      ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->D3DGetDeviceContext();
       D3D11_BOX box = {0, 0, 0, m_nWidth, m_nHeight, 1};
         // {UINT(lprcSource->left), UINT(lprcSource->top), 0, UINT(lprcSource->right), UINT(lprcSource->bottom), 1};
       UINT x = 0, y = 0;
@@ -403,7 +403,7 @@ namespace GrapX
         return FALSE;
       }
 
-      ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
+      ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->D3DGetDeviceContext();
       D3D11_MAPPED_SUBRESOURCE SubResource;
       HRESULT hval = S_OK;
       InlSetZeroT(SubResource);
@@ -468,7 +468,7 @@ namespace GrapX
     {
       if(m_sMappedResource.pData)
       {
-        ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
+        ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->D3DGetDeviceContext();
         if(m_pTextureData)
         {
           const GXUINT nMinPitch = GetMinPitchSize();
@@ -486,7 +486,7 @@ namespace GrapX
 
     GXBOOL TextureImpl::UpdateRect(GXLPCRECT prcDest, GXLPVOID pData, GXUINT nPitch)
     {
-      ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
+      ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->D3DGetDeviceContext();
       D3D11_BOX box;
       InlSetZeroT(box);
 
@@ -505,7 +505,7 @@ namespace GrapX
 
     Graphics*  TextureImpl::GetGraphicsUnsafe()
     {
-      return m_pGraphics;
+      return m_pGraphicsImpl;
     }
 
     GXBOOL TextureImpl::SaveToMemory(clstd::MemBuffer* pBuffer, GXLPCSTR szDestFormat, GXBOOL bVertFlip)
@@ -555,7 +555,7 @@ namespace GrapX
 
     GXVOID TextureImpl::GenerateMipMaps()
     {
-      m_pGraphics->D3DGetDeviceContext()->GenerateMips(m_pD3D11ShaderView);
+      m_pGraphicsImpl->D3DGetDeviceContext()->GenerateMips(m_pD3D11ShaderView);
     }
 
     GXBOOL TextureImpl::GetDesc(GXBITMAP*lpBitmap)
@@ -637,7 +637,7 @@ namespace GrapX
         }
       }
 
-      ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
+      ID3D11Device* pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
 
       D3D11_RENDER_TARGET_VIEW_DESC TarDesc = { GrapXToDX11::FormatFrom(m_Format) };
       TarDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
@@ -656,7 +656,7 @@ namespace GrapX
       TarDesc.Texture2DArray.FirstArraySlice = m_nSlice = nFaceIndex;
       TarDesc.Texture2DArray.ArraySize = 1;
       
-      ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
+      ID3D11Device* pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
       HRESULT hval = pd3dDevice->CreateRenderTargetView(m_pD3D11Texture, &TarDesc, &m_pD3D11RenderTargetView);
       return SUCCEEDED(hval);
     }
@@ -693,7 +693,7 @@ namespace GrapX
         return FALSE;
       }
 
-      ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
+      ID3D11Device* pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
 
       D3D11_RENDER_TARGET_VIEW_DESC TarDesc = { GrapXToDX11::FormatFrom(m_Format) };
       TarDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
@@ -730,7 +730,7 @@ namespace GrapX
         return FALSE;
       }
 
-      ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
+      ID3D11Device* pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
 
       // Create the depth stencil view
       D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
@@ -751,7 +751,7 @@ namespace GrapX
 
     GXBOOL TextureImpl_GPUReadBack::InitReadBackTexture()
     {
-      ID3D11Device* pd3dDevice = m_pGraphics->D3DGetDevice();
+      ID3D11Device* pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
 
       D3D11_TEXTURE2D_DESC TexDesc;
       //D3D11_SUBRESOURCE_DATA TexInitData;
@@ -778,7 +778,7 @@ namespace GrapX
 
     GXBOOL TextureImpl_GPUReadBack::Map(MAPPED* pMappedRect, GXResMap eResMap)
     {
-      ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
+      ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->D3DGetDeviceContext();
       if(FAILED(pD3D11Context->Map(m_pD3D11Texture, 0, D3D11_MAP_READ, 0, &m_sMappedResource)))
       {
         return FALSE;
@@ -793,7 +793,7 @@ namespace GrapX
     {
       if(m_sMappedResource.pData)
       {
-        ID3D11DeviceContext* pD3D11Context = m_pGraphics->D3DGetDeviceContext();
+        ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->D3DGetDeviceContext();
         pD3D11Context->Unmap(m_pD3D11Texture, 0);
         return TRUE;
       }

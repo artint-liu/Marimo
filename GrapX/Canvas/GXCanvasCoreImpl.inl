@@ -60,7 +60,7 @@ GXHRESULT CanvasCoreImpl::Invoke(GRESCRIPTDESC* pDesc)
 
 void CanvasCoreImpl::CommitState()
 {
-  m_pGraphics->InlSetBlendState(m_pBlendStateImpl);
+  m_pContext->InlSetBlendState(m_pBlendStateImpl);
 }
 
 GXSIZE* CanvasCoreImpl::GetTargetDimension(GXSIZE* pSize) const

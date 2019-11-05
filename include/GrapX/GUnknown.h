@@ -178,13 +178,13 @@ namespace GrapX
     ObjectT& operator=(_TUnknown* pNewObject)
     {
       if(m_pObject != pNewObject) {
+        if (pNewObject) {
+          pNewObject->AddRef();
+        }
         if(m_pObject) {
           m_pObject->Release();
         }
         m_pObject = pNewObject;
-        if(m_pObject) {
-          m_pObject->AddRef();
-        }
       }
       return *this;
     }

@@ -17,7 +17,7 @@ namespace GrapX
     class TextureBaseImplT : public _Interface
     {
     protected:
-      GraphicsImpl*             m_pGraphics = NULL;
+      GraphicsImpl*             m_pGraphicsImpl = NULL;
       ID3D11Texture2D*          m_pD3D11Texture = NULL;
       ID3D11ShaderResourceView* m_pD3D11ShaderView = NULL;
 
@@ -26,8 +26,8 @@ namespace GrapX
       const GXResUsage          m_eResUsage  = GXResUsage::Default;
 
     public:
-      TextureBaseImplT(GraphicsImpl*pGraphics, GXFormat eFormat, GXUINT nMipLevels, GXResUsage eResUsage)
-        : m_pGraphics(pGraphics)
+      TextureBaseImplT(GraphicsImpl* pGraphicsImpl, GXFormat eFormat, GXUINT nMipLevels, GXResUsage eResUsage)
+        : m_pGraphicsImpl(pGraphicsImpl)
         , m_pD3D11Texture(NULL)
         , m_pD3D11ShaderView(NULL)
         , m_nMipLevels(nMipLevels)
@@ -61,7 +61,7 @@ namespace GrapX
     template<class _Interface>
     Graphics* TextureBaseImplT<_Interface>::GetGraphicsUnsafe()
     {
-      return m_pGraphics;
+      return m_pGraphicsImpl;
     }
 
     class TextureImpl : public TextureBaseImplT<Texture>

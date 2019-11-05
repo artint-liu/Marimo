@@ -97,6 +97,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\GDI\GXShaderMgr.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\GDI\RegionFunc.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\GXStation.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonBase\DeviceContext.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonBase\GXGraphicsBaseImpl.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\CommonInline\GXRegionFactory.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\Platform\Win32_D3D11.h" />

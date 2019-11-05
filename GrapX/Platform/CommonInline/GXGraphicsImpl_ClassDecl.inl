@@ -180,12 +180,12 @@ private:
   GXHRESULT  InlSetCanvas            (CanvasCore* pCanvasCore);
   GXBOOL     IntSetEffect            (EffectImpl* pEffect);
   //inline GXBOOL     InlSetRenderState       (GRenderStateImpl* pRenderState);
-  template<class _TState>
-  inline GXBOOL     InlSetStateT            (GXUINT slot, _TState*& pCurState, _TState* pState);
-  inline GXBOOL     InlSetRasterizerState   (RasterizerStateImpl* pRasterizerState);
-  inline GXBOOL     InlSetBlendState        (BlendStateImpl* pBlendState);
-  inline GXBOOL     InlSetDepthStencilState (DepthStencilStateImpl* pDepthStencilState);
-  inline GXBOOL     InlSetSamplerState      (GXUINT slot, SamplerStateImpl* pSamplerState);
+  //template<class _TState>
+  //inline GXBOOL     InlSetStateT            (GXUINT slot, _TState*& pCurState, _TState* pState);
+  //inline GXBOOL     InlSetRasterizerState   (RasterizerStateImpl* pRasterizerState);
+  //inline GXBOOL     InlSetBlendState        (BlendStateImpl* pBlendState);
+  //inline GXBOOL     InlSetDepthStencilState (DepthStencilStateImpl* pDepthStencilState);
+  //inline GXBOOL     InlSetSamplerState      (GXUINT slot, SamplerStateImpl* pSamplerState);
   inline StateResult InlSetShader            (Shader* pShader);
   inline GXHRESULT  InlSetVertexDecl        (VertexDeclImpl* pVertexDecl);
   inline GXBOOL     IsActiveCanvas          (CanvasCore* pCanvasCore);

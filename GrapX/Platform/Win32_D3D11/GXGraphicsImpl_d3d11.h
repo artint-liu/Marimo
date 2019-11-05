@@ -70,59 +70,7 @@ namespace GrapX
       Same = 1,
     };
 
-    template<
-      class BlendStateTempl,
-      class SamplerStateTempl,
-      class RasterizerStateTempl,
-      class DepthStencilStateTempl>
-    struct DEVICECONTEXT_TEMPL
-    {
-      BlendStateTempl*         pBlendState = NULL;
-      SamplerStateTempl*       pSamplerState = NULL;
-      RasterizerStateTempl*    pRasterizerState = NULL;
-      DepthStencilStateTempl*  pDepthStencilState = NULL;
-
-      inline GXBOOL InlIsActiveSamplerState(SamplerStateTempl* _pSamplerState)
-      {
-        return this->pSamplerState == _pSamplerState;
-      }
-
-      inline GXBOOL InlIsActiveRasterizerState(RasterizerStateTempl* _pRasterizerState)
-      {
-        return this->pRasterizerState == _pRasterizerState;
-      }
-
-      inline GXBOOL InlIsActiveBlendState(BlendStateTempl* _pBlendState)
-      {
-        return this->pBlendState == _pBlendState;
-      }
-
-      inline GXBOOL InlIsActiveDepthStencilState(DepthStencilStateTempl* _pDepthStencilState)
-      {
-        return this->pDepthStencilState == _pDepthStencilState;
-      }
-
-      //template<class _TDrive, class _TStateObject>
-      //inline GXBOOL InlSetStateT(GXUINT slot, _TStateObject*& pCurState, _TStateObject* pState)
-      //{
-      //  ASSERT(pState);
-      //  if(pCurState == pState) {
-      //    return TRUE;
-      //  }
-      //  _TStateObject* pPrevState = pCurState;
-      //  pCurState = pState;
-      //  if(pCurState->Activate(static_cast<_TDrive*>(this), slot, pPrevState)) // slot为了模板兼容，并不是所有对象都使用这个
-      //  {
-      //    SAFE_RELEASE(pPrevState);
-      //    pCurState->AddRef();
-      //    return TRUE;
-      //  }
-
-      //  // 如果失败就换回来
-      //  pCurState = pPrevState;
-      //  return FALSE;
-      //}
-    }; // struct DEVICECONTEXT_TEMPL
+#include "Platform/CommonBase/DeviceContext.hpp"
 
     struct DEVICECONTEXT : public DEVICECONTEXT_TEMPL<BlendStateImpl, SamplerStateImpl, RasterizerStateImpl, DepthStencilStateImpl>
     {
@@ -146,6 +94,7 @@ namespace GrapX
       // State Object - 状态对象
       ID3D11RenderTargetView* pD3D11RenderTargetView = NULL;
       ID3D11DepthStencilView* pD3D11DepthStencilView = NULL;
+      ID3D11InputLayout*      pD3DVertexLayout = NULL;
 
     public:
       inline ID3D11DeviceContext* D3DGetDeviceContext ()
@@ -190,7 +139,7 @@ namespace GrapX
       void                        IntGetDimension     (GXUINT& nWidth, GXUINT& nHeight);  // 
       inline ID3D11Device*        D3DGetDevice        ();
       inline ID3D11DeviceContext* D3DGetDeviceContext ();
-      DEVICECONTEXT*              GetCurrentContext   ();
+      DEVICECONTEXT*              GetCurrentContext   (); // 如果是渲染线程，返回这个对象的Context（非全局的），如果是其它线程，返回线程本地Context（非全局的）
       //GXBOOL                      D3DGetSwapChainDesc  (DXGI_SWAP_CHAIN_DESC* pSwapChainDesc);
       inline clstd::Locker*       GetLocker           ();
     private:
@@ -218,7 +167,7 @@ namespace GrapX
       Effect*                 m_pBasicEffect;
 
 
-      ID3D11InputLayout*      m_pVertexLayout;
+      //ID3D11InputLayout*      m_pVertexLayout;
       GXDWORD                 m_dwBackBufferStencil;  // m_pDeviceOriginTex 使用的模板 [1, 255]
 
       GXINT                   m_nGraphicsCount;

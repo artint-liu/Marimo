@@ -929,72 +929,17 @@ namespace GrapX
         pd3dDevice->CreateBuffer(&bd, 0, &pD3DCB[nCB]);
       }
 
-      //ASSERT(pDesc->pD3D11ConstantBuffer == NULL);
-      //if(pDesc->pD3D11ConstantBuffer) {
-      //  return FALSE;
-      //}
-
-      //ID3D11Device* const pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
-      //Marimo::DataPoolUtility::iterator iter_var = m_pMainDataPool->begin();
-      //Marimo::DataPoolUtility::iterator iter_var_end = m_pMainDataPool->end();
-      //Marimo::DataPoolVariable var;
-      //size_t nCB = 0;
-
-      //// $Global D3D11 CB
-      //for(; iter_var != iter_var_end; ++iter_var) {
-      //  if(clstd::strncmpT(iter_var.TypeName(), CB_PREFIX_NAME, sizeof(CB_PREFIX_NAME) - 1) == 0) {
-      //    iter_var.ToVariable(var);
-      //    if(var.GetOffset() > 0) {
-      //      D3D11CreateBuffer(pd3dDevice, pDestDesc[nCB++], NULL, var.GetOffset()); // var是cb，它的offset就是全局变量的大小
-      //      break;
-      //    }
-      //  }
-      //}
-
-      //if(iter_var == iter_var_end)
-      //{
-      //  D3D11CreateBuffer(pd3dDevice, pDestDesc[nCB++], var.IsValid() ? var.GetTypeName() : NULL, m_pMainDataPool->GetRootSize());
-      //}
-      //else
-      //{
-      //  // Named D3D11 CB
-      //  for(; iter_var != iter_var_end; ++iter_var) {
-      //    if(clstd::strncmpT(iter_var.TypeName(), CB_PREFIX_NAME, sizeof(CB_PREFIX_NAME) - 1) == 0) {
-      //      iter_var.ToVariable(var);
-      //      D3D11CreateBuffer(pd3dDevice, pDestDesc[nCB++], iter_var.TypeName(), var.GetSize());
-      //    }
-      //    else {
-      //      break;
-      //    }
-      //  }
-      //}
-
       ID3D11Buffer** pD3D11BufBegin = pD3DCB + m_nVertexCBOffset;
-      //const ID3D11Buffer** const pD3D11BufEnd = );
 
       const GXINT* pIndexBegin = &m_D11ResDescPool.front() + m_nVertexCBOffset;
       const GXINT* const pIndexEnd = &m_D11ResDescPool.back() + 1;
-      //const GXINT* pIndex = pIndexBegin;
 
       ASSERT((pIndexEnd - pIndexBegin) == (reinterpret_cast<const ID3D11Buffer**>(sD3DCBPool.GetEnd()) - pD3D11BufBegin));
 
-      //ID3D11Buffer** pD3D11DestBufBegin = (ID3D11Buffer**)((size_t)sD3DCBPool.GetPtr() + nCB * sizeof(D3D11CB_DESC));
-
-      //ASSERT(((size_t)m_pVertexCB - (size_t)pDesc) == nCB * sizeof(D3D11CB_DESC)); // 检查结尾准确性
-      //ASSERT(((size_t)pD3D11BufEnd - (size_t)pD3D11BufBegin) % sizeof(ID3D11Buffer*) == 0);
-
-      //int nUniformIndex = 0;
       for(; pIndexBegin != pIndexEnd; ++pIndexBegin, ++pD3D11BufBegin)
       {
         ASSERT(*pIndexBegin < nCB);
         *pD3D11BufBegin = pD3DCB[*pIndexBegin];
-        // 索引转成内容
-        //ASSERT(reinterpret_cast<size_t>(*pD3D11BufBegin) < nCB);
-        //*pD3D11DestBufBegin = pDestDesc[reinterpret_cast<size_t>(*pD3D11BufBegin)].pD3D11ConstantBuffer;
-        //if(*pD3D11DestBufBegin == CANVAS_COMMON_MARK_PTR) {
-        //  m_nCanvasUniformIndex[nUniformIndex++] = pD3D11BufBegin - m_pVertexCB; // m_pVertexCB 是表的开始
-        //  ASSERT(nUniformIndex < countof(m_nCanvasUniformIndex));
-        //}
       }
 
       return TRUE;
@@ -1295,35 +1240,6 @@ namespace GrapX
       ASSERT(m_buffer.GetSize() == nTotalSize); // 校验实际填充大小和计算大小
       return TRUE;
     }
-
-    //ID3D11Buffer* ShaderImpl::D3D11CreateBuffer(ID3D11Device* pd3dDevice, D3D11CB_DESC& desc, GXLPCSTR szName, size_t cbSize) const
-    //{
-    //  //ID3D11Device* const pd3dDevice = m_pGraphicsImpl->D3DGetDevice();
-    //  D3D11_BUFFER_DESC bd;
-    //  InlSetZeroT(bd);
-    //  ASSERT(cbSize > 0);
-
-    //  bd.Usage          = D3D11_USAGE_DEFAULT;
-    //  bd.ByteWidth      = cbSize;
-    //  bd.BindFlags      = D3D11_BIND_CONSTANT_BUFFER;
-    //  bd.CPUAccessFlags = 0;
-    //  desc.cbSize = cbSize;
-
-    //  if (szName && clstd::strcmpT(szName, "cb_MarimoCommon") == 0)
-    //  {
-    //    desc.type = 1;
-    //    desc.pD3D11ConstantBuffer = CANVAS_COMMON_MARK_PTR;
-    //    return CANVAS_COMMON_MARK_PTR;
-    //  }
-
-    //  ASSERT(((desc.type == 1) && sizeof(STD_CANVAS_UNIFORM) == desc.cbSize) || desc.type != 1);
-
-    //  HRESULT hr = pd3dDevice->CreateBuffer(&bd, NULL, &desc.pD3D11ConstantBuffer);
-    //  if(SUCCEEDED(hr)) {
-    //    return desc.pD3D11ConstantBuffer;
-    //  }
-    //  return NULL;
-    //}
 
     ID3D11InputLayout* ShaderImpl::D3D11GetInputLayout(VertexDeclImpl* pVertexDecl)
     {

@@ -57,6 +57,7 @@
 #include <Canvas/GFTFontImpl.h>
 #include <GDI/GXShaderMgr.h>
 
+#define _GXGRAPHICS_INLINE_SET_DEPTHSTENCIL_STATE_
 #include "Platform/CommonBase/GXGraphicsBaseImpl.h"
 #include "Platform/Win32_D3D11/GXGraphicsImpl_d3d11.h"
 #include "Platform/Win32_D3D11/GXRenderTargetImpl_d3d11.h"
@@ -528,9 +529,9 @@ namespace GrapX
         m_pGraphicsImpl->SetViewport(&m_Viewport);
         m_pGraphicsImpl->SetSafeClip(NULL);
         //m_pGraphicsImpl->InlSetDepthStencil(m_pTarget->IntGetDepthStencilTextureUnsafe());
-        m_pGraphicsImpl->InlSetDepthStencilState(m_pCurDepthStencilState);
         m_CurMaterialImpl = NULL;
         m_pContext = m_pGraphicsImpl->GetCurrentContext();
+        m_pContext->InlSetDepthStencilState(m_pCurDepthStencilState);
       }
       return TRUE;
     }

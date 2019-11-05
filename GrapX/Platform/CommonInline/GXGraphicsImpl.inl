@@ -981,7 +981,7 @@ GXHRESULT GraphicsImpl::SetRasterizerState(RasterizerState* pRasterizerState)
     pRasterizerState = m_pDefaultRasterizerState;
   }
 
-  if(InlSetRasterizerState(static_cast<RasterizerStateImpl*>(pRasterizerState))) {
+  if(m_CurState.InlSetRasterizerState(static_cast<RasterizerStateImpl*>(pRasterizerState))) {
     return GX_OK;
   }
   return GX_FAIL;
@@ -993,7 +993,7 @@ GXHRESULT GraphicsImpl::SetBlendState(BlendState* pBlendState)
     pBlendState = m_pDefaultBlendState;
   }
 
-  if(InlSetBlendState(static_cast<BlendStateImpl*>(pBlendState))) {
+  if(m_CurState.InlSetBlendState(static_cast<BlendStateImpl*>(pBlendState))) {
     return GX_OK;
   }
   return GX_FAIL;
@@ -1005,7 +1005,7 @@ GXHRESULT GraphicsImpl::SetDepthStencilState(DepthStencilState* pDepthStencilSta
     pDepthStencilState = m_pDefaultDepthStencilState;
   }
 
-  if(InlSetDepthStencilState(static_cast<DepthStencilStateImpl*>(pDepthStencilState))) {
+  if(m_CurState.InlSetDepthStencilState(static_cast<DepthStencilStateImpl*>(pDepthStencilState))) {
     return GX_OK;
   }
   return GX_FAIL;
@@ -1018,7 +1018,7 @@ GXHRESULT GraphicsImpl::SetSamplerState(GXUINT slot, SamplerState* pSamplerState
     pSamplerState = m_pDefaultSamplerState;
   }
 
-  if(InlSetSamplerState(slot, static_cast<SamplerStateImpl*>(pSamplerState))) {
+  if(m_CurState.InlSetSamplerState(slot, static_cast<SamplerStateImpl*>(pSamplerState))) {
     return GX_OK;
   }
   return GX_FAIL;
