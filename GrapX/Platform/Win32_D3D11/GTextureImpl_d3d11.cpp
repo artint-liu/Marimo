@@ -271,7 +271,8 @@ namespace GrapX
         hval = pd3dDevice->CreateShaderResourceView(m_pD3D11Texture, (m_eResType == ResourceType::TextureCube) ? &sResourceViewDesc : NULL, &m_pD3D11ShaderView);
         if(m_nMipLevels == 0 && pInitData) {
           ASSERT(nPitch);
-          ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->D3DGetDeviceContext();
+          //ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->D3DGetDeviceContext();
+          ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->GetCurrentContext()->D3DGetDeviceContext();
           pD3D11Context->UpdateSubresource(m_pD3D11Texture, 0, NULL, pInitData, nPitch, 0);
           pD3D11Context->GenerateMips(m_pD3D11ShaderView);
         }
@@ -306,7 +307,8 @@ namespace GrapX
     //////////////////////////////////////////////////////////////////////////
     GXBOOL TextureImpl::Clear(GXColor color)
     {
-      ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->D3DGetDeviceContext();
+      //ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->D3DGetDeviceContext();
+      ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->GetCurrentContext()->D3DGetDeviceContext();
 
       if(m_eResUsage == GXResUsage::Write || m_eResUsage == GXResUsage::ReadWrite ||
         m_eResUsage == GXResUsage::SystemMem || m_eResUsage == GXResUsage::Default)
@@ -362,7 +364,9 @@ namespace GrapX
 
     GXBOOL TextureImpl::CopyRect(Texture* pSrc, GXLPCPOINT lpptDestination, GXLPCRECT lprcSource)
     {
-      ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->D3DGetDeviceContext();
+      // ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->D3DGetDeviceContext();
+      ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->GetCurrentContext()->D3DGetDeviceContext();
+
       D3D11_BOX box = {0, 0, 0, m_nWidth, m_nHeight, 1};
         // {UINT(lprcSource->left), UINT(lprcSource->top), 0, UINT(lprcSource->right), UINT(lprcSource->bottom), 1};
       UINT x = 0, y = 0;
@@ -403,7 +407,8 @@ namespace GrapX
         return FALSE;
       }
 
-      ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->D3DGetDeviceContext();
+      //ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->D3DGetDeviceContext();
+      ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->GetCurrentContext()->D3DGetDeviceContext();
       D3D11_MAPPED_SUBRESOURCE SubResource;
       HRESULT hval = S_OK;
       InlSetZeroT(SubResource);
@@ -468,7 +473,8 @@ namespace GrapX
     {
       if(m_sMappedResource.pData)
       {
-        ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->D3DGetDeviceContext();
+        //ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->D3DGetDeviceContext();
+        ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->GetCurrentContext()->D3DGetDeviceContext();
         if(m_pTextureData)
         {
           const GXUINT nMinPitch = GetMinPitchSize();
@@ -486,7 +492,8 @@ namespace GrapX
 
     GXBOOL TextureImpl::UpdateRect(GXLPCRECT prcDest, GXLPVOID pData, GXUINT nPitch)
     {
-      ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->D3DGetDeviceContext();
+      //ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->D3DGetDeviceContext();
+      ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->GetCurrentContext()->D3DGetDeviceContext();
       D3D11_BOX box;
       InlSetZeroT(box);
 
@@ -555,7 +562,8 @@ namespace GrapX
 
     GXVOID TextureImpl::GenerateMipMaps()
     {
-      m_pGraphicsImpl->D3DGetDeviceContext()->GenerateMips(m_pD3D11ShaderView);
+      ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->GetCurrentContext()->D3DGetDeviceContext();
+      pD3D11Context->GenerateMips(m_pD3D11ShaderView);
     }
 
     GXBOOL TextureImpl::GetDesc(GXBITMAP*lpBitmap)
@@ -778,7 +786,8 @@ namespace GrapX
 
     GXBOOL TextureImpl_GPUReadBack::Map(MAPPED* pMappedRect, GXResMap eResMap)
     {
-      ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->D3DGetDeviceContext();
+      // ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->D3DGetDeviceContext();
+      ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->GetCurrentContext()->D3DGetDeviceContext();
       if(FAILED(pD3D11Context->Map(m_pD3D11Texture, 0, D3D11_MAP_READ, 0, &m_sMappedResource)))
       {
         return FALSE;
@@ -793,7 +802,8 @@ namespace GrapX
     {
       if(m_sMappedResource.pData)
       {
-        ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->D3DGetDeviceContext();
+        //ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->D3DGetDeviceContext();
+        ID3D11DeviceContext* pD3D11Context = m_pGraphicsImpl->GetCurrentContext()->D3DGetDeviceContext();
         pD3D11Context->Unmap(m_pD3D11Texture, 0);
         return TRUE;
       }
