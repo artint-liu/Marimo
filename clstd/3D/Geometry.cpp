@@ -46,7 +46,8 @@ namespace clstd
 
     Plane::Plane(const float3& vVert0, const float3& vVert1, const float3& vVert2)
     {
-      vNormal = float3::cross(vVert1 - vVert0, vVert2 - vVert1).normalize();
+      vNormal = float3::cross(vVert1 - vVert0, vVert2 - vVert1);
+      vNormal.normalize();
       fDist = vNormal.dot(vVert1);
     }
 
