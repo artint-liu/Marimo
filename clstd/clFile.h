@@ -120,6 +120,7 @@ namespace clstd
 
     b32   IsGood      () const; // 判断文件是否在打开状态
     void  Close       ();
+    void  Flush       ();
 
     u32  GetPointer   ();
     u32  SetPointer   (u32 uMove, u32 uMode);

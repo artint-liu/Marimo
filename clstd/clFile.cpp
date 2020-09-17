@@ -204,6 +204,13 @@ namespace clstd
 #endif // _WINDOWS
   }
 
+  void File::Flush()
+  {
+#ifdef _CL_SYSTEM_WINDOWS
+    FlushFileBuffers(m_hFile);
+#endif
+  }
+
   u32 File::GetPointer()
   {
     return SetPointer(0, 1);
