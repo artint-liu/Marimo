@@ -52,7 +52,7 @@ const size_t  MAX_DIGITS = 310; // max double: 1.7976931348623158e+308
 template <typename _TCh>
 int ReadlizeFloatString(_TCh* str, int nSignificance = 5); // nSignificance就是相当于一个容差
 
-extern u32 chksum_crc32 (unsigned char *block, unsigned int length);
+extern u32 chksum_crc32 (const unsigned char *block, unsigned int length);
 
 namespace clstd
 {

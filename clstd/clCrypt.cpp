@@ -69,7 +69,7 @@ namespace clstd
   {
     clStringA t;
     CheckFinal();
-    t.Format("%08X-%04X-%04X-%2X%2X-%2X%2X%2X%2X%2X%2X",
+    t.Format("%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X",
       *(u32*)ctx.digest, (u32)*(u16*)&ctx.digest[4], (u32)*(u16*)&ctx.digest[6],
       ctx.digest[8], ctx.digest[9], ctx.digest[10], ctx.digest[11], ctx.digest[12], 
       ctx.digest[13], ctx.digest[14],ctx.digest[15]);
@@ -80,7 +80,7 @@ namespace clstd
   {
     clStringW t;
     CheckFinal();
-    t.Format(_CLTEXT("%08X-%04X-%04X-%2X%2X-%2X%2X%2X%2X%2X%2X"),
+    t.Format(_CLTEXT("%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X"),
       *(u32*)ctx.digest, (u32)*(u16*)&ctx.digest[4], (u32)*(u16*)&ctx.digest[6],
       ctx.digest[8], ctx.digest[9], ctx.digest[10], ctx.digest[11], ctx.digest[12],
       ctx.digest[13], ctx.digest[14], ctx.digest[15]);

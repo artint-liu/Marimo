@@ -51,7 +51,7 @@ u32 crc_tab[256] = {
  *        reached. the crc32-checksum will be
  *        the result.
  */
-u32 chksum_crc32(unsigned char *block, unsigned int length)
+u32 chksum_crc32(const unsigned char *block, unsigned int length)
 {
    CLREGISTER unsigned long crc;
    unsigned long i;
@@ -96,7 +96,7 @@ void chksum_crc32gentab ()
 //////////////////////////////////////////////////////////////////////////
 namespace clstd
 {
-  u32 GenerateCRC32(CLBYTE* pData, u32 nLength)
+  u32 GenerateCRC32(const CLBYTE* pData, u32 nLength)
   {
     return chksum_crc32(pData, nLength);
   }

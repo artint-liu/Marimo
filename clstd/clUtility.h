@@ -498,7 +498,7 @@ FINAL_RET:
     str.ReleaseBuffer();
   }
 
-  u32 GenerateCRC32(CLBYTE* pData, u32 nLength);
+  u32 GenerateCRC32(const CLBYTE* pData, u32 nLength);
 
   template<typename _Ty>
   inline size_t hash_value(const _vector2<_Ty>& v2)
