@@ -196,6 +196,85 @@ namespace clstd
       return (_float3*)this;
     }
 
+    // 测试一个B面三点全部在A面一侧
+    bool TestOneSide(float3 a, float3 b, float3 c, float3 a2, float3 b2, float3 c2)
+    {
+      float3 n = float3::cross(b - a, c - a);
+      float check = float3::dot(n, a);
+      float ca2 = float3::dot(n, a2);
+      float cb2 = float3::dot(n, b2);
+      float cc2 = float3::dot(n, c2);
+      return ((ca2 > check && cb2 > check && cc2 > check) || (ca2 < check && cb2 < check && cc2 < check));
+    }
+
+    // 测试异面直线AB，A2B2中分平面，且两个三角形恰好在面两侧
+    bool TestEachSide(float3 a, float3 b, float3 c, float3 a2, float3 b2, float3 c2)
+    {
+      float3 n = float3::cross(b - a, b2 - a2);
+      float ca1 = float3::dot(n, a);
+      float ca2 = float3::dot(n, a2);
+      float mid = (ca1 + ca2) * 0.5f;
+      float cc1 = float3::dot(n, c);
+      float cc2 = float3::dot(n, c2);
+
+      return (ca1 < mid && cc1 < ca1 && ca2 > mid && cc2 > ca2) || (ca1 > mid && cc1 > ca1 && ca2 < mid && cc2 < ca2);
+    }
+
+    bool TestSamePlane(float3 a, float3 b, float3 c, float3 a2, float3 b2, float3 c2)
+    {
+      float3 n = float3::cross(b - a, c - a);
+      float3 n2 = float3::cross(b2 - a2, c2 - a2);
+      float3 nt = float3::cross(n, n2);
+      return (nt.x == 0 && nt.y == 0 && nt.z == 0);
+    }
+
+
+    bool TestSamePlaneOneSide(float3 n, float3 a, float3 b, float3 a2, float3 b2, float3 c2)
+    {
+      float3 nn = float3::cross(n, a - b); // 这个有方向要求，需要指向三角形外侧, TODO: 这个方向没测试过
+      float check = float3::dot(nn, a);
+      float ca2 = float3::dot(nn, a2);
+      float cb2 = float3::dot(nn, b2);
+      float cc2 = float3::dot(nn, c2);
+      return ca2 > check && cb2 > check && cc2 > check;
+    }
+
+    b32 Triangle::intersect(const Triangle& t)
+    {
+      if (TestSamePlane(A, B, C, t.A, t.B, t.C))
+      {
+        float3 n = float3::cross(B - A, C - A);
+        float3 n2 = float3::cross(t.B - t.A, t.C - t.A);
+
+        bool bOutOfEdge = 
+          TestSamePlaneOneSide(n, A, B, t.A, t.B, t.C) ||
+          TestSamePlaneOneSide(n, B, C, t.A, t.B, t.C) ||
+          TestSamePlaneOneSide(n, C, A, t.A, t.B, t.C) ||
+          TestSamePlaneOneSide(n2, t.A, t.B, A, B, C) ||
+          TestSamePlaneOneSide(n2, t.B, t.C, A, B, C) ||
+          TestSamePlaneOneSide(n2, t.C, t.A, A, B, C);
+
+        return !bOutOfEdge;
+      }
+      else
+      {
+        // 求存在一个面，一个三角形在面上，另一个三角形在面一侧
+        // 或者存在一个面，两个三角形恰好在面的两侧
+        bool bHasPlane = TestOneSide(A, B, C, t.A, t.B, t.C) || TestOneSide(t.A, t.B, t.C, A, B, C);
+        bHasPlane = bHasPlane ||
+          TestEachSide(A, B, C, t.A, t.B, t.C) ||
+          TestEachSide(A, B, C, t.B, t.C, t.A) ||
+          TestEachSide(A, B, C, t.C, t.A, t.B) ||
+          TestEachSide(B, C, A, t.A, t.B, t.C) ||
+          TestEachSide(B, C, A, t.B, t.C, t.A) ||
+          TestEachSide(B, C, A, t.C, t.A, t.B) ||
+          TestEachSide(C, A, B, t.A, t.B, t.C) ||
+          TestEachSide(C, A, B, t.B, t.C, t.A) ||
+          TestEachSide(C, A, B, t.C, t.A, t.B);
+        return !bHasPlane;
+      }
+    }
+
     Triangle& Triangle::set(const _float3* aVertices)
     {
       _float3* m = *this;

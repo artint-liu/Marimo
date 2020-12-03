@@ -402,6 +402,7 @@ namespace clstd
       AABB bounding() const;  // 返回三角形的AABB
       operator _float3*() const;
 
+      b32 intersect(const Triangle& t); // 判断两三角形相交(无交点)
       //int intersect(const _triangle& t);  // 判断与另一个三角形相交的情况,返回值是交点数[0, 3]
     };
 
