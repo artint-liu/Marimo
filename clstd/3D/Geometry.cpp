@@ -225,7 +225,7 @@ namespace clstd
       float3 n = float3::cross(b - a, c - a);
       float3 n2 = float3::cross(b2 - a2, c2 - a2);
       float3 nt = float3::cross(n, n2);
-      return (nt.x == 0 && nt.y == 0 && nt.z == 0);
+      return (nt.x == 0 && nt.y == 0 && nt.z == 0 && float3::dot(n, a) == float3::dot(n2, a2));
     }
 
 
