@@ -1,5 +1,5 @@
 Windows
-1. 使用visual studio打开"contrib\vstudio"目录下对应版本的解决方案文件.
+1. 使用visual studio打开zlib解压目录中"contrib\vstudio"目录下对应版本的解决方案文件.
 2. 去掉zlibstat项目中的"ZLIB_WINAPI"预定义宏.这个会把函数以"__stdcall"方式定义,并使函数名支持重载而改变.
 3. 选择对应平台编译,或者使用"批生成...".
 

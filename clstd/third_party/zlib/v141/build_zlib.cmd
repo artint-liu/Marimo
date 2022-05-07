@@ -5,7 +5,7 @@ echo 1.需要在 vs 2017 命令行提示中执行
 echo 2.需要7z.exe
 pause
 
-if not exist %ZLIB_LIB%.tar.gz curl "https://www.zlib.net/zlib-1.2.11.tar.gz" --output %ZLIB_LIB%.tar.gz
+if not exist %ZLIB_LIB%.tar.gz curl "https://www.zlib.net/%ZLIB_LIB%.tar.gz" --output %ZLIB_LIB%.tar.gz
 7z x %ZLIB_LIB%.tar.gz
 7z x %ZLIB_LIB%.tar
 
@@ -23,7 +23,7 @@ rem cd zlib-1.2.11\contrib\masmx86
 rem call bld_ml32.bat
 rem cd %~dp0
 echo ===============================================================
-echo 这里需要手动去除工程中“ZLIB_WINAPI”预处理定义，没有找到好的方法
+echo 这里需要手动去除zlibstat.vcxproj工程中“ZLIB_WINAPI”预处理定义，没有找到好的方法
 echo ===============================================================
 pause
 
