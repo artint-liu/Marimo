@@ -16,10 +16,10 @@
 #include "GXMaterialImpl.h"
 #include "clStringAttach.h"
 
-using namespace clstd;
-GXBOOL Parse(GXBLENDDESC& desc, TokensA& tokens, TokensA::iterator& iter);
-GXBOOL Parse(GXRASTERIZERDESC& desc, TokensA& tokens, TokensA::iterator& iter);
-GXBOOL Parse(GXDEPTHSTENCILDESC& desc, TokensA& tokens, TokensA::iterator& iter);
+//using namespace clstd;
+GXBOOL Parse(GXBLENDDESC& desc, clstd::TokensA& tokens, clstd::TokensA::iterator& iter);
+GXBOOL Parse(GXRASTERIZERDESC& desc, clstd::TokensA& tokens, clstd::TokensA::iterator& iter);
+GXBOOL Parse(GXDEPTHSTENCILDESC& desc, clstd::TokensA& tokens, clstd::TokensA::iterator& iter);
 
 
 // 这个 MOGenerateDeclarationCodes 生成代码要用
@@ -410,7 +410,7 @@ namespace GrapX
 
   GXBOOL MaterialImpl::SetState(GXLPCSTR szStateCommand)
   {
-    TokensA tokens(szStateCommand, strlenT(szStateCommand));
+    clstd::TokensA tokens(szStateCommand, clstd::strlenT(szStateCommand));
     GXBLENDDESC sBlendDesc;
     GXRASTERIZERDESC sRasterizerDesc;
     GXDEPTHSTENCILDESC sDepthStencilDesc(TRUE, FALSE);
@@ -705,7 +705,7 @@ namespace GrapX
 } // namespace GrapX
 
 //////////////////////////////////////////////////////////////////////////
-#define CMP_STR(_STR, _ENUM) if (strncmpT(str, _STR, len) == 0) { return _ENUM; }
+#define CMP_STR(_STR, _ENUM) if (clstd::strncmpT(str, _STR, len) == 0) { return _ENUM; }
 #define CHECK_END(_ITER) if(_ITER == tokens.end()) { return FALSE; }
 GXBlend GXDLLAPI MOStringToBlend(GXLPCSTR str, size_t len)
 {
@@ -781,8 +781,8 @@ GXCHAR szOff[] = "off";
 
 GXBOOL GXBLENDDESC::Parse(GXLPCSTR szLine)
 {
-  TokensA tokens(szLine, strlenT(szLine));
-  TokensA::iterator iter = tokens.begin();
+  clstd::TokensA tokens(szLine, clstd::strlenT(szLine));
+  clstd::TokensA::iterator iter = tokens.begin();
   return ::Parse(*this, tokens, iter);
 }
 

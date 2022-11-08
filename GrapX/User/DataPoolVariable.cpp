@@ -49,7 +49,7 @@
 //#define THIS_IMPULSE_DATA(_DATA_ACT, _INDEX, _COUNT)
 //#endif // #ifdef ENABLE_DATAPOOL_WATCHER
 
-using namespace clstd;
+//using namespace clstd;
 
 
 namespace Marimo

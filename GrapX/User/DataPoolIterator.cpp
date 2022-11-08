@@ -7,7 +7,7 @@
 #include "GrapX/GXKernel.h"
 
 #include "DataPoolImpl.h"
-using namespace clstd;
+//using namespace clstd;
 
 namespace Marimo
 {

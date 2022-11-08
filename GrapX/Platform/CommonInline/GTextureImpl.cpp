@@ -57,7 +57,7 @@
 #include "GrapX/gxError.h"
 #ifdef ENABLE_DirectXTex
 # include "third_party/DirectXTex/DirectXTex.h"
-# pragma comment(lib, "DirectXTex.lib")
+//# pragma comment(lib, "DirectXTex.lib")
 #endif
 
 namespace GrapXToDX11
@@ -329,7 +329,7 @@ namespace GrapX
     else if (fi_fmt == FIF_DDS)
     {
       DirectX::ScratchImage image;
-      if(SUCCEEDED(DirectX::LoadFromDDSMemory(pBitsData, cbData, 0, NULL, image)))
+      if(SUCCEEDED(DirectX::LoadFromDDSMemory(pBitsData, cbData, DirectX::DDS_FLAGS::DDS_FLAGS_NONE, NULL, image)))
       {
         const DirectX::TexMetadata& meta = image.GetMetadata();
         format = GrapXToDX11::FormatFrom(meta.format);

@@ -23,7 +23,7 @@
 //#include "GXUISlider.h"
 #include "GrapX/gxDevice.h"
 
-using namespace clstd;
+//using namespace clstd;
 
 namespace GXUI
 {

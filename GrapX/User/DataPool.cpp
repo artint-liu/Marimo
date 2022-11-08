@@ -16,7 +16,7 @@
 #include "DataPoolErrorMsg.h"
 #include "DataPoolImpl.h"
 #include "GXStation.h"
-using namespace clstd;
+//using namespace clstd;
 
 // TODO:
 // [C]1.无符号类型是：“unsigned_int” 要改为 “unsigned int”

@@ -13,7 +13,7 @@
 #include "GrapX/GXUser.h"
 #include "GrapX/gxError.h"
 #if defined(_DEBUG) && (defined(_WIN32) || defined(_WIN64))
-#include <vld.h>
+//#include <vld.h>
 #endif // #if defined(_DEBUG) && (defined(_WIN32) || defined(_WIN64))
 
 #pragma comment(lib, "kernel32.lib")
@@ -22,7 +22,7 @@
 #pragma comment(lib, "advapi32.lib")
 #pragma warning( disable : 4996 ) // disable deprecated warning 
 
-using namespace clstd;
+//using namespace clstd;
 
 #ifdef _WINDOWS
 //GXVOID _WinVerifyFailure(GXCHAR *pszSrcFile,GXINT nLine, GXDWORD dwErrorNum)
@@ -677,7 +677,7 @@ GXVOID GXDLLAPI MOCanonicalizeVertexDecl(LPGXVERTEXELEMENT pNewVertDecl, LPCGXVE
   GXUINT nCount = MOGetDeclCount(pSrcVertDecl);
   memcpy(pNewVertDecl, pSrcVertDecl, sizeof(GXVERTEXELEMENT) * (nCount + 1));
 
-  QuickSort<SORT_CONTEXT, GXUINT>((SORT_CONTEXT*)pNewVertDecl, 0, nCount);
+  clstd::QuickSort<SORT_CONTEXT, GXUINT>((SORT_CONTEXT*)pNewVertDecl, 0, nCount);
   if(bRelocalOffset) {
     // 重新计算Offset
     MORelocateVertexDecl(pNewVertDecl);
@@ -870,7 +870,7 @@ GXBOOL IsPow2(GXINT nNum)
 
 GXINT GetAdaptedSize(GXINT nSize)
 {
-  return RoundupPowOfTwo<GXINT>(nSize);
+  return clstd::RoundupPowOfTwo<GXINT>(nSize);
 }
 
 // 从声明中获得需要的长度
@@ -1087,7 +1087,7 @@ GXBOOL MOGenerateDeclarationCodes(DATALAYOUT* lpCommUniformDef, GXDWORD dwPlatfo
   }
 
   // 按照偏移排序
-  QuickSort(&aContext.front(), 0, (int)aContext.size());
+  clstd::QuickSort(&aContext.front(), 0, (int)aContext.size());
 
   GXUINT uOffset = 0;
   clStringA strDefine;

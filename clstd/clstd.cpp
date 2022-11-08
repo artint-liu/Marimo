@@ -5,7 +5,7 @@
 # include <conio.h>
 # include <Windows.h>
 # include <Shlwapi.h>
-# include <vld.h>
+//# include <vld.h>
 # pragma comment(lib, "shlwapi.lib")
 //# pragma warning(disable : 4996)
 #elif defined(_CL_SYSTEM_LINUX)

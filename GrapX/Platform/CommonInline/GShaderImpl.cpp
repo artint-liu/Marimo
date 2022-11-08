@@ -25,7 +25,7 @@
 
 #define PS_HANDLE_SHIFT 16
 
-using namespace clstd;
+//using namespace clstd;
 
 #include <Smart/smartstream.h>
 #include <clTokens.h>

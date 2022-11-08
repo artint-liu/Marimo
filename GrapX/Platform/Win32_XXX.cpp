@@ -21,7 +21,7 @@
 #include "thread/clMessageThread.h"
 #include "User/gxMessage.hxx"
 
-using namespace clstd;
+//using namespace clstd;
 void GXDestroyRootFrame();
 #pragma comment(lib, "shell32.lib")
 
@@ -670,7 +670,7 @@ void ResolverMacroStringToD3DMacro(GXLPCSTR szMacros, GXDefinitionArray& aMacros
 {
   clStringArrayA aMacroStrings;
   GXDefinition m;
-  ResolveString<clStringA, ch, clStringArrayA>(szMacros, ';', aMacroStrings);
+  clstd::ResolveString<clStringA, ch, clStringArrayA>(szMacros, ';', aMacroStrings);
   for(clStringArrayA::iterator it = aMacroStrings.begin();
     it != aMacroStrings.end(); ++it) {
       int nPos = (int)it->Find('=');

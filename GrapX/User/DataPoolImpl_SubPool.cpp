@@ -13,7 +13,7 @@
 #include "DataPoolBuildTime.h"
 
 #include "GXStation.h"
-using namespace clstd;
+//using namespace clstd;
 
 namespace Marimo
 {

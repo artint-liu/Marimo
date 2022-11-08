@@ -23,11 +23,13 @@
 
 #include "GFTFontImpl.h"
 
-#ifdef _DEBUG
-#  pragma comment(lib, "freetype2411ST_D.lib")
-#else
-#  pragma comment(lib, "freetype2411ST.lib")
-#endif // _DEBUG
+#pragma comment(lib, "freetype.lib")
+
+//#ifdef _DEBUG
+//#  pragma comment(lib, "freetype2411ST_D.lib")
+//#else
+//#  pragma comment(lib, "freetype2411ST.lib")
+//#endif // _DEBUG
 
 
 #define DEFAULT_FONT_TEX_SIZE_X    256

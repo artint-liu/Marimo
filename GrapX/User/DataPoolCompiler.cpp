@@ -15,7 +15,7 @@
 //#include "DataPoolVariableVtbl.h"
 #include "DataPoolErrorMsg.h"
 #include "DataPoolImpl.h"
-using namespace clstd;
+//using namespace clstd;
 
 #define E_1000_NOT_FOUND_SEMICOLON          1000
 #define E_1001_SYNTAX_ERROR                 1001

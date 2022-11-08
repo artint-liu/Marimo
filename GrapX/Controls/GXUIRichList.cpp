@@ -28,7 +28,7 @@
 #define IS_LTORRICHLIST(_STYLE)  TEST_FLAG(_STYLE, GXLBS_LTRSCROLLED)
 #define IS_MULTICOLUMN(_STYLE)  TEST_FLAG(_STYLE, GXLBS_MULTICOLUMN)
 //#define CEIL(_A, _B)    _B ((_A + (_B - 1)) / _B)
-using namespace clstd;
+//using namespace clstd;
 
 int Ceil(int a, int b)
 {

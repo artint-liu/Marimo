@@ -22,10 +22,11 @@
 #include <clStock.h>
 #include <Canvas/GXSpriteImpl.h>
 
-using namespace clstd;
+//using namespace clstd;
+using StockA = clstd::StockA;
 //////////////////////////////////////////////////////////////////////////
 extern "C" GXBOOL GXDLLAPI gxSetRegn(GXLPREGN lprg, GXINT xLeft, GXINT yTop, GXINT xWidth, GXINT yHeight);
-GXHRESULT IntLoadSpriteDesc(clstd::StockA& ss, GXLPCWSTR szSpriteFile, GXSpriteDesc** ppDesc);
+GXHRESULT IntLoadSpriteDesc(StockA& ss, GXLPCWSTR szSpriteFile, GXSpriteDesc** ppDesc);
 //////////////////////////////////////////////////////////////////////////
 
 GXHRESULT GXDLLAPI GXCreateSprite(GrapX::Graphics* pGraphics, GXLPCWSTR szTextureFile, GXREGN *arrayRegion, GXSIZE_T nCount, GXSprite** ppSprite)
@@ -91,7 +92,7 @@ GXHRESULT GXDLLAPI GXCreateSpriteArray(GrapX::Graphics* pGraphics, GXLPCWSTR szT
 
 GXHRESULT GXDLLAPI GXCreateSpriteFromFileW(GrapX::Graphics* pGraphics, GXLPCWSTR szSpriteFile, GXSprite** ppSprite)
 {
-  clstd::StockA ss;
+  StockA ss;
   GXHRESULT hval = GX_FAIL;
 
   if( ! ss.LoadFromFile(szSpriteFile)) {
@@ -105,7 +106,7 @@ GXHRESULT GXDLLAPI GXCreateSpriteFromFileW(GrapX::Graphics* pGraphics, GXLPCWSTR
   // 未来不排除增加同时读取两种格式并合并为同一个Sprite对象的可能
   //
 
-  clstd::StockA::Section hSpriteArray = ss.OpenSection("SpriteArray");
+  StockA::Section hSpriteArray = ss.OpenSection("SpriteArray");
   if(hSpriteArray)
   {
     clStringW strImageFile;

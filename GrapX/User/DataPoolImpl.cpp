@@ -14,7 +14,7 @@
 #include "DataPoolBuildTime.h"
 
 #include "GXStation.h"
-using namespace clstd;
+//using namespace clstd;
 
 #endif // #ifndef _HIDING_CODE_
 // NX16B = not cross 16-byte boundary
@@ -294,7 +294,7 @@ namespace Marimo
     extern DataPoolVariable::VTBL* s_pDynamicArrayNX16BVtbl;
 
 #ifndef _HIDING_CODE_
-    void CopyVariables(DataPoolImpl::VARIABLE_DESC* pDestVarDesc, const DataPoolBuildTime::BTVarDescArray* pSrcVector, const STRINGSETDESC* pTable, GXINT_PTR lpBase)
+    void CopyVariables(DataPoolImpl::VARIABLE_DESC* pDestVarDesc, const DataPoolBuildTime::BTVarDescArray* pSrcVector, const clstd::STRINGSETDESC* pTable, GXINT_PTR lpBase)
     {
       int i = 0;
       for(auto it = pSrcVector->begin(); it != pSrcVector->end(); ++it, ++i)
@@ -660,10 +660,10 @@ namespace Marimo
 
     // Hash Find
     const HASHALGO& h = m_aHashAlgos[nHashIndex];
-    if(h.eType == (u16)StaticStringsDict::HashType_Local || h.eType == (u16)StaticStringsDict::HashType_String)
+    if(h.eType == (u16)clstd::StaticStringsDict::HashType_Local || h.eType == (u16)clstd::StaticStringsDict::HashType_String)
     {
-      STATIC_ASSERT(StaticStringsDict::HashType_Local == 1);
-      StaticStringsDict::len_t _hash = h.HashString(szName);
+      STATIC_ASSERT(clstd::StaticStringsDict::HashType_Local == 1);
+      clstd::StaticStringsDict::len_t _hash = h.HashString(szName);
 
       const u8* p = h.HashToIndex(_hash);
       ASSERT(h.nBucket >= count);
@@ -1543,7 +1543,7 @@ namespace Marimo
     auto cbDbgSave = m_Buffer.GetSize();
 #endif // #ifdef _DEBUG
 
-    STRINGSETDESC* pTable = new STRINGSETDESC[bt.NameSet.size()];
+    clstd::STRINGSETDESC* pTable = new clstd::STRINGSETDESC[bt.NameSet.size()];
     bt.NameSet.sort(pTable);
 
     memset((GXLPBYTE)m_Buffer.GetPtr() + cbHeader, 0, bt.NameSet.buffer_size());
@@ -2215,8 +2215,8 @@ namespace Marimo
 
 
 
-    StringSetW sStringVar; // 字符串变量集合
-    StringSetA sStringVarA; // 字符串变量集合
+    clstd::StringSetW sStringVar; // 字符串变量集合
+    clstd::StringSetA sStringVarA; // 字符串变量集合
     GXUINT nRelOffset = 0;  // 重定位表的开始偏移
     //UIntArray     RelocalizeTab;  
     BufDescArray  BufferTab;
@@ -2954,8 +2954,8 @@ namespace Marimo
   GXSIZE_T DATAPOOL_HASHALGO::HashString(GXLPCSTR str) const
   {
     ASSERT(eType == 1 || eType == 2);
-    return (eType == (u16)StaticStringsDict::HashType_Local)
-      ? StaticStringsDict::HashChar(str, GXSTRLEN(str), nPos)
+    return (eType == (u16)clstd::StaticStringsDict::HashType_Local)
+      ? clstd::StaticStringsDict::HashChar(str, GXSTRLEN(str), nPos)
       : clstd::HashStringT(str);
   }
 } // namespace Marimo

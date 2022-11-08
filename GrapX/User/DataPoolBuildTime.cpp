@@ -9,7 +9,7 @@
 
 #include "DataPoolImpl.h"
 #include "DataPoolBuildTime.h"
-using namespace clstd;
+//using namespace clstd;
 
 namespace Marimo
 {
@@ -20,7 +20,7 @@ namespace Marimo
     , m_nNumOfStructs(0)
     , m_nNumOfBuckets(0)
   {
-    m_VarHashInfo.eType   = StaticStringsDict::HashType_Failed;
+    m_VarHashInfo.eType   = clstd::StaticStringsDict::HashType_Failed;
     m_VarHashInfo.nBucket = 0;
     m_VarHashInfo.nPos    = 0;
   }
@@ -59,7 +59,7 @@ namespace Marimo
     sDesc.nMemberIndex = 0;
     sDesc.nMemberCount = 0;
     sDesc.nTypeAddress = 0;
-    sDesc.HashInfo.eType   = StaticStringsDict::HashType_Failed;
+    sDesc.HashInfo.eType   = clstd::StaticStringsDict::HashType_Failed;
     sDesc.HashInfo.nBucket = 0;
     sDesc.HashInfo.nPos    = 0;
 

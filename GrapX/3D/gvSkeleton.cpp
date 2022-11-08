@@ -25,7 +25,7 @@
 #define SKELETON_FMT_BONENAME    "Skeleton@BoneName_%d"
 #define SKELETON_FMT_BONEPT      "Skeleton@BonePT_%d"  // Parent & Transform
 
-using namespace clstd;
+//using namespace clstd;
 //using namespace GrapX;
 
 //////////////////////////////////////////////////////////////////////////
@@ -126,7 +126,7 @@ void GVAnimationTrack::UpdateBoneLocalMarix(Bone& bone, int nBoneIndex, int nFra
   bone.matLocal.AffineTransformation(&vScaling, NULL, &vRotation, &vTranslation);
 }
 
-GXHRESULT GVAnimationTrack::SaveFile(SmartRepository* pStorage)
+GXHRESULT GVAnimationTrack::SaveFile(clstd::SmartRepository* pStorage)
 {
   pStorage->WriteNumeric(NULL, ANIMTRACK_FRAMECOUNT, m_nFrameCount);
   pStorage->WriteNumeric(NULL, ANIMTRACK_FRAMERATE, m_nFrameRate);
@@ -142,7 +142,7 @@ GXHRESULT GVAnimationTrack::SaveFile(SmartRepository* pStorage)
   return GX_OK;
 }
 
-GXHRESULT GVAnimationTrack::LoadFile(SmartRepository* pStorage)
+GXHRESULT GVAnimationTrack::LoadFile(clstd::SmartRepository* pStorage)
 {
   SAFE_DELETE(m_pTS);
   SAFE_DELETE(m_pQuaternions);
@@ -183,7 +183,7 @@ GXHRESULT GVAnimationTrack::LoadFile(SmartRepository* pStorage)
 
 GXHRESULT GVAnimationTrack::SaveFileW(GXLPCWSTR szFilename)
 {
-  SmartRepository Storage;
+  clstd::SmartRepository Storage;
   GXHRESULT hval = SaveFile(&Storage);
   if(GXSUCCEEDED(hval)) {
     hval = Storage.SaveW(szFilename) ? GX_OK : GX_FAIL;
@@ -259,7 +259,7 @@ GXHRESULT GVAnimationTrack::CreateAnimationTrack(
 
 GXHRESULT GVAnimationTrack::CreateFromFileW(GVAnimationTrack** ppTrack, GXLPCWSTR szFilename)
 {
-  SmartRepository Storage;
+  clstd::SmartRepository Storage;
   if( ! Storage.LoadW(szFilename)) {
     return GX_FAIL;
   }
@@ -267,7 +267,7 @@ GXHRESULT GVAnimationTrack::CreateFromFileW(GVAnimationTrack** ppTrack, GXLPCWST
   return CreateFromRepository(ppTrack, &Storage);
 }
 
-GXHRESULT GVAnimationTrack::CreateFromRepository(GVAnimationTrack** ppTrack, SmartRepository* pStorage)
+GXHRESULT GVAnimationTrack::CreateFromRepository(GVAnimationTrack** ppTrack, clstd::SmartRepository* pStorage)
 {
   GXHRESULT hval = GX_OK;
   GVAnimationTrack* pTrack = new GVAnimationTrack;
@@ -383,7 +383,7 @@ void GVSkeleton::BuildUpdateOrderTable()
   }
 
   // 根据深度排序
-  QuickSort(&aOrder.front(), (int)0, (int)aOrder.size());
+  clstd::QuickSort(&aOrder.front(), (int)0, (int)aOrder.size());
 
   // 把排序后的索引值写入表中
   for(IndexOrderArray::iterator it = aOrder.begin();
@@ -508,14 +508,14 @@ GXBOOL GVSkeleton::Update(const GVSCENEUPDATE& sContext)
 
 GXHRESULT GVSkeleton::CreateFromFileW(GVSkeleton** ppSkeleton, GVScene* pScene, GXLPCWSTR szFilename)
 {
-  SmartRepository Storage;
+  clstd::SmartRepository Storage;
   if( ! Storage.LoadW(szFilename)) {
     return GX_FAIL;
   }
   return CreateFromRepository(ppSkeleton, pScene, &Storage);
 }
 
-GXHRESULT GVSkeleton::CreateFromRepository(GVSkeleton** ppSkeleton, GVScene* pScene, SmartRepository* pStorage)
+GXHRESULT GVSkeleton::CreateFromRepository(GVSkeleton** ppSkeleton, GVScene* pScene, clstd::SmartRepository* pStorage)
 {
   GXHRESULT hval = GX_OK;
   GVSkeleton* pSkeleton = new GVSkeleton(pScene);
@@ -682,7 +682,7 @@ GXBOOL GVSkeleton::PlayById(int nId)
   return m_pCurrTrack != NULL;
 }
 
-GXHRESULT GVSkeleton::SaveFile(SmartRepository* pStorage)
+GXHRESULT GVSkeleton::SaveFile(clstd::SmartRepository* pStorage)
 {
   GXUINT nBoneCount = (GXUINT)m_aBones.size();
   pStorage->Write64(NULL, SKELETON_BONECOUNT, nBoneCount, NULL);
@@ -704,7 +704,7 @@ GXHRESULT GVSkeleton::SaveFile(SmartRepository* pStorage)
   return GX_OK;
 }
 
-GXHRESULT GVSkeleton::LoadFile(GrapX::Graphics* pGraphics, SmartRepository* pStorage)
+GXHRESULT GVSkeleton::LoadFile(GrapX::Graphics* pGraphics, clstd::SmartRepository* pStorage)
 {
   Clear();
   int nBoneCount;

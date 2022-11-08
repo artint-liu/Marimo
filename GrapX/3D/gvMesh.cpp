@@ -32,8 +32,9 @@
 //#define MESH_STARTINDEX   "Mesh@StartIndex"
 #define MESH_TRANSFORM    "Mesh@Transform"
 
-using namespace clstd;
+//using namespace clstd;
 using namespace GrapX;
+using SmartRepository = clstd::SmartRepository;
 
 GVMesh::GVMesh(Graphics* pGraphics)
   : GVNode       (NULL, GXMAKEFOURCC('M','E','S','H'))
