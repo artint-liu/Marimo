@@ -177,6 +177,7 @@ namespace clstd
     // 最后最后,读出Variable用的Buffer
     if(Header.dwMagic == SZDB_MAGIC)
     {
+#ifdef ENABLE_ZLIB
       ZHEADER ZHeader;
       if( ! file.Read(&ZHeader, sizeof(ZHEADER))) {
         CLOG_ERROR("%s: Can not read Z-Header data(%s).\n", __FUNCTION__, szSmartNodeName);
@@ -208,6 +209,9 @@ namespace clstd
       pSmart->pBuffer = new Buffer;
       pSmart->pBuffer->Append(pDataBuf->GetPtr(), pDataBuf->GetSize());
       SAFE_DELETE(pDataBuf);
+#else
+      CLOG_ERROR("%s: ENABLE_ZLIB is not enabled, can not read zlib data(%s).", __FUNCTION__, szSmartNodeName);
+#endif
     }
     else
     {
@@ -301,6 +305,7 @@ namespace clstd
     }
 
     // 数据buffer放在最后面
+#ifdef ENABLE_ZLIB
     if(m_bCompressed)
     {
       b32 bval = TRUE;
@@ -328,7 +333,14 @@ namespace clstd
       }
     }
     else
+#endif
     {
+#ifndef ENABLE_ZLIB
+      if (m_bCompressed)
+      {
+        CLOG_WARNING("%s: ENABLE_ZLIB is not enabled. Write data directly.", __FUNCTION__);
+      }
+#endif
       if( ! file.Write(pSmart->pBuffer->GetPtr(), (u32)pSmart->pBuffer->GetSize()) ) {
         CLOG_ERROR("%s: Can not write buffer data(%s).\n", __FUNCTION__, szSmartNodeName);
         return FALSE;

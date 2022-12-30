@@ -2,6 +2,8 @@
 //#include "clBuffer.h"
 #include "clCompress.h"
 
+#ifdef ENABLE_ZLIB
+
 #if defined(_CL_SYSTEM_MACOS)
 # include "zlib.h"
 #elif _MSC_VER <= 1600
@@ -9,6 +11,12 @@
 #else
 //# define Z_PREFIX
 # include <zlib.h>
+#endif
+
+#ifdef _DEBUG
+# pragma comment(lib, "zlibstat_d.lib")
+#else
+# pragma comment(lib, "zlibstat.lib")
 #endif
 
 namespace clstd
@@ -79,3 +87,5 @@ namespace clstd
     return pBuffer;
   }
 } // namespace clstd
+
+#endif // ENABLE_ZLIB

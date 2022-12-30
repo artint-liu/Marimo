@@ -1,0 +1,45 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33205.214
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "clstd", "clstd.vcxitems", "{488033D1-AAFF-437F-A770-1DD650AEE70C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "clstd_win32", "clstd_win32.vcxproj", "{0A932C05-F32C-466A-8192-A6212FA693BD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM = Debug|ARM
+		Debug|ARM64 = Debug|ARM64
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|ARM = Release|ARM
+		Release|ARM64 = Release|ARM64
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0A932C05-F32C-466A-8192-A6212FA693BD}.Debug|ARM.ActiveCfg = Debug|Win32
+		{0A932C05-F32C-466A-8192-A6212FA693BD}.Debug|ARM64.ActiveCfg = Debug|Win32
+		{0A932C05-F32C-466A-8192-A6212FA693BD}.Debug|x64.ActiveCfg = Debug|x64
+		{0A932C05-F32C-466A-8192-A6212FA693BD}.Debug|x64.Build.0 = Debug|x64
+		{0A932C05-F32C-466A-8192-A6212FA693BD}.Debug|x86.ActiveCfg = Debug|Win32
+		{0A932C05-F32C-466A-8192-A6212FA693BD}.Debug|x86.Build.0 = Debug|Win32
+		{0A932C05-F32C-466A-8192-A6212FA693BD}.Release|ARM.ActiveCfg = Release|Win32
+		{0A932C05-F32C-466A-8192-A6212FA693BD}.Release|ARM64.ActiveCfg = Release|Win32
+		{0A932C05-F32C-466A-8192-A6212FA693BD}.Release|x64.ActiveCfg = Release|x64
+		{0A932C05-F32C-466A-8192-A6212FA693BD}.Release|x64.Build.0 = Release|x64
+		{0A932C05-F32C-466A-8192-A6212FA693BD}.Release|x86.ActiveCfg = Release|Win32
+		{0A932C05-F32C-466A-8192-A6212FA693BD}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7DF1917D-9A65-4221-98D6-13C531D5CAAF}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		clstd.vcxitems*{0a932c05-f32c-466a-8192-a6212fa693bd}*SharedItemsImports = 4
+		clstd.vcxitems*{488033d1-aaff-437f-a770-1dd650aee70c}*SharedItemsImports = 9
+	EndGlobalSection
+EndGlobal

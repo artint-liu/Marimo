@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--语法参考：-->
+<!--https://docs.microsoft.com/zh-cn/visualstudio/debugger/create-custom-views-of-native-objects?view=vs-2015-->
+<!--https://docs.microsoft.com/zh-cn/visualstudio/debugger/format-specifiers-in-cpp?view=vs-2015-->
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="clstd::StringX&lt;*&gt;">
+    <DisplayString>{{{m_pBuf,na} (size={*(size_t*)((char*)m_pBuf-sizeof(void*))})}}</DisplayString>
+  </Type>
+
+  <Type Name="clstd::TokensT&lt;*&gt;::iterator">
+    <DisplayString>{marker,[length]s}</DisplayString>
+  </Type>
+
+</AutoVisualizer>

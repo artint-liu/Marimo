@@ -1,6 +1,7 @@
 ﻿#ifndef _CLSTD_COMPRESS_H_
 #define _CLSTD_COMPRESS_H_
 
+#ifdef ENABLE_ZLIB
 namespace clstd
 {
   //b32 Compress(PROCESSBUFFER* pProcessBuffer);
@@ -17,5 +18,6 @@ namespace clstd
   FixedBuffer*  UncompressBuffer (BufferBase* pSourceBuffer, clsize nDestSize);  // nDestSize 解压后的长度, 如果与数据实际长度不符, 会失败.
 } // namespace clstd
 
+#endif // ENABLE_ZLIB
 
 #endif // #ifndef _CLSTD_COMPRESS_H_
