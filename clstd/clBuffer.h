@@ -230,6 +230,30 @@ namespace clstd
     MemBuffer& ConvertFromUtf8(MemBuffer& strUnicode, const ch* szUtf8, size_t nUtf8);
   } // namespace StringUtility
 
+#ifdef _CL_SYSTEM_WINDOWS
+  class SharedBuffer
+  {
+  public:
+    enum Flags
+    {
+      Flags_Read = 0x00000000,
+      Flags_Write = 0x00000001,
+    };
+
+  protected:
+    HANDLE m_hMapFile = NULL;
+    void* m_pSharedMemory = NULL;
+    clsize m_size = 0;
+  public:
+    SharedBuffer(CLLPCSTR szName, u32 flags = Flags_Read | Flags_Write, clsize cbBuffer = 4096);
+    virtual ~SharedBuffer();
+
+    clsize Write(const u8* ptr, clsize count);
+    clsize Read(u8* ptr, clsize count);
+  };
+#endif
+
+
 } // namespace clstd
 //////////////////////////////////////////////////////////////////////////
 //

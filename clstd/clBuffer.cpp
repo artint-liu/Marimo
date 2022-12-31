@@ -252,6 +252,58 @@ namespace clstd
   } // namespace StringUtility
 
 
+  SharedBuffer::SharedBuffer(CLLPCSTR szName, u32 flags, clsize cbBuffer)
+  {
+    DWORD dwFlags = PAGE_READONLY;
+    if (TEST_FLAG(flags, Flags_Write))
+    {
+      dwFlags = PAGE_READWRITE;
+    }
+    m_hMapFile = CreateFileMappingA(INVALID_HANDLE_VALUE, NULL, dwFlags, 0, cbBuffer, szName);
+    m_size = cbBuffer;
+    if (m_hMapFile != NULL)
+    {
+      m_pSharedMemory = MapViewOfFile(m_hMapFile, FILE_MAP_ALL_ACCESS, 0, 0, cbBuffer);
+    }
+  }
+
+  SharedBuffer::~SharedBuffer()
+  {
+    if (m_pSharedMemory)
+    {
+      UnmapViewOfFile(m_pSharedMemory);
+      m_pSharedMemory = NULL;
+    }
+
+    if (m_hMapFile)
+    {
+      CloseHandle(m_hMapFile);
+    }
+  }
+
+  clsize SharedBuffer::Write(const u8* ptr, clsize count)
+  {
+    if (m_pSharedMemory)
+    {
+      clsize cbCopy = min(count, m_size);
+      memcpy(m_pSharedMemory, ptr, cbCopy);
+      return cbCopy;
+    }
+    return 0;
+  }
+
+  clsize SharedBuffer::Read(u8* ptr, clsize count)
+  {
+    if (m_pSharedMemory)
+    {
+      clsize cbCopy = min(count, m_size);
+      memcpy(ptr, m_pSharedMemory, cbCopy);
+      return cbCopy;
+    }
+    return 0;
+  }
+
+
 } // namespace clstd
 //////////////////////////////////////////////////////////////////////////
 clQueueBuffer::clQueueBuffer(u32 uElementSize)
