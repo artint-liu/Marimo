@@ -174,10 +174,10 @@ namespace clstd
       return y * v.x - x * v.y;
     }
 
-    _float2& set(float x) { this->x = x = this->y = x; return *this; }
-    _float2& set(float x, float y) { this->x = x; this->y = y; return *this; }
-    _float2& set(int x) { this->x = this->y = (float)x; return *this; }
-    _float2& set(int x, int y) { this->x = (float)x; this->y = (float)y; return *this; }
+    _float2& set(float _x) { this->x = _x; this->y = _x; return *this; }
+    _float2& set(float _x, float _y) { this->x = _x; this->y = _y; return *this; }
+    _float2& set(int _x) { this->x = this->y = (float)_x; return *this; }
+    _float2& set(int _x, int _y) { this->x = (float)_x; this->y = (float)_y; return *this; }
 
     b32 IsNearTo(const _float2& v, float epsilon) const
     {
@@ -322,9 +322,9 @@ namespace clstd
     _float2 zy() const {return _float2(z,y);}
     _float2 xz() const {return _float2(x,z);}
 
-    _float3& set(float x, float y, float z)
+    _float3& set(float _x, float _y, float _z)
     {
-      this->x = x; this->y = y; this->z = z; return *this;
+      this->x = _x; this->y = _y; this->z = _z; return *this;
     }
 
     _float3& set(float f)
@@ -591,7 +591,7 @@ namespace clstd
     }
 
     _float4& set(float f) { x = y = z = w = f; return *this; }
-    _float4& set(float x, float y, float z, float w){this->x = x; this->y = y; this->z = z; this->w = w; return *this;}
+    _float4& set(float _x, float _y, float _z, float _w){this->x = _x; this->y = _y; this->z = _z; this->w = _w; return *this;}
     float lengthsquare() const { return x * x + y * y + z * z + w * w; }
     float length() const { return sqrt(lengthsquare()); }
     _float4& abs()

@@ -12,7 +12,7 @@
 
 #define REFACTOR_SHADER   // shader 重构宏
 
-#if __cplusplus < 201103L
+#if !defined(_NOCHECKCPLUSPLUS) && __cplusplus < 201103L
 # error 需要C++11或以上级别的编译器支持
 #endif
 

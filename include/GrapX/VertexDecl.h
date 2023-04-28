@@ -83,11 +83,11 @@ struct GXVERTEX_P4T2F_C1D
   };
   GXVERTEX_P4T2F_C1D() CLTRIVIAL_DEFAULT;
 
-  GXVERTEX_P4T2F_C1D& operator=(const GXVERTEX_P4T2F_C1D& v)
+  GXVERTEX_P4T2F_C1D& operator=(const GXVERTEX_P4T2F_C1D& _v)
   {
-    pos = v.pos;
-    texcoord = v.texcoord;
-    color = v.color;
+    pos = _v.pos;
+    texcoord = _v.texcoord;
+    color = _v.color;
     return *this;
   }
 };

@@ -52,9 +52,9 @@
 
 #if defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP)
 # if defined(__UNREAL__)
-#   include "AllowWindowsPlatformTypes.h"
+#   include "Windows/AllowWindowsPlatformTypes.h"
 #   include <windows.h>
-#   include "HideWindowsPlatformTypes.h"
+#   include "Windows/HideWindowsPlatformTypes.h"
 # else
 #   include <windows.h>
 # endif

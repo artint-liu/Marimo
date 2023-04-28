@@ -78,10 +78,10 @@ namespace EditorUtility
         return func(ptAbsoluteDelta, ptOrigin);
       }
     public:
-      DragImpl(_Fn f) : func(f){}
+      DragImpl(_Fn f) : func(f) {}
     }drag(DragFunc);
     return drag.Track(ptCursor, ptOrigin);
-  }
+  };
 } // namespace EditorUtility
 
 #endif // #ifndef _EDITOR_UTILITY_DRAG_H_
