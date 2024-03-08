@@ -275,6 +275,70 @@ namespace clstd
       }
     }
 
+    b32 Triangle::intersect(const Ray& ray, float* u, float* v, float* t)
+    {
+        // https://www.cnblogs.com/graphics/archive/2010/08/09/1795348.html
+         // E1
+        float3 E1 = B - A;
+
+        // E2
+        float3 E2 = C - A;
+
+        // P
+        float3 P = float3::cross(ray.vDirection, E2);
+
+        // determinant
+        float det = float3::dot(E1, P);
+
+        // keep det > 0, modify T accordingly
+        float3 T;
+        if (det > 0)
+        {
+            T = ray.vOrigin - A;
+        }
+        else
+        {
+            T = A - ray.vOrigin;
+            det = -det;
+        }
+
+        // If determinant is near zero, ray lies in plane of triangle
+        if (det < 0.0001f)
+        {
+            return false;
+        }
+
+        // Calculate u and make sure u <= 1
+        *u = float3::dot(T, P);
+        if (*u < 0.0f || *u > det)
+        {
+            return false;
+        }
+
+        // Q
+        float3 Q = float3::cross(T, E1);
+
+        // Calculate v and make sure u + v <= 1
+        *v = float3::dot(ray.vDirection, Q);
+        if (*v < 0.0f || *u + *v > det)
+        {
+            return false;
+        }
+
+        float fInvDet = 1.0f / det;
+
+        if (t) // Calculate t, scale parameters, ray intersects triangle
+        {
+            *t = float3::dot(E2, Q);
+            *t *= fInvDet;
+        }
+
+        *u *= fInvDet;
+        *v *= fInvDet;
+
+        return true;
+    }
+
     Triangle& Triangle::set(const _float3* aVertices)
     {
       _float3* m = *this;

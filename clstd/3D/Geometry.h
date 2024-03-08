@@ -7,6 +7,7 @@ namespace clstd
     struct Plane;
     struct NormalizedRay;
     struct FrustumPlanes;
+    struct Ray;
 
     class AABB
     {
@@ -403,6 +404,10 @@ namespace clstd
       operator _float3*() const;
 
       b32 intersect(const Triangle& t); // 判断两三角形相交(无交点)
+      // 射线与三角形相交判断【未验证】
+      // 交点计算：1. ray.vOrigin + float3::normalize(ray.vDirection)
+      //          2. (1 - u - v) * A + u * B + v * C
+      b32 intersect(const Ray& ray, float* u, float* v, float* t);
       //int intersect(const _triangle& t);  // 判断与另一个三角形相交的情况,返回值是交点数[0, 3]
     };
 
