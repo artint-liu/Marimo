@@ -344,6 +344,13 @@ namespace clstd
         v3 vMaxRes = v3::Min(vMax, aabb.vMax);
         return vMinRes <= vMaxRes;  // 这个"="以后修改要小心, 注意AABB是个薄片(vMin.x==vMax.x || vMin.y==vMax.y || vMin.z==vMax.z)的情况
       }
+
+      void GetNearestPoint(v3* pOut, const v3& position) // 求点到AABB上最近距离点，如果在AABB中则返回自身位置
+      {
+          pOut->x = (position.x < vMin.x) ? vMin.x : ((position.x > vMax.x) ? vMax.x : position.x);
+          pOut->y = (position.y < vMin.y) ? vMin.y : ((position.y > vMax.y) ? vMax.y : position.y);
+          pOut->z = (position.z < vMin.z) ? vMin.z : ((position.z > vMax.z) ? vMax.z : position.z);
+      }
     };
 
     template<typename _Ty>
