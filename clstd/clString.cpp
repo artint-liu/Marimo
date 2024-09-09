@@ -1644,7 +1644,7 @@ namespace clstd
   _CLSTR_TEMPL
     void _CLSTR_IMPL::Clear()
   {
-    _Reduce(0);
+    _ResizeLengthNoCopy(0);
   }
 
   _CLSTR_TEMPL

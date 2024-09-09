@@ -31,6 +31,37 @@ CLDEPRECATED_ATTRIBUTE b32 IsFullPathT(const _TString& strFilename);
 CLDEPRECATED_ATTRIBUTE b32 IsFullPath(const clStringA& strFilename);
 CLDEPRECATED_ATTRIBUTE b32 IsFullPath(const clStringW& strFilename);
 
+namespace clstd
+{
+    enum FileAttribute
+    {
+        FileAttribute_ReadOnly = 0x00000001,
+        FileAttribute_Hidden = 0x00000002,
+        FileAttribute_System = 0x00000004,
+        FileAttribute_Directory = 0x00000010,
+    };
+
+    struct FINDFILEDATAW
+    {
+        CLWCHAR cFileName[MAX_PATH];
+        CLDWORD dwAttributes;
+        u64     nFileSize;
+        u64     nCreationTime;
+        u64     nLastAccessTime;
+        u64     nLastWriteTime;
+    };
+
+    struct FINDFILEDATAA
+    {
+        CLCHAR  cFileName[MAX_PATH];
+        CLDWORD dwAttributes;
+        u64     nFileSize;
+        u64     nCreationTime;
+        u64     nLastAccessTime;
+        u64     nLastWriteTime;
+    };
+}
+
 namespace clpathfile
 {
   // 定位工作目录
@@ -274,7 +305,11 @@ namespace clpathfile {
         RecursiveSearchDir<_TString>(szPath, [&rFileList, &fn]
         (const _TString& strDir, const WIN32_FIND_DATA& wfd) -> b32
         {
+#ifdef _MINWINBASE_
+          if (TEST_FLAG(wfd.dwFileAttributes, FILE_ATTRIBUTE_DIRECTORY))
+#else
           if(TEST_FLAG(wfd.dwAttributes, FILE_ATTRIBUTE_DIRECTORY))
+#endif
           {
             return fn(strDir, wfd);
           }
@@ -330,33 +365,6 @@ namespace clpathfile {
 
 namespace clstd
 {
-  enum FileAttribute
-  {
-    FileAttribute_ReadOnly  = 0x00000001,
-    FileAttribute_Hidden    = 0x00000002,
-    FileAttribute_System    = 0x00000004,
-    FileAttribute_Directory = 0x00000010,
-  };
-
-  struct FINDFILEDATAW
-  {
-    CLWCHAR cFileName[MAX_PATH];
-    CLDWORD dwAttributes;
-    u64     nFileSize;
-    u64     nCreationTime;
-    u64     nLastAccessTime;
-    u64     nLastWriteTime;
-  };
-
-  struct FINDFILEDATAA
-  {
-    CLCHAR  cFileName[MAX_PATH];
-    CLDWORD dwAttributes;
-    u64     nFileSize;
-    u64     nCreationTime;
-    u64     nLastAccessTime;
-    u64     nLastWriteTime;
-  };
 
   //#define _CRT_FINDFILE
 
