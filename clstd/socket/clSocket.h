@@ -42,6 +42,8 @@ namespace clstd
     SocketResult_CanotListen = -6,
     SocketResult_CanotConnect = -7,
 
+    SocketResult_BadSocket = -8,
+
     SocketResult_TimeOut = 100,
   };
 

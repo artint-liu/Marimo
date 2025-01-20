@@ -127,106 +127,122 @@ namespace clstd
 
   int TCPServer::MainLoop()
   {
-    fd_set ReadSet;
-    fd_set ExceptSet;
-  	int result = 0;
+      fd_set ReadSet;
+      fd_set ExceptSet;
+      int result = 0;
 
-  	while(1)
-  	{
-      FD_ZERO(&ReadSet);
-      FD_SET(m_ServerSocket, &ReadSet);
-
-      FD_ZERO(&ExceptSet);
-      FD_SET(m_ServerSocket, &ExceptSet);
-
-      ASSERT(m_ClientList.size() < FD_SETSIZE - 1); // ServerSocket 要占用一个
-      for(SocketList::iterator it = m_ClientList.begin();
-        it != m_ClientList.end(); ++it)
+      while (1)
       {
-        ASSERT(*it != NULL);
-        FD_SET(*it, &ReadSet);
-        FD_SET(*it, &ExceptSet);
-      }
+          FD_ZERO(&ReadSet);
+          FD_SET(m_ServerSocket, &ReadSet);
 
-      result = select(0, &ReadSet, 0, &ExceptSet, 0);
+          FD_ZERO(&ExceptSet);
+          FD_SET(m_ServerSocket, &ExceptSet);
 
-      if(result == 0)
-      {
-        // Time Out
-        ASSERT(ExceptSet.fd_count == 0);
-      }
-      else if(result == SOCKET_ERROR)
-      {
-        if(FD_ISSET(m_ServerSocket, &ReadSet))
-        {
-          break;
-        }
-        
-        CLBREAK;
-      }
-      else if(result != 0)
-      {
-        ASSERT(ExceptSet.fd_count == 0);
-        if(FD_ISSET(m_ServerSocket, &ReadSet))
-        {
-          SOCKADDR_IN clientSockAddr;
-          int addrLen = sizeof(SOCKADDR_IN);
-
-          // accept the connection request when one is received
-          SOCKET client = accept(m_ServerSocket, (LPSOCKADDR)&clientSockAddr, &addrLen);
-          if(client != INVALID_SOCKET) {
-            if(m_ClientList.size() < FD_SETSIZE - 1) {
-              CLOG("Got the connection(%d)...\r\n", client);
-              OnEvent(client, SE_ACCEPT);
-              m_ClientList.push_back(client);
-            }
-            else {
-              ::closesocket(client);
-            }
-          }
-        }
-        
-        for(SocketList::iterator it = m_ClientList.begin();
-          it != m_ClientList.end();)
-        {
-          if(FD_ISSET(*it, &ReadSet))
+          ASSERT(m_ClientList.size() < FD_SETSIZE - 1); // ServerSocket 要占用一个
+          for (SocketList::iterator it = m_ClientList.begin();
+              it != m_ClientList.end(); ++it)
           {
-            u32 dwPeek;
-            result = recv(*it, (char*)&dwPeek, sizeof(u32), MSG_PEEK);
-
-            if(result == 0) // 端口已经关闭
-            {
-              // 这种方式下
-              // 如果客户端在Debug下出现断点并关闭，这里会无法收到close消息
-              OnEvent(*it, SE_CLOSE);
-
-              result = ::closesocket(*it);
-              CLOG("Close socket(%d).\r\n", *it);
-
-              it = m_ClientList.erase(it);
-              continue;
-            }
-            else {
-              OnEvent(*it, SE_READ);
-            }
+              ASSERT(*it != NULL);
+              FD_SET(*it, &ReadSet);
+              FD_SET(*it, &ExceptSet);
           }
-          ++it;
-        } // for
-      }
-  	}
 
-    // 退出时清理客户端端口
-    for(SocketList::iterator it = m_ClientList.begin();
-      it != m_ClientList.end(); ++it)
-    {
-      result = closesocket(*it);
-      if(result == SOCKET_ERROR) {
-        CLOG_ERROR("Error for closing socket(%d)...\r\n", *it);
-      }
-    }
-    m_ClientList.clear();
+          result = select(0, &ReadSet, 0, &ExceptSet, 0);
 
-  	return result;
+          if (result == 0)
+          {
+              // Time Out
+              ASSERT(ExceptSet.fd_count == 0);
+          }
+          else if (result == SOCKET_ERROR)
+          {
+              if (FD_ISSET(m_ServerSocket, &ReadSet))
+              {
+                  break;
+              }
+
+              CLBREAK;
+          }
+          else if (result != 0)
+          {
+              ASSERT(ExceptSet.fd_count == 0);
+              if (FD_ISSET(m_ServerSocket, &ReadSet))
+              {
+                  SOCKADDR_IN clientSockAddr;
+                  int addrLen = sizeof(SOCKADDR_IN);
+
+                  // accept the connection request when one is received
+                  SOCKET client = accept(m_ServerSocket, (LPSOCKADDR)&clientSockAddr, &addrLen);
+                  if (client != INVALID_SOCKET) {
+                      if (m_ClientList.size() < FD_SETSIZE - 1) {
+                          CLOG("Got the connection(%d)...\r\n", client);
+                          m_bMarkCloseScoket = false;
+                          OnEvent(client, SE_ACCEPT);
+                          m_ClientList.push_back(client);
+                      }
+                      else {
+                          ::closesocket(client);
+                      }
+                  }
+              }
+
+              for (SocketList::iterator it = m_ClientList.begin(); it != m_ClientList.end();)
+              {
+                  if (FD_ISSET(*it, &ReadSet))
+                  {
+                      u32 dwPeek;
+                      result = recv(*it, (char*)&dwPeek, sizeof(u32), MSG_PEEK);
+
+                      if (result == 0) // 端口已经关闭
+                      {
+                          // 这种方式下
+                          // 如果客户端在Debug下出现断点并关闭，这里会无法收到close消息
+                          result = IntCloseSocket(it);
+                          continue;
+                      }
+                      else {
+                          m_bMarkCloseScoket = false;
+                          OnEvent(*it, SE_READ);
+                          if (m_bMarkCloseScoket) // 发生了删除，一般是调用了CloseSocket()
+                          {
+                              result = IntCloseSocket(it);
+                              m_bMarkCloseScoket = false;
+                              continue;
+                          }
+                      }
+                  }
+                  ++it;
+              } // for
+          }
+      }
+
+      // 退出时清理客户端端口
+      for (SocketList::iterator it = m_ClientList.begin();
+          it != m_ClientList.end(); ++it)
+      {
+          result = closesocket(*it);
+          if (result == SOCKET_ERROR) {
+              CLOG_ERROR("Error for closing socket(%d)...\r\n", *it);
+          }
+      }
+      m_ClientList.clear();
+
+      return result;
+  }
+
+  int TCPServer::IntCloseSocket(clist<SOCKET>::iterator& iter)
+  {
+      OnEvent(*iter, SE_CLOSE);
+      int result = ::closesocket(*iter);
+      CLOG("Close socket(%d).\r\n", *iter);
+      iter = m_ClientList.erase(iter);
+      return result;
+  }
+
+  void TCPServer::CloseSocket()
+  {
+      m_bMarkCloseScoket = true;
   }
 
   //void TCPServer::OnEvent(SOCKET sock, SocketEvent eEvent)

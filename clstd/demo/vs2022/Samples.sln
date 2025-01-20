@@ -12,6 +12,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "clstd_win32", "..\..\projec
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "clstd", "..\..\projects\vs2022\clstd.vcxitems", "{488033D1-AAFF-437F-A770-1DD650AEE70C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sample_SocketsClass", "Sample_SocketsClass.vcxproj", "{3F5DC2F0-C850-463B-9FD8-9699C2A8BED1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -36,6 +38,14 @@ Global
 		{0A932C05-F32C-466A-8192-A6212FA693BD}.Release|Win32.Build.0 = Release|Win32
 		{0A932C05-F32C-466A-8192-A6212FA693BD}.Release|x64.ActiveCfg = Release|x64
 		{0A932C05-F32C-466A-8192-A6212FA693BD}.Release|x64.Build.0 = Release|x64
+		{3F5DC2F0-C850-463B-9FD8-9699C2A8BED1}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3F5DC2F0-C850-463B-9FD8-9699C2A8BED1}.Debug|Win32.Build.0 = Debug|Win32
+		{3F5DC2F0-C850-463B-9FD8-9699C2A8BED1}.Debug|x64.ActiveCfg = Debug|x64
+		{3F5DC2F0-C850-463B-9FD8-9699C2A8BED1}.Debug|x64.Build.0 = Debug|x64
+		{3F5DC2F0-C850-463B-9FD8-9699C2A8BED1}.Release|Win32.ActiveCfg = Release|Win32
+		{3F5DC2F0-C850-463B-9FD8-9699C2A8BED1}.Release|Win32.Build.0 = Release|Win32
+		{3F5DC2F0-C850-463B-9FD8-9699C2A8BED1}.Release|x64.ActiveCfg = Release|x64
+		{3F5DC2F0-C850-463B-9FD8-9699C2A8BED1}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -45,5 +55,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\..\projects\vs2022\clstd.vcxitems*{0a932c05-f32c-466a-8192-a6212fa693bd}*SharedItemsImports = 4
+		..\..\projects\vs2022\clstd.vcxitems*{488033d1-aaff-437f-a770-1dd650aee70c}*SharedItemsImports = 9
 	EndGlobalSection
 EndGlobal
