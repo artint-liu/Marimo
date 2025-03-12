@@ -1,4 +1,5 @@
 ﻿#include <functional>
+#include <algorithm>
 #include "clstd.h"
 #include "clString.h"
 #include "thread/clThread.h"
@@ -9,7 +10,6 @@
 # include <errno.h>
 # include <arpa/inet.h>
 # include <unistd.h>
-# include <algorithm> // std::for_each
 #endif // #if defined(_CL_SYSTEM_LINUX)
 
 #include "clSocket.h"
