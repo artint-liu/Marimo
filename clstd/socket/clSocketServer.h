@@ -13,38 +13,37 @@ namespace clstd
 {
   enum SocketEvent;
 #if defined(_CL_SYSTEM_WINDOWS)
-  class TCPServer : public Thread
+  class TCPServer
   {
   public:
-    typedef clist<SOCKET> SocketList;
-    typedef clist<SOCKET>::iterator socket_iter;
+      typedef clist<SOCKET> SocketList;
+      typedef clist<SOCKET>::iterator socket_iter;
   protected:
-    SOCKET          m_ServerSocket;
-    SocketList      m_ClientList;
-    //socket_iter     m_itEvent; // OnEvent触发的socket
-    bool            m_bMarkCloseScoket = false;
-    int MainLoop  ();
-    i32 StartRoutine() override;
-    int IntCloseSocket(socket_iter& iter);
+      std::thread* m_pThread = nullptr;
+      SOCKET          m_ServerSocket;
+      SocketList      m_ClientList;
+      //socket_iter     m_itEvent; // OnEvent触发的socket
+      bool            m_bMarkCloseScoket = false;
+      int MainLoop();
+      i32 StartRoutine();
+      int IntCloseSocket(socket_iter& iter);
 
   public:
-    	TCPServer();
-    	virtual ~TCPServer();
-    
-    	SocketResult OpenPort(CLUSHORT port);
+      TCPServer();
+      virtual ~TCPServer();
+
+      SocketResult OpenPort(CLUSHORT port);
+      void Start();
+      void Wait();
 
       // 关闭网络套接字
-      // dwMilliSec: 等待线程超时
-      // 0: 不等待
-      // -1(0xffffffff): 等待直到退出
-      // 其它: 等待超时时间
-      int Close (u32 nMilliSec);
+      int Close(bool bWait);
       void CloseSocket(); // 只能关闭OnEvent中的字节
-      i32 Send  (SOCKET sock, CLLPCVOID pData, u32 nLen);
-      i32 Recv  (SOCKET sock, CLLPVOID pData, u32 nLen);
+      i32 Send(SOCKET sock, CLLPCVOID pData, u32 nLen);
+      i32 Recv(SOCKET sock, CLLPVOID pData, u32 nLen);
 
   public:
-    virtual void OnEvent(SOCKET sock, SocketEvent eEvent) = 0;
+      virtual void OnEvent(SOCKET sock, SocketEvent eEvent) = 0;
   };
 
   class UDPSocket : public Thread

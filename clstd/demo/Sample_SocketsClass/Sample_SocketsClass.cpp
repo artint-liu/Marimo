@@ -99,7 +99,7 @@ void StartAsServer()
     {
         CLOG("启动服务器");
         server.Start();
-        server.Wait(-1);
+        server.Wait();
         CLOG("服务器关闭");
     }
 }

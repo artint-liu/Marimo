@@ -13,6 +13,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "clstd", "..\..\projects\vs2022\clstd.vcxitems", "{488033D1-AAFF-437F-A770-1DD650AEE70C}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sample_SocketsClass", "Sample_SocketsClass.vcxproj", "{3F5DC2F0-C850-463B-9FD8-9699C2A8BED1}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0A932C05-F32C-466A-8192-A6212FA693BD} = {0A932C05-F32C-466A-8192-A6212FA693BD}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

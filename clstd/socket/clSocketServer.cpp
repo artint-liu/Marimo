@@ -22,6 +22,7 @@ namespace clstd
   
   TCPServer::~TCPServer()
   {
+      SAFE_DELETE(m_pThread);
   }
   
   SocketResult TCPServer::OpenPort(CLUSHORT port)
@@ -68,8 +69,24 @@ namespace clstd
   //FD_ISSET
     return SocketResult_Ok;
   }
+
+  void TCPServer::Start()
+  {
+      SAFE_DELETE(m_pThread);
+      m_pThread = new std::thread(&TCPServer::StartRoutine, this);
+  }
+
+  void TCPServer::Wait()
+  {
+      if (m_pThread)
+      {
+          m_pThread->join();
+          SAFE_DELETE(m_pThread);
+      }
+  }
+
   
-  int TCPServer::Close(u32 nMilliSec)
+  int TCPServer::Close(bool bWait)
   {
     int status = 0;
     if(m_ServerSocket)
@@ -79,8 +96,8 @@ namespace clstd
       SOCKET_ERROR_LOG(status, "Error for closing server socket...\r\n");
 
       // 等待线程退出
-      if(nMilliSec != 0) {
-        Wait(nMilliSec);
+      if(bWait) {
+        Wait();
       }
 
       m_ServerSocket = 0;
