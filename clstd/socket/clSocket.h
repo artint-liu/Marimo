@@ -55,7 +55,7 @@ namespace clstd
     SocketOption_ReceiveBuffer,
   };
 
-#define _ChkWSACleanup(_status) _status = WSACleanup(); ASSERT(_status != WSANOTINITIALISED)
+//#define _ChkWSACleanup(_status) _status = WSACleanup(); ASSERT(_status != WSANOTINITIALISED)
 
   namespace net_sockets
   {

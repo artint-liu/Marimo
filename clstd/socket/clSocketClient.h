@@ -12,7 +12,7 @@ namespace clstd
   class TCPClient : public Thread
   {
   protected:
-    SOCKET		m_clientSocket;
+    SOCKET      m_clientSocket = INVALID_SOCKET;
     int MainLoop();
   public:
     TCPClient();

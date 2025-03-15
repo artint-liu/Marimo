@@ -14,12 +14,8 @@
 #pragma comment(lib, "Ws2_32.lib")
 namespace clstd
 {
-
-
   //////////////////////////////////////////////////////////////////////////
-
   TCPClient::TCPClient()
-    : m_clientSocket (0)
   {
   }
 
@@ -43,18 +39,8 @@ namespace clstd
 
   SocketResult TCPClient::Connect(u32 addr, CLUSHORT port)
   {
-    WSADATA		Data;
     SOCKADDR_IN SockAddr;
-
-    ASSERT(net_sockets::IsStartup());
-
-    //	
-    //
-
-    int status = WSAStartup(CLMAKEWORD(1, 1), &Data);
-    if (status != 0) {
-      CLOG_ERROR("ERROR: WSAStartup unsuccessful\r\n");
-    }
+    net_sockets::Startup();
 
     // zero the sockaddr_in structure
     memset(&SockAddr, 0, sizeof(SockAddr));
@@ -69,14 +55,16 @@ namespace clstd
     // create a socket  socket(通信发生的区域,套接字的类型,套接字使用的特定协议)
     m_clientSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (m_clientSocket == INVALID_SOCKET) {
-      _ChkWSACleanup(status);
+      //_ChkWSACleanup(status);
       CLOG_ERROR("ERROR: socket unsuccessful\n");
       return SocketResult_CreateFailed;
     }
 
-    status = connect(m_clientSocket, (SOCKADDR*)&SockAddr, sizeof(SockAddr));
+    int status = connect(m_clientSocket, (SOCKADDR*)&SockAddr, sizeof(SockAddr));
     if(status == SOCKET_ERROR) {
-      _ChkWSACleanup(status);
+      //_ChkWSACleanup(status);
+      status = closesocket(m_clientSocket);
+      m_clientSocket = INVALID_SOCKET;
       CLOG_ERROR("ERROR: can not connect the server.\n");
       return SocketResult_CanotConnect;
     }
@@ -88,18 +76,20 @@ namespace clstd
   int TCPClient::Close(u32 nMilliSec)
   {
     int status = 0;
-    if(m_clientSocket)
+    if(m_clientSocket != INVALID_SOCKET)
     {
       status = closesocket(m_clientSocket);
-      //status = closesocket(m_serverSocket);
-      m_clientSocket = 0;
-      //m_serverSocket = 0;
+      if (status != 0)
+      {
+          CLOG_ERROR("closesocket error(CODE:%d)\r\n", WSAGetLastError());
+      }
+      m_clientSocket = INVALID_SOCKET;
 
       if(nMilliSec != 0) {
         Wait(nMilliSec);
       }
 
-      _ChkWSACleanup(status);
+      net_sockets::Cleanup();
     }
     return status;
   }

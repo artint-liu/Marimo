@@ -75,7 +75,7 @@ namespace clstd
           g_nWSAStartup--;
         }
         else {
-          CLOG_ERROR("ERROR: WSACleanup unsuccessful\r\n");
+          CLOG_ERROR("ERROR: WSACleanup unsuccessful(CODE:%d)\r\n", WSAGetLastError());
         }
         return result;
       }
