@@ -42,6 +42,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clStock.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clString.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clStringAttach.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clStringPool.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clStringSet.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clTextLines.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clTokens.h" />

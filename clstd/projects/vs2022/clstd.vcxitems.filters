@@ -70,6 +70,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\smart\smartstream.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\smart\SmartProfile.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clParallelWork.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clStringPool.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\clAllocator.cpp" />
