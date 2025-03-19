@@ -21,7 +21,7 @@ namespace clstd
     BufferBase& operator=(const BufferBase& buf);
   public:
     template<class _Ty>
-    inline _Ty*       CastPtr   () const; // 转换为指定类型
+    inline _Ty*       CastPtr   (size_t cbOffset = 0) const; // 转换为指定类型
     template<class _Ty>
     inline clsize     CastSize  () const; // 转换为指定类型的长度
     inline CLLPVOID   GetPtr    () const;
@@ -30,9 +30,9 @@ namespace clstd
   };
 
   template<class _Ty>
-  _Ty* BufferBase::CastPtr() const
+  _Ty* BufferBase::CastPtr(size_t cbOffset) const
   {
-    return reinterpret_cast<_Ty*>(GetPtr());
+      return reinterpret_cast<_Ty*>(reinterpret_cast<size_t>(GetPtr()) + cbOffset);
   }
 
   template<class _Ty>
