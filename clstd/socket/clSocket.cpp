@@ -1,5 +1,4 @@
-﻿#include <functional>
-#include <algorithm>
+﻿#include <algorithm>
 #include "clstd.h"
 #include "clString.h"
 #include "thread/clThread.h"

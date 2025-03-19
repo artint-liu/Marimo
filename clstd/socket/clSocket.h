@@ -1,8 +1,6 @@
 ﻿#ifndef _CLSTD_SOCKET_H_
 #define _CLSTD_SOCKET_H_
 
-#include <functional>
-
 #if defined(_CL_SYSTEM_LINUX)
 # include <sys/socket.h>
 # include <netinet/in.h>

@@ -85,7 +85,7 @@ namespace clstd
     return TRUE;
   }
 
-  void FixedBuffer::Set(CLLPVOID lpData, clsize cbSize)
+  void FixedBuffer::Set(CLLPCVOID lpData, clsize cbSize)
   {
     Resize(cbSize, FALSE);
     ASSERT(cbSize == m_uSize);

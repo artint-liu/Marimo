@@ -80,7 +80,7 @@ namespace clstd
     // 新的缓冲区大小与输入参数严格相等, 不会预留多余追加数据的空间
     // Resize 尺寸比原来数据区小, 会截断数据, 比原来数据区大, 不会破坏数据, 根据参数决定是否填0
     b32 Resize(clsize dwSize, b32 bZeroInit);
-    void Set(CLLPVOID lpData, clsize cbSize);
+    void Set(CLLPCVOID lpData, clsize cbSize);
     void Set(const BufferBase* pBuffer);
   };
 
