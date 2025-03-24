@@ -10,10 +10,12 @@
 # include <dirent.h>
 //# include <io.h>
 #endif
+
 namespace clstd
 {
   class BufferBase;
   class MemBuffer;
+  class FixedBuffer;
 
   class File : public NonCopyable
   {
@@ -117,6 +119,16 @@ namespace clstd
       ShareMode eShareMode, 
       CreationDistribution eCreationDistribution, 
       FlagsAndAttributes eFlagAttr);
+
+    // 使用stl实现
+    template<typename _STR, class _BufferT>
+    static b32 ReadAllBytesT(_STR pszFileName, _BufferT* pBuffer);
+
+    static b32 ReadAllBytes(CLLPCSTR szFileName, MemBuffer* pBuffer);
+    static b32 ReadAllBytes(CLLPCWSTR szFileName, MemBuffer* pBuffer);
+    static b32 ReadAllBytes(CLLPCSTR szFileName, FixedBuffer* pBuffer);
+    static b32 ReadAllBytes(CLLPCWSTR szFileName, FixedBuffer* pBuffer);
+
 
     b32   IsGood      () const; // 判断文件是否在打开状态
     void  Close       ();
