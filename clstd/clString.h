@@ -432,9 +432,43 @@ namespace clstd
 
     // 按照ch分割分解字符串
     template<typename _TStr, class _Fn>
-    size_t Resolve(const _TStr& str, typename _TStr::TChar ch, _Fn fn) // // fn(size_t index, const _TCh* str, size_t len)
+    size_t Resolve(const _TStr& str, typename _TStr::TChar ch, _Fn fn) // fn(size_t index, const _TCh* str, size_t len)
     {
       return Resolve((typename _TStr::LPCSTR)str, str.GetLength(), ch, fn);
+    }
+
+    // 按照ch分割分解字符串, 不会跳过空白，带反馈
+    template<typename _TCh, class _Fn>
+    size_t ResolveFeedback(const _TCh* str, size_t len, _TCh ch, _Fn fn) // const _TCh* fn(size_t index, const _TCh* str, const _TCh* end)
+    {
+        if (!len) { return 0; }
+
+        const _TCh* str_begin = str;
+        const _TCh* str_end = str + len;
+        size_t index = 0;
+
+        while (str < str_end) {
+            if (*str == ch) {
+                str = fn(index++, str_begin, str); // 默认要返回str
+                str_begin = ++str;
+                continue;
+            }
+            str++;
+        }
+
+        if (str_begin < str)
+        {
+            const _TCh* ret_end = fn(index++, str_begin, str);
+            ASSERT(ret_end == str_end); // 检查结尾是否一致
+        }
+        return index;
+    }
+
+    // 按照ch分割分解字符串
+    template<typename _TStr, class _Fn>
+    size_t ResolveFeedback(const _TStr& str, typename _TStr::TChar ch, _Fn fn) // const _TCh* fn(size_t index, const _TCh* str, const _TCh* end)
+    {
+        return ResolveFeedback((typename _TStr::LPCSTR)str, str.GetLength(), ch, fn);
     }
 
   } // namespace StringUtility
