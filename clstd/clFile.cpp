@@ -528,22 +528,22 @@ namespace clstd
     template<typename _STR, class _BufferT>
         b32 File::ReadAllBytesT(_STR pszFileName, _BufferT* pBuffer)
     {
-        std::fstream file;
-        file.open(pszFileName, std::ios::in | std::ios::binary);
+        std::ifstream file;
+        file.open(pszFileName, std::ios::ate | std::ios::binary);
         if (!file.is_open())
         {
             return false;
         }
 
-        file.seekg(0, std::ios::end);
         size_t file_size = file.tellg();
         file.seekg(0, std::ios::beg);
 
         pBuffer->Resize(file_size, false);
         file.read(static_cast<char*>(pBuffer->GetPtr()), file_size);
+        size_t read_bytes = file.gcount();
         file.close();
 
-        return (file.gcount() == file_size);
+        return (read_bytes == file_size);
     }
 
     b32 File::ReadAllBytes(CLLPCSTR szFileName, MemBuffer* pBuffer)
@@ -564,6 +564,40 @@ namespace clstd
     b32 File::ReadAllBytes(CLLPCWSTR szFileName, FixedBuffer* pBuffer)
     {
         return ReadAllBytesT(szFileName, pBuffer);
+    }
+
+    template<typename _STR, class _BufferT>
+    b32 File::WriteAllBytesT(_STR pszFileName, _BufferT* pBuffer)
+    {
+        std::ofstream file;
+        file.open(pszFileName, std::ios::out | std::ios::binary);
+        if (!file.is_open())
+        {
+            return false;
+        }
+
+        file.write(static_cast<char*>(pBuffer->GetPtr()), pBuffer->GetSize());
+        size_t write_bytes = file.tellp();
+        file.close();
+
+        return (write_bytes == pBuffer->GetSize());
+    }
+
+    b32 File::WriteAllBytes(CLLPCSTR szFileName, MemBuffer* pBuffer)
+    {
+        return WriteAllBytesT(szFileName, pBuffer);
+    }
+    b32 File::WriteAllBytes(CLLPCWSTR szFileName, MemBuffer* pBuffer)
+    {
+        return WriteAllBytesT(szFileName, pBuffer);
+    }
+    b32 File::WriteAllBytes(CLLPCSTR szFileName, FixedBuffer* pBuffer)
+    {
+        return WriteAllBytesT(szFileName, pBuffer);
+    }
+    b32 File::WriteAllBytes(CLLPCWSTR szFileName, FixedBuffer* pBuffer)
+    {
+        return WriteAllBytesT(szFileName, pBuffer);
     }
 
   //File::TextStream& File::GetTextStream()
