@@ -51,7 +51,7 @@ namespace clstd
       clstack<_TString> stackOp;
       for(auto it = expression.begin(); it != expression.end(); ++it)
       {
-        GXINT o = OperatorPrecedence(*it);
+        int o = OperatorPrecedence(*it);
         if(o == 0) {
           stackOp.push(*it);
         }
@@ -73,7 +73,7 @@ namespace clstd
             }
           }
           else {
-            GXINT oTop = OperatorPrecedence(stackOp.top());
+            int oTop = OperatorPrecedence(stackOp.top());
             if(o >= oTop) // 当前操作符小于等于栈顶操作符
             {
               m_PostfixExpression.push_back(stackOp.top());
@@ -104,7 +104,7 @@ namespace clstd
       clstack<ELEMENT> stackCalc;
       ELEMENT e;
       for(auto it = m_PostfixExpression.begin(); it != m_PostfixExpression.end(); ++it) {
-        GXUINT o = OperatorPrecedence(*it);
+        u32 o = OperatorPrecedence(*it);
         if(o == 0) {
           e.pstr = &*it;
           e.value = 0;

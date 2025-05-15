@@ -312,7 +312,7 @@ namespace clstd
       status = bind(m_Socket, (LPSOCKADDR)&RecvSockAddr, sizeof(RecvSockAddr));
       if (status == SOCKET_ERROR) { 
         //_ChkWSACleanup(status);
-        CLOG_ERROR("ERROR: bind unsuccessful\r\n"); 
+        CLOG_ERROR("ERROR: bind unsuccessful(%d)\r\n", WSAGetLastError());
         return SocketResult_CanotBind;
       }
     }

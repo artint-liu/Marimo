@@ -607,7 +607,7 @@ _SS_TEMPL
         va_end(arglist);
         return it;
       }
-      va_arg(arglist, char*);
+      //va_arg(arglist, char*);
     }
     ++it;
   }
