@@ -159,8 +159,8 @@ namespace clstd
   template b32    IsNumericT(const wch* str, clsize len, i32 radix);
   template b32    IsNumericT(const  ch* str, clsize len, i32 radix);
 
-  template u32    HashStringT(const wch* str);
-  template u32    HashStringT(const  ch* str);
+  template u32    HashStringT<wch>(const wch* str);
+  template u32    HashStringT<ch>(const  ch* str);
 
   template b32    _StringToBooleanT(const wch* pStr, size_t len);
   template b32    _StringToBooleanT(const ach* pStr, size_t len);
@@ -3066,10 +3066,29 @@ namespace clstd
     return (u32)_Val;
   }
 
+  u32 HashString(const wch* str, clsize len)
+  {
+      return HashStringT(str, len);
+  }
+
+  u32 HashString(const ch* str, clsize len)
+  {
+      return HashStringT(str, len);
+  }
+
   template<typename _TCh>
   u32 HashStringT(const _TCh* str)
   {
     return HashStringT(str, strlenT(str));
+  }
+
+  u32 HashString(const wch* str)
+  {
+      return HashStringT(str);
+  }
+  u32 HashString(const ch* str)
+  {
+      return HashStringT(str);
   }
 
 } // namespace clstd

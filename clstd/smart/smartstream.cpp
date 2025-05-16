@@ -1,7 +1,7 @@
 ﻿#include <stdarg.h>
 #include "../clstd.h"
 #include "../clString.h"
-#include "SmartStream.h"
+#include "smartstream.h"
 #include "../clUtility.h"
 
 //using namespace clstd;
@@ -24,8 +24,16 @@
 //
 // 显式声明模板类
 //
+extern template class clstd::StringX<wch, clstd::StdAllocator, g_StdAlloc, clstd::StringW_traits>;
+extern template class clstd::StringX<ch, clstd::StdAllocator, g_StdAlloc, clstd::StringA_traits>;
+
 template class SmartStreamT<clStringA>;
 template class SmartStreamT<clStringW>;
+
+// 构造函数单独实例化
+template SmartStreamA::SmartStreamT(typename SmartStreamA::T_LPCSTR pStream, clsize uCountOfChar);
+template SmartStreamW::SmartStreamT(typename SmartStreamW::T_LPCSTR pStream, clsize uCountOfChar);
+
 
 //b32 SmartStream_TraitsW::_StrCmpN(const wch* pStr1, const wch* pStr2, int nCount)
 //{
@@ -67,7 +75,7 @@ template class SmartStreamT<clStringW>;
 #define _SS_TEMPL template<class _TStr>
 #define _SS_IMPL SmartStreamT<_TStr>
 
-_SS_TEMPL _SS_IMPL::SmartStreamT(T_LPCSTR pStream /* = NULL */, clsize uCountOfChar /* = NULL */)
+_SS_TEMPL _SS_IMPL::SmartStreamT(T_LPCSTR pStream, clsize uCountOfChar)
 : m_pBegin          (pStream)
 , m_pEnd            (pStream + uCountOfChar)
 , m_dwFlags         (0)
@@ -650,4 +658,39 @@ namespace SmartStreamUtility
   //{
   //  return 0;
   //}
+
+#ifdef _CL_SYSTEM_ANDROID
+    // 复杂模板在Clang中声明有问题，这里显式调用一次
+    void force_include_smartstream()  __attribute__((used))
+    {
+        ::SmartStreamA* p = new ::SmartStreamA((char const*)nullptr, (clsize)0);
+        delete p;
+
+        ::SmartStreamA stream((char const*)nullptr, (clsize)0);
+        stream.SetFlags(0);
+        stream.SetTriggerCallBack(nullptr, 0);
+        stream.GetCharSemantic('c');
+        stream.GetCharSemantic(nullptr, 0, 0);
+        stream.SetCharSemantic('c', 0);
+        stream.SetCharSemantic(nullptr, 0, 0);
+        stream.Initialize("", 0);
+        stream.GetStreamPtr();
+        auto it = stream.begin();
+        auto itEnd = stream.end();
+        it.BeginsWith('/');
+        it.BeginsWith("hello");
+        stream.find(it, 1, 0);
+        ++it;
+        bool result = it != itEnd;
+        result = it == itEnd;
+        result = it != "hello";
+        result = it == "hello";
+        result = it != 'c';
+        result = it == 'c';
+        result = it.IsEqual(nullptr, 0);
+        it.ToString();
+        it.offset();
+        stream.end();
+    }
+#endif
 } // namespace SmartStreamUtility

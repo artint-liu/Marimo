@@ -170,7 +170,7 @@ protected:
   u32_ptr       m_lParamTrigger;
 
 public:
-  SmartStreamT               (T_LPCSTR pStream = NULL, clsize uCountOfChar = 0);
+  SmartStreamT               (T_LPCSTR pStream = nullptr, clsize uCountOfChar = 0);
   b32      Initialize        (T_LPCSTR pStream, clsize uCountOfChar);
   void     GetCharSemantic   (SemType* pCharSem, clsize uStart, clsize uEnd) const;
   void     SetCharSemantic   (const SemType* pCharSem, clsize uStart, clsize uEnd);

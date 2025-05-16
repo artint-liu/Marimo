@@ -7,6 +7,7 @@
 
 #if ! (defined(_CL_SYSTEM_WINDOWS) || defined(_CL_SYSTEM_UWP))
 # include <sys/time.h>
+//# include <math.h>
 #endif
 
 u32 crc_tab[256] = {
@@ -496,6 +497,7 @@ namespace clstd
     }
   }
 
+#ifdef _CL_SYSTEM_WINDOWS
   template<class _StockT, class _StringT>
   _StockT& ReadUserDefaultT(_StockT& stock)
   {
@@ -516,5 +518,5 @@ namespace clstd
   {
     return ReadUserDefaultT<StockW, clStringW>(stock);
   }
-
+#endif
 } // namespace clstd

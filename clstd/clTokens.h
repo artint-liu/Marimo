@@ -37,19 +37,19 @@ namespace clstd {
       const TokensT*  pContainer;
 
       iterator()
-        : pContainer(NULL)
-        , marker    (NULL)
-        , length    (0){}
+        : marker    (NULL)
+        , length    (0)
+        , pContainer(NULL) {}
 
       iterator(const TokensT*  _pContainer) 
-        : pContainer(_pContainer)
-        , marker    (_pContainer->m_pBegin)
-        , length    (0){}
+        : marker    (_pContainer->m_pBegin)
+        , length    (0)
+        , pContainer(_pContainer) {}
 
       iterator(const iterator& it)
-        : pContainer(it.pContainer)
-        , marker    (it.marker)
-        , length    (it.length){}
+        : marker    (it.marker)
+        , length    (it.length)
+        , pContainer(it.pContainer) {}
 
       iterator&  operator++();
       iterator&  operator++(int);

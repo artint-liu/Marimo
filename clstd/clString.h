@@ -76,9 +76,13 @@ namespace clstd
 
   template<typename _TCh>
   u32 HashStringT(const _TCh* str, clsize len);
+  u32 HashString(const wch* str, clsize len);
+  u32 HashString(const ch* str, clsize len);
 
   template<typename _TCh>
   u32 HashStringT(const _TCh* str);
+  u32 HashString(const wch* str);
+  u32 HashString(const ch* str);
 
   // string to integer
   i32 xtoi(const wch* str);

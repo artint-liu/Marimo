@@ -646,8 +646,10 @@ FINAL_RET:
   void DumpMemory(const void* ptr, size_t count);
   extern int s_aPrimeNum[];
 
+#ifdef _CL_SYSTEM_WINDOWS
   class StockA& ReadUserDefault(StockA& stock);
   class StockW& ReadUserDefault(StockW& stock);
+#endif
 
   // "yes", "true", "ok", "1"字符串返回TRUE，不区分大消息
   b32 CheckBoolean(const ch* str, size_t len);
