@@ -251,7 +251,7 @@ namespace clstd
     }
   } // namespace StringUtility
 
-
+#ifdef _CL_SYSTEM_WINDOWS
   SharedBuffer::SharedBuffer(CLLPCSTR szName, u32 flags, clsize cbBuffer)
   {
     DWORD dwFlags = PAGE_READONLY;
@@ -302,6 +302,7 @@ namespace clstd
     }
     return 0;
   }
+#endif
 
 
 } // namespace clstd

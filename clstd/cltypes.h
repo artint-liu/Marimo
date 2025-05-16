@@ -35,6 +35,8 @@ typedef size_t              clsize;
 typedef size_t              clsize_t;
 #else
 
+#include <stdint.h>
+
 typedef signed char         s8, i8;
 typedef signed short        s16, i16;
 typedef signed int          s32, i32;
@@ -72,7 +74,7 @@ typedef intptr_t            i32_ptr;
 typedef intptr_t            s32_ptr;
 typedef uintptr_t           u32_ptr;
 #else
-#error 需要定义新平台
+#error NEED define platform // 需要定义新平台
 #endif // #if defined(_CL_ARCH_X86)
 
 typedef char                ch;

@@ -1,7 +1,7 @@
 ﻿#ifndef _CLSTD_SOCKET_H_
 #define _CLSTD_SOCKET_H_
 
-#if defined(_CL_SYSTEM_LINUX)
+#if defined(_CL_SYSTEM_LINUX) || defined(_CL_SYSTEM_ANDROID)
 # include <sys/socket.h>
 # include <netinet/in.h>
 

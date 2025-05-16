@@ -66,6 +66,7 @@
 # include <assert.h>
 #elif defined(_CL_SYSTEM_ANDROID)
 # include <wchar.h>
+# define _CPLUSPLUS_11_THREAD
 //# include <corecrt_io.h> // _findfile
 #elif defined(_CL_SYSTEM_LINUX)
 # include <stdint.h>

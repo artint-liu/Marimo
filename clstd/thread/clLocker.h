@@ -76,7 +76,7 @@ namespace clstd
 #elif defined(_CL_SYSTEM_WINDOWS)
   class Locker : public _win32::Locker {};
 #else
-# pragma message(__FILE__ ": warning : 没有合适的Locker定义")
+# pragma message(__FILE__ ": warning : No suitable Locker definition found.") // 没有合适的Locker定义
 #endif // #if defined(_Win32) && !defined(POSIX_THREAD)
 
   //////////////////////////////////////////////////////////////////////////

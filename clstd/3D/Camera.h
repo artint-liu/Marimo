@@ -3,6 +3,7 @@
 
 namespace clstd
 {
+  enum ESpace;
   // 左手坐标系
   class Camera
   {

@@ -190,11 +190,11 @@ namespace clstd
       if(len == 1) {
         val = (len_t)str[0];
       }
-      else if(pos >= 0)
+      else if(pos >= 0) // 从字符串开始位置
       {
         val = (len_t)(((len_t)pos + 1 < len) ? (*(short*)&str[pos]) : str[len - 2]);
       }
-      else {
+      else { // 从字符串结尾位置
         pos = -pos;
         val = (len_t)(((len_t)pos <= len) ? (*(short*)&str[len - pos]) : str[0]);
       }

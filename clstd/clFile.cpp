@@ -551,12 +551,12 @@ namespace clstd
         return ReadAllBytesT(szFileName, pBuffer);
     }
 
-    b32 File::ReadAllBytes(CLLPCWSTR szFileName, MemBuffer* pBuffer)
+    b32 File::ReadAllBytes(CLLPCSTR szFileName, FixedBuffer* pBuffer)
     {
         return ReadAllBytesT(szFileName, pBuffer);
     }
-
-    b32 File::ReadAllBytes(CLLPCSTR szFileName, FixedBuffer* pBuffer)
+#ifdef _CL_SYSTEM_WINDOWS
+    b32 File::ReadAllBytes(CLLPCWSTR szFileName, MemBuffer* pBuffer)
     {
         return ReadAllBytesT(szFileName, pBuffer);
     }
@@ -565,6 +565,7 @@ namespace clstd
     {
         return ReadAllBytesT(szFileName, pBuffer);
     }
+#endif
 
     template<typename _STR, class _BufferT>
     b32 File::WriteAllBytesT(_STR pszFileName, _BufferT* pBuffer)
@@ -587,11 +588,12 @@ namespace clstd
     {
         return WriteAllBytesT(szFileName, pBuffer);
     }
-    b32 File::WriteAllBytes(CLLPCWSTR szFileName, MemBuffer* pBuffer)
+    b32 File::WriteAllBytes(CLLPCSTR szFileName, FixedBuffer* pBuffer)
     {
         return WriteAllBytesT(szFileName, pBuffer);
     }
-    b32 File::WriteAllBytes(CLLPCSTR szFileName, FixedBuffer* pBuffer)
+#ifdef _CL_SYSTEM_WINDOWS
+    b32 File::WriteAllBytes(CLLPCWSTR szFileName, MemBuffer* pBuffer)
     {
         return WriteAllBytesT(szFileName, pBuffer);
     }
@@ -599,7 +601,7 @@ namespace clstd
     {
         return WriteAllBytesT(szFileName, pBuffer);
     }
-
+#endif
   //File::TextStream& File::GetTextStream()
   //{
   //  return m_TextStream;

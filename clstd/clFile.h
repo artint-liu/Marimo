@@ -125,17 +125,21 @@ namespace clstd
     static b32 ReadAllBytesT(_STR pszFileName, _BufferT* pBuffer);
 
     static b32 ReadAllBytes(CLLPCSTR szFileName, MemBuffer* pBuffer);
-    static b32 ReadAllBytes(CLLPCWSTR szFileName, MemBuffer* pBuffer);
     static b32 ReadAllBytes(CLLPCSTR szFileName, FixedBuffer* pBuffer);
+#ifdef _CL_SYSTEM_WINDOWS
+    static b32 ReadAllBytes(CLLPCWSTR szFileName, MemBuffer* pBuffer);
     static b32 ReadAllBytes(CLLPCWSTR szFileName, FixedBuffer* pBuffer);
+#endif
 
     template<typename _STR, class _BufferT>
     static b32 WriteAllBytesT(_STR pszFileName, _BufferT* pBuffer);
 
     static b32 WriteAllBytes(CLLPCSTR szFileName, MemBuffer* pBuffer);
-    static b32 WriteAllBytes(CLLPCWSTR szFileName, MemBuffer* pBuffer);
     static b32 WriteAllBytes(CLLPCSTR szFileName, FixedBuffer* pBuffer);
+#ifdef _CL_SYSTEM_WINDOWS
+    static b32 WriteAllBytes(CLLPCWSTR szFileName, MemBuffer* pBuffer);
     static b32 WriteAllBytes(CLLPCWSTR szFileName, FixedBuffer* pBuffer);
+#endif
 
 
     b32   IsGood      () const; // 判断文件是否在打开状态

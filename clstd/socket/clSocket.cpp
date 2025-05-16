@@ -5,7 +5,7 @@
 #include "thread/clSignal.h"
 #include "clRepository.h"
 
-#if defined(_CL_SYSTEM_LINUX)
+#if defined(_CL_SYSTEM_LINUX) || defined(_CL_SYSTEM_ANDROID)
 # include <errno.h>
 # include <arpa/inet.h>
 # include <unistd.h>
@@ -18,7 +18,7 @@
 
 #if defined(_CL_SYSTEM_WINDOWS)
 typedef int socklen_t;
-#elif defined(_CL_SYSTEM_LINUX)
+#elif defined(_CL_SYSTEM_LINUX) || defined(_CL_SYSTEM_ANDROID)
 struct WSADATA
 {
   void* xxx;
@@ -756,16 +756,16 @@ namespace clstd
       switch(eOpt)
       {
       case SocketOption_SendTimeOut:
-        result = getsockopt(m_socket, SOL_SOCKET, SO_SNDTIMEO, (char*)&value, (int*)&len);
+        result = getsockopt(m_socket, SOL_SOCKET, SO_SNDTIMEO, (char*)&value, (socklen_t*)&len);
         break;
       case SocketOption_ReceiveTimeOut:
-        result = getsockopt(m_socket, SOL_SOCKET, SO_RCVTIMEO, (char*)&value, (int*)&len);
+        result = getsockopt(m_socket, SOL_SOCKET, SO_RCVTIMEO, (char*)&value, (socklen_t*)&len);
         break;
       case SocketOption_SendBuffer:
-        result = getsockopt(m_socket, SOL_SOCKET, SO_SNDBUF, (char*)&value, (int*)&len);
+        result = getsockopt(m_socket, SOL_SOCKET, SO_SNDBUF, (char*)&value, (socklen_t*)&len);
         break;
       case SocketOption_ReceiveBuffer:
-        result = getsockopt(m_socket, SOL_SOCKET, SO_RCVBUF, (char*)&value, (int*)&len);
+        result = getsockopt(m_socket, SOL_SOCKET, SO_RCVBUF, (char*)&value, (socklen_t*)&len);
         break;
       }
       if(result == 0) {

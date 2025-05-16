@@ -2096,7 +2096,7 @@ namespace clstd
   {
     class StringXF : public StringCommon::StringFormattedT<StringX> {};
     STATIC_ASSERT(sizeof(StringXF) == sizeof(StringX));
-#if defined(_CL_SYSTEM_IOS)
+#if defined(_CL_SYSTEM_IOS) || defined(_CL_SYSTEM_ANDROID)
     reinterpret_cast<StringXF*>(this)->template StringFormattedT<StringX>::VarFormat(pFmt, arglist);
 #else
     reinterpret_cast<StringXF*>(this)->StringCommon::StringFormattedT<StringX>::VarFormat(pFmt, arglist);

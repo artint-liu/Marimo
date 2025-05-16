@@ -497,9 +497,9 @@ namespace clstd
   }
 
   template<class _StockT, class _StringT>
-  typename _StockT& ReadUserDefaultT(typename _StockT& stock)
+  _StockT& ReadUserDefaultT(_StockT& stock)
   {
-    static _StringT::TChar s_szExtension[] = {'.','s','t','o','c','k','\0'};
+    static typename _StringT::TChar s_szExtension[] = {'.','s','t','o','c','k','\0'};
     _StringT strUserDefault;
     clpathfile::GetApplicationFilename(strUserDefault);
     clpathfile::RenameExtension(strUserDefault, s_szExtension);

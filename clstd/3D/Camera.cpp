@@ -2,8 +2,8 @@
 #include "../clstd.h"
 #include "cl3d.h"
 //#include "../floatx.h"
-#include "Camera.h"
 #include "clTransform.h"
+#include "Camera.h"
 
 namespace clstd
 {
