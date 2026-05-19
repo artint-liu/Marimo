@@ -385,33 +385,41 @@ namespace clstd
 extern "C" void _cl_WinVerifyFailure(const char *pszSrc, const char *pszSrcFile, int nLine, unsigned long dwErrorNum)
 {
 #ifdef _WIN32
-  PCHAR  pszCaption = "系统API调用错误";
-  LPSTR  lpBuffer;
-  FormatMessageA(
+  const WCHAR* pszCaption = L"系统API调用错误";
+  LPWSTR lpBuffer;
+  FormatMessageW(
     FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
     NULL,
     dwErrorNum,
     LANG_NEUTRAL,
-    (LPSTR)&lpBuffer,
+    (LPWSTR)&lpBuffer,
     0,
     NULL
     );
 
-  CHAR  buffer[1024];
-  wsprintfA(
+  // 将 char 参数转换为 wchar_t
+  int nSrcLen = (int)strlen(pszSrc);
+  int nFileLen = (int)strlen(pszSrcFile);
+  WCHAR wszSrc[1024];
+  WCHAR wszFile[MAX_PATH];
+  MultiByteToWideChar(CP_ACP, 0, pszSrc, nSrcLen + 1, wszSrc, 1024);
+  MultiByteToWideChar(CP_ACP, 0, pszSrcFile, nFileLen + 1, wszFile, MAX_PATH);
+
+  WCHAR  buffer[1024];
+  wsprintfW(
     buffer,
-    ">%s(%d)\n%s失败:\n最后的错误错误代码是:%d - %s",
-    pszSrcFile,
+    L">%s(%d)\n%s失败:\n最后的错误错误代码是:%d - %s",
+    wszFile,
     nLine,
-    pszSrc,
+    wszSrc,
     dwErrorNum,
     lpBuffer
-    ),
-    OutputDebugStringA("\n====================== ");
-  OutputDebugStringA(pszCaption);
-  OutputDebugStringA(" ======================\n");
-  OutputDebugStringA(buffer);
-  MessageBoxA(NULL, buffer, pszCaption, MB_OK);
+    );
+  OutputDebugStringW(L"\n====================== ");
+  OutputDebugStringW(pszCaption);
+  OutputDebugStringW(L" ======================\n");
+  OutputDebugStringW(buffer);
+  MessageBoxW(NULL, buffer, pszCaption, MB_OK);
   LocalFree(lpBuffer);
 #else
 #endif
