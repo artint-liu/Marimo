@@ -11,6 +11,9 @@ http://www.microsoft.com/en-us/download/details.aspx?id=6812
 获得其它第三方库
 用git取下https://github.com/artint-liu/Marimo_3rd.git,将Marimo3rdParty.7z解压到Marimo工程目录.
 
+设置环境变量：
+在PowerShell（管理员模式）下执行
+Set-ExecutionPolicy -Scope Process Bypass; .\set_env.ps1
 
 Visual Studio 2017
 使用clstd库的工程配置
