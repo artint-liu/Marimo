@@ -7,6 +7,10 @@
 #define SOCKET_ERROR_LOG(_STAT, _MSG) if (_STAT == SOCKET_ERROR) { CLOG_ERROR(_MSG); }
 #define MAX_RECV_BUF 4096
 
+// 辅助宏：同时输出 WSA 错误码和文本描述
+#define WSA_ERROR_FMT "(WSA error: %d: %s)"
+#define WSA_ERROR_ARGS(_ErrCode) (_ErrCode), WSAErrorToString(strErrorString, _ErrCode)
+
 #if defined(_CL_SYSTEM_WINDOWS)
 #pragma comment(lib, "Ws2_32.lib")
 #endif // #if defined(_CL_SYSTEM_WINDOWS)
@@ -14,6 +18,30 @@
 namespace clstd
 {
 #if defined(_CL_SYSTEM_WINDOWS)
+
+  static const clStringA& WSAErrorToString(clStringA& strResult, int nErrorCode)
+  {
+    LPSTR pBuffer = NULL;
+    DWORD dwLen = FormatMessageA(
+      FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+      NULL, (DWORD)nErrorCode,
+      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+      (LPSTR)&pBuffer, 0, NULL);
+    
+    if (dwLen > 0 && pBuffer != NULL) {
+      // 去掉末尾的 \r\n
+      while (dwLen > 0 && (pBuffer[dwLen - 1] == '\r' || pBuffer[dwLen - 1] == '\n')) {
+        pBuffer[--dwLen] = '\0';
+      }
+      strResult = pBuffer;
+      LocalFree(pBuffer);
+    }
+    else {
+      strResult = "Unknown error";
+    }
+    return strResult;
+  }
+
   TCPServer::TCPServer()
     : m_ServerSocket (0)
   {
@@ -53,7 +81,9 @@ namespace clstd
     m_ServerSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (m_ServerSocket == INVALID_SOCKET) {
       //_ChkWSACleanup(status);
-      CLOG_ERROR("ERROR: socket unsuccessful\r\n");
+      int nSocketErr = WSAGetLastError();
+      clStringA strErrorString;
+      CLOG_ERROR("ERROR: socket unsuccessful " WSA_ERROR_FMT "\r\n", WSA_ERROR_ARGS(nSocketErr));
       return SocketResult_CreateFailed;
     }
   
@@ -61,7 +91,9 @@ namespace clstd
     status = bind(m_ServerSocket, (LPSOCKADDR)&serverSockAddr, sizeof(serverSockAddr));
     if (status == SOCKET_ERROR) { 
       //_ChkWSACleanup(status);
-      CLOG_ERROR("ERROR: bind unsuccessful\r\n"); 
+      int nBindErr = WSAGetLastError();
+      clStringA strErrorString;
+      CLOG_ERROR("ERROR: bind unsuccessful (port=%d) " WSA_ERROR_FMT "\r\n", port, WSA_ERROR_ARGS(nBindErr));
       return SocketResult_CanotBind;
     }
   
