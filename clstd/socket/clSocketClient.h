@@ -26,6 +26,8 @@ namespace clstd
     i32 Send    (CLLPCVOID pData, CLINT nLen);
     i32 Recv    (CLLPCVOID pData, CLINT nLen, b32 bRecvSpecifySize);
 
+    b32 IsConnected() const { return m_clientSocket != INVALID_SOCKET; }
+
     i32 StartRoutine() override;
 
   public:
