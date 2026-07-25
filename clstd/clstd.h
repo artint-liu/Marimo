@@ -459,6 +459,4 @@ namespace clstd_cli
 #include "3D/GeoOp.h"
 #include "clGeometry2D.h"
 
-#else
-#pragma message(__FILE__": warning : Duplicate included this file.")
 #endif // _CL_STD_CODE_

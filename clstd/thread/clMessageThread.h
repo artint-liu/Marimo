@@ -515,6 +515,4 @@ namespace clstd
 //};
 
 
-#else
-//#pragma message(__FILE__": warning : Duplicate included this file.")
 #endif // _CLSTD_THREAD_MESSAGE_H_

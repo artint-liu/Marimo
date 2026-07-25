@@ -170,7 +170,13 @@ namespace clstd
       return *this;
     }
 
-
+    template<typename _Ty>
+    void PushBack(_Ty data)
+    {
+      const clsize dwTail = m_uSize;
+      Resize(m_uSize + sizeof(_Ty), FALSE);
+      *reinterpret_cast<_Ty*>(m_lpBuffer + dwTail) = data;
+    }
   };
 
   //////////////////////////////////////////////////////////////////////////
@@ -294,6 +300,4 @@ namespace clstd
   };
 } // namespace clstd
 
-#else
-#pragma message(__FILE__": warning : Duplicate included this file.")
 #endif // _CL_BUFFER_H_

@@ -242,6 +242,4 @@ namespace clstd
 
 } // namespace clstd
 
-#else
-#pragma message(__FILE__": warning : Duplicate included this file.")
 #endif // #ifndef _CLSTD_MATRIX_H_

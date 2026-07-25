@@ -570,6 +570,4 @@ namespace clstd
   } // namespace StringUtility
 } // namespace clstd
 
-#else
-# pragma message(__FILE__": warning : Duplicate included this file.")
 #endif // _CLSTD_STRING_H_

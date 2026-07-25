@@ -370,6 +370,4 @@ typedef uintptr_t         CLULONG_PTR;
 //#endif
 //#endif
 
-#else
-#pragma message(__FILE__ ": warning : Duplicate included this file.")
 #endif // _CLTYPES_H_

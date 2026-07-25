@@ -22,6 +22,8 @@ namespace clstd
     SocketResult Connect (CLLPCSTR addr, CLUSHORT port);
     SocketResult Connect (u32 addr, CLUSHORT port);
 
+    b32 IsConnected() const { return m_clientSocket != INVALID_SOCKET; }
+
     int Close   (u32 nMilliSec);
     i32 Send    (CLLPCVOID pData, CLINT nLen);
     i32 Recv    (CLLPCVOID pData, CLINT nLen, b32 bRecvSpecifySize);

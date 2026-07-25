@@ -30,7 +30,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clMathExpressionParser.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clMathVector.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clMatrix.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clmemory.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clMesh.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clParallelWork.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\clPathFile.h" />

@@ -145,6 +145,4 @@ namespace clstd
 
 } // namespace clstd
 
-#else
-#pragma message(__FILE__": warning : Duplicate included this file.")
 #endif // _CL_ALLOCATOR_H_

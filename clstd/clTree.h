@@ -172,6 +172,4 @@ namespace clstd
 
 }
 typedef clstd::Tree Tree;
-#else
-#pragma message(__FILE__": warning : Duplicate included this file.")
 #endif // _TREE_H_

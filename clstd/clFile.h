@@ -193,6 +193,4 @@ typedef clstd::File clFile;
 //#define CreateFile    CreateFileA
 //#endif
 
-#else
-# pragma message(__FILE__": warning : Duplicate included this file.")
 #endif // _CL_FILE_H_

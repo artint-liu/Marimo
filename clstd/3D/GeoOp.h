@@ -112,6 +112,4 @@ namespace clstd
   } // namespace geometry
 } // namespace clstd
 
-#else
-#pragma message(__FILE__": warning : Duplicate included this file.")
 #endif // _GEOMETRY_OPERATION_H_

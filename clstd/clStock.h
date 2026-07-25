@@ -272,6 +272,4 @@ namespace clstd
   class StockW : public StockT<clStringW> { public: StockW(u32 dwFlags = 0) : StockT<clStringW>(dwFlags){} };
 } // namespace clstd
 
-#else
-# pragma message(__FILE__": warning : Duplicate included this file.")
 #endif // _CLSTD_STOCK_H_

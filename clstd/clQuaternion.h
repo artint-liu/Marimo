@@ -157,6 +157,4 @@ namespace clstd
 //typedef const quaternion  CQuaternion;
 //typedef const euler       CEuler;
 
-#else
-#pragma message(__FILE__": warning : Duplicate included this file.")
 #endif // #ifndef _CLSTD_QUATERNION_H_

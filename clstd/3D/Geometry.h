@@ -501,6 +501,4 @@ namespace clstd
 //typedef clstd::OBB                  obb_t;
 //typedef const aabb_t CAABB;
 
-#else
-#pragma message(__FILE__": warning : Duplicate included this file.")
 #endif // _GEOMETRY_IMPL_H_

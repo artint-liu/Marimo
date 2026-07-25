@@ -704,6 +704,4 @@ namespace clstd
 
 } // namespace clstd
 
-#else
-#pragma message(__FILE__": warning : Duplicate included this file.")
 #endif // _FLOAT_X_IMPL_H_
